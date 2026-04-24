@@ -1,0 +1,199 @@
+{
+  "num_classes": 6,
+  "input_dim": 29,
+  "features": [
+    "Body Size",
+    "Body Weight",
+    "Height",
+    "Bone Structure",
+    "Complexion",
+    "General feel of skin",
+    "Texture of Skin",
+    "Hair Color",
+    "Appearance of Hair",
+    "Shape of face",
+    "Eyes",
+    "Eyelashes",
+    "Blinking of Eyes",
+    "Cheeks",
+    "Nose",
+    "Teeth and gums",
+    "Lips",
+    "Nails",
+    "Appetite",
+    "Liking tastes",
+    "Metabolism Type",
+    "Climate Preference",
+    "Stress Levels",
+    "Sleep Patterns",
+    "Dietary Habits",
+    "Physical Activity Level",
+    "Water Intake",
+    "Digestion Quality",
+    "Skin Sensitivity"
+  ],
+  "feature_classes": {
+    "Body Size": [
+      "large",
+      "medium",
+      "slim"
+    ],
+    "Body Weight": [
+      "heavy - difficulties in losing weight",
+      "low - difficulties in gaining weight",
+      "moderate - no difficulties in gaining or losing weight"
+    ],
+    "Height": [
+      "average",
+      "short",
+      "tall"
+    ],
+    "Bone Structure": [
+      "large, broad shoulders , heavy bone structure",
+      "light, small bones, prominent joints",
+      "medium bone structure"
+    ],
+    "Complexion": [
+      "dark-complexion, tans easily",
+      "fair-skin sunburns easily",
+      "white, pale, tans easily"
+    ],
+    "General feel of skin": [
+      "dry and thin, cool to touch, rough",
+      "smooth and warm, oily t-zone",
+      "thick and moist/greasy, cold"
+    ],
+    "Texture of Skin": [
+      "dry, pigments and aging",
+      "freckles, many moles, redness and rashes",
+      "oily"
+    ],
+    "Hair Color": [
+      "black/brown,dull",
+      "brown",
+      "red, light brown, yellow"
+    ],
+    "Appearance of Hair": [
+      "dry, black, knotted, brittle",
+      "straight, oily",
+      "thick, curly"
+    ],
+    "Shape of face": [
+      "heart-shaped, pointed chin",
+      "large, round, full",
+      "long, angular, thin"
+    ],
+    "Eyes": [
+      "big, round, beautiful, glowing eyes",
+      "medium-sized, penetrating, light-sensitive eyes",
+      "small, active, darting, dark eyes"
+    ],
+    "Eyelashes": [
+      "moderate eyelashes",
+      "scanty eyelashes",
+      "thick/fused eyelashes"
+    ],
+    "Blinking of Eyes": [
+      "excessive blinking",
+      "moderate blinking",
+      "more or less stable"
+    ],
+    "Cheeks": [
+      "rounded, plump",
+      "smooth, flat",
+      "wrinkled, sunken"
+    ],
+    "Nose": [
+      "crooked, narrow",
+      "pointed, average",
+      "rounded, large open nostrils"
+    ],
+    "Teeth and gums": [
+      "big, white, strong teeth, healthy gums",
+      "irregular, protruding teeth, receding gums",
+      "medium-sized teeth, reddish gums"
+    ],
+    "Lips": [
+      "lips are large, soft, pink, and full",
+      "lips are soft, medium-sized",
+      "tight, thin, dry lips which chaps easily"
+    ],
+    "Nails": [
+      "dry, rough, brittle, break",
+      "sharp, flexible, pink, lustrous",
+      "thick, oily, smooth, polished"
+    ],
+    "Appetite": [
+      "irregular, scanty",
+      "slow but steady",
+      "strong, unbearable"
+    ],
+    "Liking tastes": [
+      "pungent / bitter / astringent",
+      "sweet / bitter / astringent",
+      "sweet / sour / salty"
+    ],
+    "Metabolism Type": [
+      "fast",
+      "moderate",
+      "slow"
+    ],
+    "Climate Preference": [
+      "cool",
+      "moderate",
+      "warm"
+    ],
+    "Stress Levels": [
+      "high",
+      "low",
+      "moderate"
+    ],
+    "Sleep Patterns": [
+      "long",
+      "moderate",
+      "short"
+    ],
+    "Dietary Habits": [
+      "omnivorous",
+      "vegan",
+      "vegetarian"
+    ],
+    "Physical Activity Level": [
+      "high",
+      "moderate",
+      "sedentary"
+    ],
+    "Water Intake": [
+      "high",
+      "low",
+      "moderate"
+    ],
+    "Digestion Quality": [
+      "moderate",
+      "strong",
+      "weak"
+    ],
+    "Skin Sensitivity": [
+      "insensitive",
+      "normal",
+      "sensitive"
+    ]
+  },
+  "id_to_name": {
+    "0": "kapha",
+    "1": "pitta",
+    "2": "pitta+kapha",
+    "3": "vata",
+    "4": "vata+kapha",
+    "5": "vata+pitta"
+  },
+  "name_to_id": {
+    "kapha": 0,
+    "pitta": 1,
+    "pitta+kapha": 2,
+    "vata": 3,
+    "vata+kapha": 4,
+    "vata+pitta": 5
+  },
+  "accuracy": 87.67
+}

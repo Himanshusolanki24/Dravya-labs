@@ -1,0 +1,14 @@
+{
+    "classes": [
+        "melanoma",
+        "nevus"
+    ],
+    "class_to_idx": {
+        "melanoma": 0,
+        "nevus": 1
+    },
+    "descriptions": {
+        "melanoma": "Skin condition: melanoma",
+        "nevus": "Skin condition: nevus"
+    }
+}

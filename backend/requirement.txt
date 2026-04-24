@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+httpx
+aiohttp
+
+pinecone
+sentence-transformers
+python-jose[cryptography]
+pydantic
+tenacity
+langgraph

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.env.local
+.venv/
+env/
+venv/
+*.pth
+*.pt
+.DS_Store
+.idea/
+.vscode/
+data/
+logs/
+*.log
+best_model*.pth

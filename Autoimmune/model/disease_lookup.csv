@@ -1,0 +1,117 @@
+disease_name,total_cases,common_symptoms
+Acute disseminated encephalomyelitis,85,Rheumatoid factor; ACPA; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Dry eyes and/or mouth
+Acute motor axonal neuropathy,81,Anti-Sm; Rheumatoid factor; Anti-TPO; Anti-Tg; Low-grade fever; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth
+Addison's disease,80,Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; General 'unwell' feeling
+Alopecia areata,78,Anti-Sm; Rheumatoid factor; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling; Joint pain
+Anti-NMDA receptor encephalitis,82,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-TPO; Low-grade fever; Dry eyes and/or mouth; Joint pain
+Antiphospholipid syndrome,101,ACPA; Anti-TPO; Anti-SMA; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Autoimmune angioedema,82,ACPA; Anti-TPO; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Stiffness in the joints; Dry eyes and/or mouth; Joint pain; C1_inhibitor
+Autoimmune encephalitis,85,ACPA; Anti-SMA; Rashes and skin lesions; Stiffness in the joints
+Autoimmune enteropathy,80,Anti-dsDNA; Anti-Sm; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Weight loss; Joint pain; Anti_enterocyte_antibodies
+Autoimmune hemolytic anemia,76,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Low-grade fever; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Autoimmune hepatitis,84,Anti-TPO; Anti-Tg; Dizziness; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; anti_LKM1; ASMA
+Autoimmune oophoritis,170,Anti-dsDNA; Anti-Sm; Rheumatoid factor; ACPA; Anti-Tg; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Autoimmune orchitis,162,Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Autoimmune pancreatitis,76,Anti-dsDNA; Anti-Sm; Anti-TPO; Fatigue or chronic tiredness; Dizziness; Weight loss; Brittle hair or hair loss; General 'unwell' feeling
+Autoimmune polyendocrine syndrome type 1 (APS1),85,Anti-dsDNA; Anti-Sm; Rheumatoid factor; ACPA; Dizziness; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Autoimmune polyendocrine syndrome type 2 (APS2),78,Anti-dsDNA; Anti-TPO; Dizziness; Dry eyes and/or mouth; General 'unwell' feeling
+Autoimmune polyendocrine syndrome type 3 (APS3),83,Anti-dsDNA; Anti-Sm; ACPA; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth
+Autoimmune progesterone dermatitis,82,Anti-SMA; Dizziness; Brittle hair or hair loss; Progesterone_antibodies
+Autoimmune retinopathy,82,Anti-dsDNA; Rheumatoid factor; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Autoimmune urticaria,96,Anti-Sm; Rheumatoid factor; Anti-TPO; Anti-Tg; Anti-SMA; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling; Joint pain; IgG_IgE_receptor
+Autoimmune uveitis,73,Anti-dsDNA; ACPA; Anti-TPO; Anti-SMA; Low-grade fever; Dizziness; Weight loss; Rashes and skin lesions; Dry eyes and/or mouth; Joint pain
+Balo concentric sclerosis,83,Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Stiffness in the joints
+Behçet's disease,81,Anti-dsDNA; Rheumatoid factor; ACPA; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness; Dizziness; Weight loss; Rashes and skin lesions; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Bickerstaff's encephalitis,94,Rheumatoid factor; Fatigue or chronic tiredness; Dizziness; Stiffness in the joints; Brittle hair or hair loss
+Bullous pemphigoid,88,Anti-dsDNA; Rheumatoid factor; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Rashes and skin lesions; Stiffness in the joints; Dry eyes and/or mouth; Joint pain; Anti_BP230; Anti_BP180
+Celiac disease,86,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-SMA; Low-grade fever; Rashes and skin lesions; Joint pain; DGP; EMA; Anti_tissue_transglutaminase
+Chronic inflammatory demyelinating polyneuropathy,98,Anti-Sm; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss
+Cicatricial pemphigoid,77,Anti-dsDNA; Anti-Sm; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness; Weight loss; Brittle hair or hair loss; General 'unwell' feeling; Joint pain; Anti_BP230; Anti_BP180
+Cogan syndrome,84,Anti-dsDNA; Anti-Sm; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling; Joint pain
+Crohn's disease,81,Anti-dsDNA; Rheumatoid factor; ACPA; Anti-TPO; Anti-SMA; Low-grade fever; Dizziness; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; ASCA; Anti_CBir1; ANCA; Anti_OmpC
+Dermatitis herpetiformis,101,Anti-TPO; Low-grade fever; Dizziness; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling; Joint pain; Anti_tissue_transglutaminase
+Dermatomyositis,183,ACPA; Anti-TPO; Anti-Tg; Anti-SMA; Low-grade fever; Dizziness; Stiffness in the joints; Dry eyes and/or mouth; Anti_SRP; Anti_Jo1; Anti_TIF1; Anti_Mi2
+Diabetes mellitus type 1,75,ACPA; Anti-SMA; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Discoid lupus erythematosus,92,ACPA; Weight loss; General 'unwell' feeling; Joint pain; Anti_dsDNA; Anti_Sm
+Endometriosis,184,Rheumatoid factor; ACPA; Low-grade fever; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling
+Eosinophilic granulomatosis with polyangiitis (EGPA),76,Anti-dsDNA; Anti-Sm; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Weight loss; Rashes and skin lesions; Dry eyes and/or mouth; Joint pain
+Epidermolysis bullosa acquisita,89,Anti-dsDNA; ACPA; Anti-TPO; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Joint pain; Anti_type_VII_collagen
+Erythema nodosum,86,Anti-dsDNA; Rheumatoid factor; Anti-TPO; Anti-SMA; Dizziness; Weight loss; Dry eyes and/or mouth; Joint pain
+Fibromyalgia,84,Anti-dsDNA; Anti-TPO; Anti-Tg; Anti-SMA; Low-grade fever; Dizziness; Weight loss; Rashes and skin lesions; General 'unwell' feeling; Joint pain
+Gestational pemphigoid,88,Anti-Tg; Low-grade fever; Rashes and skin lesions; Stiffness in the joints; Dry eyes and/or mouth; General 'unwell' feeling; Anti_BP230; Anti_BP180
+Giant cell arteritis,82,Anti-Tg; Low-grade fever; Dizziness; Joint pain
+Goodpasture syndrome,80,Anti-dsDNA; ACPA; Low-grade fever; Fatigue or chronic tiredness; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth
+Granulomatosis with polyangiitis (GPA),78,Anti-Sm; Anti-Tg; Anti-SMA; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth
+Graves' disease,81,Anti-dsDNA; Anti-Sm; Rheumatoid factor; ACPA; Anti-SMA; Low-grade fever; Dizziness; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Graves' ophthalmopathy,83,Anti-dsDNA; Rheumatoid factor; ACPA; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Guillain-Barré syndrome,91,Anti-dsDNA; ACPA; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness; Rashes and skin lesions; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Hashimoto's encephalopathy,78,Anti-TPO; Anti-SMA; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling
+Hashimoto's thyroiditis,72,Anti-dsDNA; Anti-Sm; Anti-TPO; Anti-SMA; Dizziness; Weight loss; Stiffness in the joints; Dry eyes and/or mouth; General 'unwell' feeling
+Hidradenitis suppurativa,101,ACPA; Anti-Tg; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Idiopathic inflammatory demyelinating diseases,81,Anti-Sm; ACPA; Anti-TPO; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Stiffness in the joints; Dry eyes and/or mouth; Joint pain
+Idiopathic pulmonary fibrosis,70,Rheumatoid factor; ACPA; Anti-Tg; Dizziness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; Joint pain
+IgA nephropathy,97,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Stiffness in the joints; General 'unwell' feeling
+IgA vasculitis (IgAV),76,Anti-Sm; ACPA; Fatigue or chronic tiredness; Dizziness; Brittle hair or hair loss; Joint pain
+Immune thrombocytopenia,99,Anti-Sm; Rheumatoid factor; ACPA; Anti-TPO; Anti-Tg; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Inclusion body myositis,79,Anti-Sm; Rheumatoid factor; ACPA; Anti-SMA; Fatigue or chronic tiredness; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Intermediate uveitis,83,Anti-dsDNA; ACPA; Anti-TPO; Low-grade fever; Dizziness; Stiffness in the joints; Dry eyes and/or mouth
+Interstitial cystitis,90,Anti-dsDNA; Anti-Sm; ACPA; Anti-TPO; Low-grade fever; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling; Joint pain
+Interstitial lung disease,97,Anti-dsDNA; ACPA; Anti-Tg; Low-grade fever; Rashes and skin lesions; Dry eyes and/or mouth; General 'unwell' feeling
+Interstitial nephritis,79,Anti-dsDNA; Rheumatoid factor; Anti-TPO; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Stiffness in the joints
+Kawasaki disease,97,Anti-Sm; ACPA; Anti-TPO; Anti-Tg; Anti-SMA; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Lambert–Eaton myasthenic syndrome,78,Anti-dsDNA; Anti-Sm; Anti-Tg; Dizziness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling
+Leukocytoclastic vasculitis,84,Anti-dsDNA; Anti-Sm; Anti-TPO; Anti-Tg; Weight loss; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Lichen planus,84,Anti-dsDNA; Anti-Sm; ACPA; Anti-TPO; Anti-Tg; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth
+Lichen sclerosus,68,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Weight loss; Rashes and skin lesions; Dry eyes and/or mouth
+Ligneous conjunctivitis,80,Rheumatoid factor; Anti-Tg; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth
+Linear IgA disease,88,Anti-Sm; Rheumatoid factor; Anti-Tg; Dizziness; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Joint pain; Anti_epidermal_basement_membrane_IgA
+Lupus nephritis,75,Anti-dsDNA; Anti-Sm; Low-grade fever; Stiffness in the joints; General 'unwell' feeling
+Lupus vasculitis,87,Anti-dsDNA; Rheumatoid factor; Anti-Tg; Anti-SMA; Weight loss; Brittle hair or hair loss
+Membranous nephropathy,85,Anti-dsDNA; Rheumatoid factor; ACPA; Anti-TPO; Fatigue or chronic tiredness; Weight loss; Brittle hair or hair loss
+Microscopic polyangiitis (MPA),85,Anti-dsDNA; ACPA; Low-grade fever; Fatigue or chronic tiredness; Rashes and skin lesions; Joint pain
+Mooren's ulcer,93,Anti-dsDNA; Anti-Sm; ACPA; Anti-TPO; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Morphea,99,Anti-Sm; Rheumatoid factor; Anti-Tg; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth
+Multiple sclerosis,75,Rheumatoid factor; Anti-TPO; Anti-SMA; Low-grade fever; Brittle hair or hair loss; General 'unwell' feeling; Joint pain
+Myasthenia gravis,149,Anti-dsDNA; Anti-TPO; Anti-Tg; Anti-SMA; Low-grade fever; Stiffness in the joints; Brittle hair or hair loss
+Myositis,85,Anti-Sm; Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Neuromyelitis optica,70,ACPA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Stiffness in the joints
+Neuromyelitis optica (Devic's disease)/NMOSD,92,Anti-Sm; ACPA; Anti-TPO; Anti-Tg; Anti-SMA; Weight loss; Rashes and skin lesions; Dry eyes and/or mouth
+Neuromyotonia,62,Anti-Sm; Rheumatoid factor; ACPA; Anti-SMA; Dizziness
+Normal,88,Varies
+Opsoclonus myoclonus syndrome,97,Anti-Sm; ACPA; Low-grade fever; Joint pain
+Optic neuritis,79,Anti-dsDNA; Anti-Sm; Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Stiffness in the joints; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Ord's thyroiditis,78,Anti-dsDNA; Anti-Tg; Anti-SMA; Weight loss; Brittle hair or hair loss; General 'unwell' feeling
+Paraneoplastic cerebellar degeneration,82,Anti-dsDNA; Rheumatoid factor; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness
+Paroxysmal nocturnal hemoglobinuria,76,Anti-Sm; Rheumatoid factor; ACPA; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness; Stiffness in the joints; Dry eyes and/or mouth; Joint pain
+Pemphigus vulgaris,87,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-TPO; Anti-Tg; Low-grade fever; Dizziness; Weight loss; Rashes and skin lesions; Brittle hair or hair loss; General 'unwell' feeling; Joint pain; Anti_desmoglein_3; Anti_desmoglein_1
+Pernicious anemia,85,Anti-dsDNA; ACPA; Low-grade fever; Stiffness in the joints; Dry eyes and/or mouth; Joint pain; Anti_IF; Anti_parietal_cell
+Polyarteritis nodosa (PAN),63,Anti-Sm; ACPA; Anti-TPO; Anti-Tg; Fatigue or chronic tiredness; Dizziness; Stiffness in the joints; Brittle hair or hair loss
+Polymyalgia rheumatica,80,Rheumatoid factor; Anti-TPO; Anti-SMA; Dizziness; Weight loss; Rashes and skin lesions; Stiffness in the joints; Dry eyes and/or mouth
+Polymyositis,90,Anti-dsDNA; ACPA; Anti-Tg; Dizziness; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling
+Premature ovarian failure,90,Anti-Sm; Anti-Tg; Anti-SMA; Low-grade fever; Weight loss; Stiffness in the joints; Dry eyes and/or mouth; Joint pain
+Primary sclerosing cholangitis,76,Anti-Sm; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Psoriasis,80,Anti-TPO; Anti-SMA; Stiffness in the joints; General 'unwell' feeling; Joint pain
+Pulmonary alveolar proteinosis,81,Anti-Sm; Rheumatoid factor; ACPA; Anti-TPO; Anti-SMA; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling; Joint pain
+Restless legs syndrome,86,Anti-TPO; Anti-SMA; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Rheumatic heart disease,67,Anti-dsDNA; Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Dizziness; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth
+Rheumatoid arthritis,91,Anti-Sm; Rheumatoid factor; ACPA; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Weight loss; Stiffness in the joints; General 'unwell' feeling; Joint pain
+Rheumatoid lung disease,82,Anti-Sm; Rheumatoid factor; Anti-TPO; Anti-Tg; Low-grade fever; Stiffness in the joints; Dry eyes and/or mouth; General 'unwell' feeling
+Rheumatoid vasculitis,88,Anti-dsDNA; Anti-Sm; ACPA; Anti-Tg; Anti-SMA; Low-grade fever; Rashes and skin lesions; Stiffness in the joints; Dry eyes and/or mouth
+Sarcoidosis,87,Anti-dsDNA; Anti-Sm; Rheumatoid factor; Anti-Tg; Low-grade fever; Fatigue or chronic tiredness; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Scleritis,87,Anti-dsDNA; Anti-Sm; Anti-Tg; Anti-SMA; Low-grade fever; Dizziness; Rashes and skin lesions; General 'unwell' feeling; Joint pain
+Scleroderma (systemic sclerosis),77,Anti-Sm; Rheumatoid factor; Anti-SMA; Low-grade fever; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain; anti_centromere; anti_Scl_70
+Sjögren syndrome,85,Anti-dsDNA; Anti-Sm; ACPA; Low-grade fever; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; General 'unwell' feeling
+Stiff-person syndrome,80,Rheumatoid factor; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Susac's syndrome,78,ACPA; Anti-TPO; Anti-SMA; Fatigue or chronic tiredness; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth
+Sydenham's chorea,68,Rheumatoid factor; ACPA; Anti-TPO; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Sympathetic ophthalmia,75,ACPA; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Brittle hair or hair loss; Dry eyes and/or mouth
+Systemic Lupus Erythematosus,93,Anti_dsDNA; Anti_RNP; Anti_Ro_SSA; Anti_La_SSB; Anti_Sm
+Takayasu's arteritis,73,Anti-dsDNA; Rheumatoid factor; ACPA; Anti-TPO; Anti-Tg; Anti-SMA; Low-grade fever; Dizziness; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling
+Thrombotic thrombocytopenic purpura,83,Anti-dsDNA; ACPA; Anti-TPO; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Stiffness in the joints; Dry eyes and/or mouth
+Tolosa–Hunt syndrome,79,Anti-Sm; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Transverse myelitis,89,Anti-dsDNA; Anti-Sm; Rheumatoid factor; ACPA; Anti-Tg; Anti-SMA; Weight loss; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; Joint pain
+Ulcerative colitis,78,Rheumatoid factor; ACPA; Anti-Tg; Low-grade fever; Fatigue or chronic tiredness; Brittle hair or hair loss; General 'unwell' feeling; Joint pain; ASCA; pANCA
+Undifferentiated connective tissue disease (UCTD),77,Anti-Sm; Anti-Tg; Dizziness; Weight loss; Brittle hair or hair loss; Joint pain
+Urticarial vasculitis,77,Anti-dsDNA; Rheumatoid factor; Anti-TPO; Anti-Tg; Anti-SMA; Low-grade fever; Fatigue or chronic tiredness; Weight loss; Rashes and skin lesions; Stiffness in the joints; Brittle hair or hair loss; Dry eyes and/or mouth; General 'unwell' feeling; Joint pain
+Vasculitis,101,Anti-Sm; Low-grade fever; Fatigue or chronic tiredness; Dizziness; Weight loss; Rashes and skin lesions; Joint pain
+Vitiligo,91,Anti-dsDNA; ACPA; Anti-Tg; Anti-SMA; Fatigue or chronic tiredness; Dizziness; Rashes and skin lesions; Dry eyes and/or mouth

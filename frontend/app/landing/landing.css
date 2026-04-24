@@ -1,0 +1,527 @@
+/* ====================================
+ * LANDING PAGE STYLES
+ * ==================================== */
+
+/* Custom Gradient Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%);
+  border-radius: 10px;
+  border: 2px solid #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #16a34a 0%, #059669 50%, #047857 100%);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #f1f5f9;
+}
+
+/* White Frame Border - Picture Frame Effect */
+.landing-frame {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
+}
+
+/* Hide frame on mobile */
+@media (max-width: 768px) {
+  .landing-frame {
+    display: none;
+  }
+}
+
+/* Top border */
+.landing-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 20px solid white;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+/* Inner rounded cutout overlay */
+.landing-frame::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 0 20px white;
+}
+
+/* Hero Section Video Background */
+.hero-video-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 50, 30, 0.5) 50%,
+      rgba(0, 0, 0, 0.7) 100%);
+}
+
+/* Section Backgrounds */
+.section-about {
+  background: linear-gradient(180deg,
+      #f0fdf4 0%,
+      #ecfdf5 50%,
+      #f0fdf4 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* About Section Floating Orbs */
+.section-about::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  top: -100px;
+  right: -100px;
+  animation: floatOrb1 15s ease-in-out infinite;
+}
+
+.section-about::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  bottom: -50px;
+  left: -50px;
+  animation: floatOrb2 18s ease-in-out infinite;
+}
+
+@keyframes floatOrb1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(-30px, 40px) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-60px, 20px) scale(0.95);
+  }
+
+  75% {
+    transform: translate(-20px, 60px) scale(1.05);
+  }
+}
+
+@keyframes floatOrb2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(40px, -30px) scale(1.15);
+  }
+
+  66% {
+    transform: translate(20px, -50px) scale(0.9);
+  }
+}
+
+.section-solution {
+  background: linear-gradient(180deg,
+      #f0fdf4 0%,
+      #dcfce7 50%,
+      #f0fdf4 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Solution Section Animated Background */
+.section-solution::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 60%);
+  border-radius: 50%;
+  top: 50%;
+  left: -150px;
+  transform: translateY(-50%);
+  animation: floatOrb3 20s ease-in-out infinite;
+}
+
+.section-solution::after {
+  content: '';
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+  border-radius: 50%;
+  top: 20%;
+  right: -100px;
+  animation: floatOrb4 16s ease-in-out infinite;
+}
+
+@keyframes floatOrb3 {
+
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+
+  50% {
+    transform: translateY(-50%) translate(50px, 30px) scale(1.2);
+  }
+}
+
+@keyframes floatOrb4 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(-40px, 40px) rotate(180deg);
+  }
+}
+
+/* Footer */
+.landing-footer {
+  background: linear-gradient(180deg,
+      #0a192f 0%,
+      #061020 100%);
+}
+
+/* Text Gradient */
+.text-gradient-green {
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated Underline */
+.animated-underline {
+  position: relative;
+}
+
+.animated-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #22c55e, #10b981);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.animated-underline:hover::after {
+  width: 100%;
+}
+
+/* Scroll Indicator */
+.scroll-indicator-landing {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+@keyframes bounce-gentle {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0) translateX(-50%);
+  }
+
+  40% {
+    transform: translateY(-12px) translateX(-50%);
+  }
+
+  60% {
+    transform: translateY(-6px) translateX(-50%);
+  }
+}
+
+/* Feature Cards */
+.feature-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(34, 197, 94, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* Image Placeholder */
+.image-placeholder {
+  background: linear-gradient(135deg,
+      #e2e8f0 0%,
+      #f1f5f9 50%,
+      #e2e8f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.5rem;
+  border: 2px dashed #cbd5e1;
+}
+
+/* Features Section */
+.section-features {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-features::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.06) 0%, transparent 60%);
+  border-radius: 50%;
+  top: -200px;
+  right: -200px;
+  animation: floatOrb1 25s ease-in-out infinite;
+}
+
+/* Bento Cards */
+.bento-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ====================================
+ * LANDING PAGE MOBILE RESPONSIVE STYLES
+ * iOS and Android optimizations
+ * ==================================== */
+
+/* Mobile Hero Section */
+@media screen and (max-width: 768px) {
+  .hero-video-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .hero-video {
+    object-position: center center;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 50, 30, 0.6) 50%,
+        rgba(0, 0, 0, 0.8) 100%);
+  }
+}
+
+/* Very small screens hero */
+@media screen and (max-width: 480px) {
+  .section-hero h1 {
+    font-size: 2.5rem !important;
+    letter-spacing: -0.02em;
+  }
+
+  .section-hero p {
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .scroll-indicator-landing {
+    display: none;
+  }
+}
+
+/* Mobile About Section */
+@media screen and (max-width: 1024px) {
+  .section-about {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .section-about::before,
+  .section-about::after {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+}
+
+@media screen and (max-width: 640px) {
+
+  .section-about::before,
+  .section-about::after {
+    display: none;
+  }
+}
+
+/* Mobile Solution Section */
+@media screen and (max-width: 1024px) {
+  .section-solution {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .section-solution::before,
+  .section-solution::after {
+    opacity: 0.3;
+    transform: scale(0.5);
+  }
+}
+
+@media screen and (max-width: 640px) {
+
+  .section-solution::before,
+  .section-solution::after {
+    display: none;
+  }
+}
+
+/* Mobile Features Section */
+@media screen and (max-width: 768px) {
+  .section-features {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .section-features::before {
+    opacity: 0.3;
+  }
+}
+
+/* Mobile Feature Cards */
+@media screen and (max-width: 768px) {
+  .feature-card {
+    padding: 1.25rem;
+    border-radius: 1rem;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Mobile Bento Cards */
+@media screen and (max-width: 768px) {
+  .bento-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .bento-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Mobile Footer */
+@media screen and (max-width: 768px) {
+  .landing-footer {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .landing-footer {
+    text-align: center;
+  }
+
+  .landing-footer .flex {
+    justify-content: center;
+  }
+}
+
+/* Mobile Scrollbar - thinner on mobile */
+@media screen and (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-width: 1px;
+  }
+}
+
+/* Mobile Image Placeholders */
+@media screen and (max-width: 640px) {
+  .image-placeholder {
+    border-radius: 1rem;
+    min-height: 200px;
+  }
+}
+
+/* Mobile Text Gradient */
+.text-gradient-green {
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Improve touch targets for links */
+@media screen and (max-width: 768px) {
+  .animated-underline {
+    padding: 0.5rem 0;
+  }
+
+  .animated-underline::after {
+    bottom: 0;
+  }
+}
+
+/* Mobile safe areas for bottom content */
+@supports (padding: max(0px)) {
+  @media screen and (max-width: 768px) {
+    .landing-footer {
+      padding-bottom: max(3rem, env(safe-area-inset-bottom));
+    }
+  }
+}
