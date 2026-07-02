@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 // Health goals options
 const HEALTH_GOALS = [
@@ -86,6 +86,11 @@ export default function ProfilePage() {
 
         // Give the auth state a moment to sync (OAuth callback race condition)
         const timer = setTimeout(async () => {
+            if (!isSupabaseConfigured) {
+                router.push('/auth/login');
+                return;
+            }
+
             // Double-check with Supabase directly before redirecting
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -235,6 +240,21 @@ export default function ProfilePage() {
         }
 
         setIsSubmitting(true);
+
+        if (!isSupabaseConfigured) {
+            completeProfile({
+                fullName: fullName.trim(),
+                age: Number(age),
+                gender: gender as 'male' | 'female' | 'other',
+                location: location.trim(),
+            });
+            setShowSuccess(true);
+            setTimeout(() => {
+                router.push('/dashboard');
+            }, 1500);
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             // Save profile directly to Supabase users table

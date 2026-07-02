@@ -1,12 +1,28 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id'];
+const authPaths = ['/auth/login', '/signup'];
+
 export async function proxy(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const isProtectedRoute = protectedPaths.some(path =>
+        request.nextUrl.pathname.startsWith(path)
+    );
+    const isAuthRoute = authPaths.some(path =>
+        request.nextUrl.pathname.startsWith(path)
+    );
+
+    if (!supabaseUrl || !supabaseKey) {
+        // Allow access to protected routes for mock auth when Supabase isn't configured
+        return supabaseResponse;
+    }
 
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseKey,
         {
             cookies: {
                 getAll() {
@@ -28,6 +44,7 @@ export async function proxy(request: NextRequest) {
     // Refresh the auth session (keeps cookies valid)
     await supabase.auth.getUser();
 
+<<<<<<< HEAD
     // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
     // Uncomment the blocks below when ready for production.
 
@@ -52,6 +69,21 @@ export async function proxy(request: NextRequest) {
     //     url.pathname = '/dashboard';
     //     return NextResponse.redirect(url);
     // }
+=======
+    // Protected routes — redirect to login if not authenticated
+    if (isProtectedRoute && !user) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/auth/login';
+        return NextResponse.redirect(url);
+    }
+
+    // Redirect authenticated users away from auth pages
+    if (isAuthRoute && user) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        return NextResponse.redirect(url);
+    }
+>>>>>>> c265e37 (Make some changes)
 
     return supabaseResponse;
 }

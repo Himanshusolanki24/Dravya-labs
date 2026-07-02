@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase';
 
 // User profile interface
 export interface UserProfile {
@@ -112,6 +112,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
         }
 
+        if (!isSupabaseConfigured) {
+            setIsLoading(false);
+            return;
+        }
+
         // Check active Supabase session and sync with DB (runs in background)
         const initSession = async () => {
             try {
@@ -162,6 +167,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         email: string,
         userMetadata: Record<string, string> = {}
     ) => {
+        if (!isSupabaseConfigured) return;
+
         try {
             // Try to fetch existing profile
             const { data: existingProfile } = await supabase
@@ -210,6 +217,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const signInWithGoogle = async () => {
         try {
+            if (!isSupabaseConfigured) {
+                throw new Error(missingSupabaseMessage);
+            }
+
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
@@ -247,7 +258,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } catch (e) {
             console.error('Failed to call logout API', e);
         }
-        await supabase.auth.signOut();
+        if (isSupabaseConfigured) {
+            await supabase.auth.signOut();
+        }
         setUser(null);
         localStorage.removeItem('user');
         if (typeof window !== 'undefined') {

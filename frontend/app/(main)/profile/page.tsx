@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import dynamic from 'next/dynamic';
 
 const HealthStatsCharts = dynamic(() => import('@/components/profile/HealthStatsCharts'), { ssr: false });
@@ -577,6 +577,11 @@ export default function ProfilePage() {
         setIsLoadingProfile(true);
         setFetchError('');
         try {
+            if (!isSupabaseConfigured) {
+                setIsLoadingProfile(false);
+                return;
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.access_token) {
                 setIsLoadingProfile(false);
@@ -599,8 +604,15 @@ export default function ProfilePage() {
                 } catch (e) {
                     console.error('Failed to logout API', e);
                 }
+<<<<<<< HEAD:frontend/app/(main)/profile/page.tsx
                 await supabase.auth.signOut();
                 // window.location.href = '/auth/login';
+=======
+                if (isSupabaseConfigured) {
+                    await supabase.auth.signOut();
+                }
+                window.location.href = '/auth/login';
+>>>>>>> c265e37 (Make some changes):frontend/app/profile/page.tsx
                 return;
             } else if (res.status === 404) {
                 // No profile yet — show form

@@ -42,7 +42,7 @@ load_dotenv()
 
 API_KEY = os.getenv("HERB_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "..", "model"))
-PORT = int(os.getenv("PORT", 8003))
+PORT = int(os.getenv("PORT", 8002))
 
 logging.basicConfig(
     level=logging.INFO,

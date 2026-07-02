@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 // Define SavedItem type
 export interface SavedItem {
@@ -44,6 +44,16 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
 
     const refreshSavedItems = useCallback(async () => {
         if (!userId) return;
+        if (!isSupabaseConfigured) {
+            // Load from localStorage
+            try {
+                const stored = localStorage.getItem('savedItems');
+                if (stored) setSavedItems(JSON.parse(stored));
+            } catch (e) {
+                console.error("Failed to load saved items from localStorage", e);
+            }
+            return;
+        }
         setIsLoading(true);
         try {
             const { data, error } = await supabase
@@ -83,10 +93,21 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
         // Optimistic update
         const exists = isItemSaved(item.item_id);
         if (exists) {
-            setSavedItems(prev => prev.filter(i => i.item_id !== item.item_id));
+            setSavedItems(prev => {
+                const updated = prev.filter(i => i.item_id !== item.item_id);
+                if (!isSupabaseConfigured) localStorage.setItem('savedItems', JSON.stringify(updated));
+                return updated;
+            });
         } else {
-            setSavedItems(prev => [{ ...item, id: 'temp-' + Date.now(), user_id: userId, created_at: new Date().toISOString() } as SavedItem, ...prev]);
+            const newItem = { ...item, id: 'local-' + Date.now(), user_id: userId, created_at: new Date().toISOString() } as SavedItem;
+            setSavedItems(prev => {
+                const updated = [newItem, ...prev];
+                if (!isSupabaseConfigured) localStorage.setItem('savedItems', JSON.stringify(updated));
+                return updated;
+            });
         }
+
+        if (!isSupabaseConfigured) return;
 
         try {
             if (exists) {

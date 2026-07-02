@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase'
 import { useUser } from '@/context/UserContext'
 
 export default function Login() {
@@ -38,9 +38,24 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
+
     setIsLoading(true)
 
     try {
+      if (!isSupabaseConfigured) {
+        // MOCK AUTH: create a local-only session without Supabase
+        const mockId = 'local-' + crypto.randomUUID();
+        const userData = {
+          id: mockId,
+          email: formData.email,
+          fullName: formData.email.split('@')[0],
+          isProfileComplete: true,
+        }
+        login(userData)
+        router.push('/dashboard')
+        return;
+      }
+
       // Sign in with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -102,12 +117,25 @@ export default function Login() {
   }
 
   const handleGoogleLogin = async () => {
-    console.log('Google login clicked')
+    if (!isSupabaseConfigured) {
+      // MOCK: simulate Google login locally
+      const mockId = 'local-' + crypto.randomUUID();
+      const userData = {
+        id: mockId,
+        email: 'demo@dravyalabs.com',
+        fullName: 'Demo User',
+        isProfileComplete: true,
+      }
+      login(userData)
+      router.push('/dashboard')
+      return
+    }
+
     try {
       await signInWithGoogle();
     } catch (error) {
-      console.error("Google login failed", error);
-      setErrors({ general: 'Google login failed. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Google login failed. Please try again.';
+      setErrors({ general: errorMessage });
     }
   }
 

@@ -7,7 +7,7 @@ import {
     ChevronDown,
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase';
 
 // ─── Types ───────────────────────────────────────────────────
 interface Review {
@@ -130,6 +130,11 @@ export default function FeedbackPage() {
     }, []);
 
     const fetchReviews = async () => {
+        if (!isSupabaseConfigured) {
+            setIsLoadingReviews(false);
+            return;
+        }
+
         setIsLoadingReviews(true);
         try {
             const { data, error } = await supabase
@@ -160,6 +165,28 @@ export default function FeedbackPage() {
 
         setIsSubmitting(true);
         setSubmitError('');
+
+        if (!isSupabaseConfigured) {
+            // Mock submission
+            const newReview = {
+                id: 'local-' + Date.now(),
+                user_name: user?.fullName || user?.firstName || 'Anonymous',
+                rating,
+                category,
+                title: title.trim() || null,
+                review_text: reviewText.trim(),
+                created_at: new Date().toISOString(),
+            };
+            setReviews(prev => [newReview as Review, ...prev]);
+            setSubmitSuccess(true);
+            setRating(0);
+            setCategory('general');
+            setTitle('');
+            setReviewText('');
+            setTimeout(() => setSubmitSuccess(false), 4000);
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             const { error } = await supabase.from('reviews').insert({

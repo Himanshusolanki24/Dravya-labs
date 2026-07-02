@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase';
 
 export default function AuthCallbackPage() {
     const router = useRouter();
@@ -12,6 +12,12 @@ export default function AuthCallbackPage() {
     useEffect(() => {
         if (hasRun.current) return;
         hasRun.current = true;
+
+        if (!isSupabaseConfigured) {
+            // No Supabase — just redirect to dashboard
+            router.push('/dashboard');
+            return;
+        }
 
         // Supabase client with detectSessionInUrl:true will automatically
         // exchange the ?code= for a session. We just need to listen for it.

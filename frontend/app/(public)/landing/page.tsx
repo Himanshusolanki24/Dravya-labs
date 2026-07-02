@@ -25,6 +25,7 @@ export default function LandingPage() {
                         loop
                         playsInline
                         className="hero-video"
+                        suppressHydrationWarning
                     >
                         <source src="/homebg.mp4" type="video/mp4" />
                     </video>

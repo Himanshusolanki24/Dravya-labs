@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase'
 import { useUser } from '@/context/UserContext'
 
 export default function Signup() {
@@ -56,8 +56,28 @@ export default function Signup() {
     setIsLoading(true)
 
     try {
-      // Sign up with Supabase Auth
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+
+      if (!isSupabaseConfigured) {
+        // MOCK AUTH: create a local-only user without Supabase
+        const mockId = 'local-' + crypto.randomUUID();
+        const userData = {
+          id: mockId,
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          fullName: fullName,
+          isProfileComplete: false,
+        }
+        login(userData)
+        setShowProfilePopup(true)
+        setTimeout(() => {
+          router.push('/auth/profile')
+        }, 2000)
+        return;
+      }
+
+      // Sign up with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -114,11 +134,30 @@ export default function Signup() {
   }
 
   const handleGoogleSignup = async () => {
+    if (!isSupabaseConfigured) {
+      // MOCK: simulate Google signup locally
+      const mockId = 'local-' + crypto.randomUUID();
+      const userData = {
+        id: mockId,
+        email: 'demo@dravyalabs.com',
+        firstName: 'Demo',
+        lastName: 'User',
+        fullName: 'Demo User',
+        isProfileComplete: false,
+      }
+      login(userData)
+      setShowProfilePopup(true)
+      setTimeout(() => {
+        router.push('/auth/profile')
+      }, 2000)
+      return
+    }
+
     try {
       await signInWithGoogle();
     } catch (error) {
-      console.error("Google signup failed", error);
-      setErrors({ general: 'Google signup failed. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Google signup failed. Please try again.';
+      setErrors({ general: errorMessage });
     }
   }
 
