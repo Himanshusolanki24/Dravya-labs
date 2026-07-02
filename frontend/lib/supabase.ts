@@ -7,7 +7,21 @@ export const isSupabaseConfigured = Boolean(
 export const missingSupabaseMessage =
     'Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to frontend/.env.local, then restart npm run dev.';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'missing-supabase-anon-key';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createBrowserClient(supabaseUrl, supabaseKey);
+function createMissingSupabaseClient() {
+    return new Proxy({} as never, {
+        get() {
+            throw new Error('Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.');
+        },
+    });
+}
+
+if (!supabaseUrl || !supabaseKey) {
+    console.warn('Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.');
+}
+
+export const supabase = supabaseUrl && supabaseKey
+    ? createBrowserClient(supabaseUrl, supabaseKey)
+    : createMissingSupabaseClient();

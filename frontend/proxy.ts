@@ -8,43 +8,32 @@ export async function proxy(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const isProtectedRoute = protectedPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
-    );
-    const isAuthRoute = authPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
-    );
 
     if (!supabaseUrl || !supabaseKey) {
-        // Allow access to protected routes for mock auth when Supabase isn't configured
+        console.warn('Supabase middleware skipped because the environment variables are missing.');
         return supabaseResponse;
     }
 
-    const supabase = createServerClient(
-        supabaseUrl,
-        supabaseKey,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
-                    );
-                    supabaseResponse = NextResponse.next({ request });
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    );
-                },
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+        cookies: {
+            getAll() {
+                return request.cookies.getAll();
             },
-        }
-    );
+            setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value }) =>
+                    request.cookies.set(name, value)
+                );
+                supabaseResponse = NextResponse.next({ request });
+                cookiesToSet.forEach(({ name, value, options }) =>
+                    supabaseResponse.cookies.set(name, value, options)
+                );
+            },
+        },
+    });
 
     // Refresh the auth session (keeps cookies valid)
     await supabase.auth.getUser();
 
-<<<<<<< HEAD
     // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
     // Uncomment the blocks below when ready for production.
 
@@ -69,21 +58,6 @@ export async function proxy(request: NextRequest) {
     //     url.pathname = '/dashboard';
     //     return NextResponse.redirect(url);
     // }
-=======
-    // Protected routes — redirect to login if not authenticated
-    if (isProtectedRoute && !user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/auth/login';
-        return NextResponse.redirect(url);
-    }
-
-    // Redirect authenticated users away from auth pages
-    if (isAuthRoute && user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-    }
->>>>>>> c265e37 (Make some changes)
 
     return supabaseResponse;
 }
@@ -93,4 +67,3 @@ export const config = {
         '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
-

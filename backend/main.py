@@ -40,11 +40,23 @@ try:
     from app.routes.onboarding_route import router as onboarding_router
     from app.routes.agent_routes import router as agent_router
     from app.routes.chat_sessions_route import router as chat_sessions_router
+    from app.routes.feedback_route import router as feedback_router
     app.include_router(onboarding_router)
     app.include_router(agent_router)
     app.include_router(chat_sessions_router)
+    app.include_router(feedback_router)  # Data Flywheel: capture 👍/👎 feedback
 except ImportError:
     pass
+
+
+# Release pooled Supabase sockets on shutdown
+@app.on_event("shutdown")
+async def _close_pools() -> None:
+    try:
+        from app.services.supabase_async import close_client
+        await close_client()
+    except Exception:
+        pass
 
 # -----------------------------------------------------
 # Frontend Expected Interfaces
