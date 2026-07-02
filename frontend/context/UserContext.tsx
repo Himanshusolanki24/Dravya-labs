@@ -66,6 +66,19 @@ function mapDbRowToProfile(row: Record<string, unknown>): Partial<UserProfile> {
     };
 }
 
+const mockUser: UserProfile = {
+    id: 'mock-user-id-12345',
+    email: 'dev-user@dravyalabs.com',
+    fullName: 'Dev User',
+    firstName: 'Dev',
+    lastName: 'User',
+    age: 28,
+    gender: 'male',
+    location: 'Mumbai, India',
+    isProfileComplete: true,
+    createdAt: new Date().toISOString(),
+};
+
 export function UserProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +100,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 console.error('Error parsing stored user:', error);
                 localStorage.removeItem('user');
             }
+        } else {
+            // Default to mock user for UI development
+            setUser(mockUser);
+            hasCachedUser = true;
         }
 
         // If we have cached user data, stop loading immediately
@@ -101,13 +118,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
                     await syncUserFromDb(session.user.id, session.user.email || '', session.user.user_metadata);
-                } else if (hasCachedUser) {
-                    // Session expired but we had cached data — clear it
-                    setUser(null);
-                    localStorage.removeItem('user');
+                } else {
+                    // Default to mock user if no session
+                    setUser(mockUser);
                 }
             } catch (error) {
                 console.error('Error checking session:', error);
+                setUser(mockUser);
             } finally {
                 // Always set loading false when done (covers no-cache case)
                 setIsLoading(false);
@@ -121,6 +138,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             if (event === 'SIGNED_IN' && session?.user) {
                 await syncUserFromDb(session.user.id, session.user.email || '', session.user.user_metadata);
             } else if (event === 'SIGNED_OUT') {
+                // For dev, don't clear mock user entirely, or allow logout to clean it
                 setUser(null);
                 localStorage.removeItem('user');
             }

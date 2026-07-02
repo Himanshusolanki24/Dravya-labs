@@ -25,47 +25,40 @@ export async function proxy(request: NextRequest) {
         }
     );
 
-    // Refresh the auth session
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    // Refresh the auth session (keeps cookies valid)
+    await supabase.auth.getUser();
 
-    // Protected routes — redirect to login if not authenticated
-    const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id'];
-    const isProtectedRoute = protectedPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
-    );
+    // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
+    // Uncomment the blocks below when ready for production.
 
-    if (isProtectedRoute && !user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/auth/login';
-        return NextResponse.redirect(url);
-    }
+    // // Protected routes — redirect to login if not authenticated
+    // const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id', '/profile', '/treatment', '/feedback'];
+    // const isProtectedRoute = protectedPaths.some(path =>
+    //     request.nextUrl.pathname.startsWith(path)
+    // );
+    // if (isProtectedRoute && !user) {
+    //     const url = request.nextUrl.clone();
+    //     url.pathname = '/auth/login';
+    //     return NextResponse.redirect(url);
+    // }
 
-    // Redirect authenticated users away from auth pages
-    const authPaths = ['/auth/login', '/signup'];
-    const isAuthRoute = authPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
-    );
-
-    if (isAuthRoute && user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-    }
+    // // Redirect authenticated users away from auth pages
+    // const authPaths = ['/auth/login', '/auth/signup', '/signup'];
+    // const isAuthRoute = authPaths.some(path =>
+    //     request.nextUrl.pathname.startsWith(path)
+    // );
+    // if (isAuthRoute && user) {
+    //     const url = request.nextUrl.clone();
+    //     url.pathname = '/dashboard';
+    //     return NextResponse.redirect(url);
+    // }
 
     return supabaseResponse;
 }
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except:
-         * - _next/static (static files)
-         * - _next/image (image optimization)
-         * - favicon.ico
-         * - public folder files
-         */
         '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
+
