@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import HerbCard from '@/components/ui/herb-card';
-import { Leaf, Sparkles, Search, Filter, X } from 'lucide-react';
+import { Leaf, Sparkles, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { herbs, categories, doshaOptions } from '@/lib/herbs-data';
 import { translations } from '@/lib/translations';
 import { useLanguage } from '@/context/LanguageContext';
@@ -131,37 +131,43 @@ export default function EncyclopediaPage() {
                         <div className="flex flex-col sm:flex-row gap-4 mb-2">
                             {/* Dosha Filters */}
                             <div className="flex-1 max-w-[200px]">
-                                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">{t.encyclopedia.byDoshaBalance}</label>
-                                <select 
-                                    value={selectedDoshas.length > 0 ? selectedDoshas[0] : 'All'}
-                                    onChange={(e) => {
-                                        if (e.target.value === 'All') setSelectedDoshas([]);
-                                        else setSelectedDoshas([e.target.value]);
-                                    }}
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none hover:bg-gray-100 transition-colors"
-                                >
-                                    <option value="All">All Doshas</option>
-                                    {doshaOptions.map(dosha => (
-                                        <option key={dosha} value={dosha}>{dosha}</option>
-                                    ))}
-                                </select>
+                                <label className="text-[10px] font-semibold text-emerald-800/60 uppercase tracking-wider mb-2 block pl-1">{t.encyclopedia.byDoshaBalance}</label>
+                                <div className="relative">
+                                    <select 
+                                        value={selectedDoshas.length > 0 ? selectedDoshas[0] : 'All'}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'All') setSelectedDoshas([]);
+                                            else setSelectedDoshas([e.target.value]);
+                                        }}
+                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2.5 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
+                                    >
+                                        <option value="All">All Doshas</option>
+                                        {doshaOptions.map(dosha => (
+                                            <option key={dosha} value={dosha}>{dosha}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-emerald-600 pointer-events-none" />
+                                </div>
                             </div>
 
                             {/* Category Filters */}
                             <div className="flex-1 max-w-[250px]">
-                                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">{t.encyclopedia.byCategory}</label>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none hover:bg-gray-100 transition-colors"
-                                >
-                                    {categories.map(category => {
-                                        const translatedCategory = (t.encyclopedia.categories as Record<string, string>)[category] || category;
-                                        return (
-                                            <option key={category} value={category}>{translatedCategory}</option>
-                                        );
-                                    })}
-                                </select>
+                                <label className="text-[10px] font-semibold text-emerald-800/60 uppercase tracking-wider mb-2 block pl-1">{t.encyclopedia.byCategory}</label>
+                                <div className="relative">
+                                    <select
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2.5 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
+                                    >
+                                        {categories.map(category => {
+                                            const translatedCategory = (t.encyclopedia.categories as Record<string, string>)[category] || category;
+                                            return (
+                                                <option key={category} value={category}>{translatedCategory}</option>
+                                            );
+                                        })}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-emerald-600 pointer-events-none" />
+                                </div>
                             </div>
                         </div>
                     )}

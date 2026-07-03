@@ -24,7 +24,7 @@ function MessageBubble({ message, sessionId }: { message: Message; sessionId?: s
             <div
                 className={`max-w-[85%] sm:max-w-[80%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 ${isUser
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-800'
+                    : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}
             >
                 <div className={`prose prose-sm max-w-none ${isUser ? 'prose-invert text-white' : 'text-gray-800'}`}>
@@ -149,7 +149,7 @@ function AnalysisCard({ analysis, sessionId }: { analysis: AnalysisResult; sessi
 function LoadingIndicator() {
     return (
         <div className="flex justify-start mb-4">
-            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3">
+            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
                 <div className="flex items-center gap-2">
                     <div className="flex gap-1">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -311,7 +311,7 @@ function ChatPageContent() {
                             <div className="flex justify-end mb-3 sm:mb-4">
                                 <button
                                     onClick={handleNewConversation}
-                                    className="text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 font-medium px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors touch-target"
+                                    className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 font-medium px-3 py-2 rounded-lg hover:bg-white/10 transition-colors touch-target"
                                 >
                                     + New Consultation
                                 </button>

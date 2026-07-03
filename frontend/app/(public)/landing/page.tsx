@@ -15,7 +15,7 @@ export default function LandingPage() {
             <LandingNavbar />
 
             {/* Section 1: Hero */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#0A1A10]">
+            <section className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden bg-[#0A1A10] pt-32 pb-6 md:pb-10">
                 {/* Video Background */}
                 <div className="hero-video-container">
                     <video
@@ -36,7 +36,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Hero Content */}
-                <div className="relative z-10 w-full max-w-7xl mx-auto px-4 flex flex-col items-center pt-24 pb-48">
+                <div className="relative z-10 w-full max-w-7xl mx-auto px-4 flex flex-1 flex-col items-center justify-center">
                     {/* Top Badge */}
                     <div className="animate-wellness-slide-up mb-8">
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-sm text-gray-200 shadow-sm">
@@ -113,74 +113,77 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                {/* Scroll Indicator */}
-                <div className="absolute bottom-[180px] lg:bottom-[220px] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
-                    <div className="relative w-24 h-24 flex items-center justify-center group">
-                        <svg className="absolute inset-0 w-full h-full animate-[spin_10s_linear_infinite]" viewBox="0 0 100 100">
-                            <path id="curve" fill="transparent" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
-                            <text className="text-[10px] uppercase tracking-[0.2em] fill-gray-300 font-medium transition-colors duration-300 group-hover:fill-green-400">
-                                <textPath href="#curve" startOffset="0">
-                                    SCROLL TO EXPLORE • SCROLL TO EXPLORE • 
-                                </textPath>
-                            </text>
-                        </svg>
-                        <a href="#about" className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center bg-black/20 hover:bg-green-500/20 hover:border-green-400/50 backdrop-blur-sm transition-all duration-300 cursor-pointer text-white relative z-10 group-hover:scale-110">
-                            <svg className="w-4 h-4 transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                {/* Bottom Area: Scroll Indicator and Feature Bar */}
+                <div className="relative z-20 w-full flex flex-col items-center gap-8 md:gap-12 mt-8 px-4">
+                    {/* Scroll Indicator */}
+                    <div className="hidden md:flex flex-col items-center">
+                        <div className="relative w-24 h-24 flex items-center justify-center group">
+                            <svg className="absolute inset-0 w-full h-full animate-[spin_10s_linear_infinite]" viewBox="0 0 100 100">
+                                <path id="curve" fill="transparent" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
+                                <text className="text-[10px] uppercase tracking-[0.2em] fill-gray-300 font-medium transition-colors duration-300 group-hover:fill-green-400">
+                                    <textPath href="#curve" startOffset="0">
+                                        SCROLL TO EXPLORE • SCROLL TO EXPLORE • 
+                                    </textPath>
+                                </text>
                             </svg>
-                        </a>
+                            <a href="#about" className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center bg-black/20 hover:bg-green-500/20 hover:border-green-400/50 backdrop-blur-sm transition-all duration-300 cursor-pointer text-white relative z-10 group-hover:scale-110">
+                                <svg className="w-4 h-4 transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                {/* Bottom Feature Bar (Glassmorphic) */}
-                <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-20">
-                    <div className="bg-[#1C231F]/70 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10">
-                            
-                            {/* Feature 1 */}
-                            <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-6 first:pt-0 first:pl-0 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
-                                    <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    {/* Bottom Feature Bar (Glassmorphic) */}
+                    <div className="w-full max-w-6xl">
+                        <div className="bg-[#1C231F]/70 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10">
+                                
+                                {/* Feature 1 */}
+                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-6 first:pt-0 first:pl-0 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
+                                        <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">AI-Powered</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">Advanced AI analyzes your health needs</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">AI-Powered</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">Advanced AI analyzes your health needs</p>
+                                
+                                {/* Feature 2 */}
+                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
+                                        <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Natural & Safe</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">100% natural solutions from Ayurvedic wisdom</p>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            {/* Feature 2 */}
-                            <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
-                                    <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                                </div>
-                                <div>
-                                    <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Natural & Safe</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">100% natural solutions from Ayurvedic wisdom</p>
-                                </div>
-                            </div>
 
-                            {/* Feature 3 */}
-                            <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
-                                    <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                {/* Feature 3 */}
+                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
+                                        <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Trusted Knowledge</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">Backed by centuries of traditional Ayurveda</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Trusted Knowledge</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">Backed by centuries of traditional Ayurveda</p>
-                                </div>
-                            </div>
 
-                            {/* Feature 4 */}
-                            <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
-                                    <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                {/* Feature 4 */}
+                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
+                                        <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Personalized for You</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">Tailored recommendations just for your unique needs</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Personalized for You</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">Tailored recommendations just for your unique needs</p>
-                                </div>
+                                
                             </div>
-                            
                         </div>
                     </div>
                 </div>
