@@ -10,9 +10,10 @@ import {
     Bell, Mail, Smartphone, Globe, ChevronRight, Edit3,
     Shield, Pill, UtensilsCrossed, Dumbbell, Star,
     BookOpen, Quote, Sun, Wind, Droplets, Flame, Plus, LogOut,
-    Target
+    Target, ShieldAlert, ArrowRight, ChevronLeft, Utensils
 } from 'lucide-react';
 import { mockUserData, wellnessQuote, seasonalTips, type Allergy } from '@/lib/user-data';
+import { Skeleton } from '@/components/ui/skeleton-loader';
 
 import { translations } from '@/lib/translations';
 import { useLanguage } from '@/context/LanguageContext';
@@ -20,8 +21,10 @@ import { useSavedItems } from '@/context/SavedItemsContext';
 import { useUser } from '@/context/UserContext';
 
 // Dynamic imports for chart components (avoid SSR issues)
-const DoshaChart = dynamic(() => import('@/components/dashboard/dosha-chart'), { ssr: false });
-const ProgressChart = dynamic(() => import('@/components/dashboard/progress-chart'), { ssr: false });
+const DoshaChart = dynamic(() => import('@/components/dashboard/dosha-chart'), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-[250px] w-full rounded-2xl" />
+});
 
 // Dosha colors
 const DOSHA_COLORS = {
@@ -53,15 +56,10 @@ const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
     bookmark: <Bookmark className="size-4" />,
 };
 
-type DashboardTab = 'overview' | 'health' | 'analytics' | 'saved' | 'settings';
-
 export default function DashboardPage() {
-    const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
-    const { language, setLanguage } = useLanguage();
+    const { language } = useLanguage();
+    const { user: loggedInUser } = useUser();
     const { savedItems } = useSavedItems();
-    const { user: loggedInUser, logout } = useUser();
-    const [privacyEnabled, setPrivacyEnabled] = useState(false); // Simulating enablement
-    const [notificationsEnabled, setNotificationsEnabled] = useState(false); // Simulating enablement
 
     // Allergies state
     const [allergies, setAllergies] = useState<Allergy[]>(mockUserData.allergies);
@@ -84,13 +82,6 @@ export default function DashboardPage() {
         setAllergies(allergies.filter((_, i) => i !== index));
     };
 
-    // Notification states
-    const [notifications, setNotifications] = useState({
-        email: true,
-        push: true,
-        sms: false
-    });
-
     const t = translations[language];
     const user = mockUserData;
 
@@ -105,229 +96,442 @@ export default function DashboardPage() {
     const currentHour = new Date().getHours();
     const greetingText = currentHour < 12 ? t.greeting.morning : currentHour < 17 ? t.greeting.afternoon : t.greeting.evening;
 
-    const tabs = [
-        { id: 'overview' as DashboardTab, label: t.tabs.overview, icon: <User className="size-4" /> },
-        { id: 'health' as DashboardTab, label: t.tabs.health, icon: <Heart className="size-4" /> },
-        { id: 'analytics' as DashboardTab, label: t.tabs.analytics, icon: <Activity className="size-4" /> },
-        { id: 'saved' as DashboardTab, label: t.tabs.saved, icon: <Bookmark className="size-4" /> },
-        { id: 'settings' as DashboardTab, label: t.tabs.settings, icon: <Settings className="size-4" /> },
-    ];
+
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-[#F1F5F0] p-2 sm:p-4 lg:p-4">
-            {/* The Main Floating Card */}
-            <div className="w-full flex-1 mx-auto bg-gradient-to-br from-[#FFFdfa] to-[#F3F8EC] rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/50 overflow-hidden flex flex-col relative">
-
-                {/* Dashboard Content */}
-                <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto h-full">
-                    {/* Overview Tab */}
-                    {activeTab === 'overview' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Left Column */}
-                            <div className="lg:col-span-2 space-y-6">
-                                {/* Alerts Section */}
-                                {(user.currentImbalances.some(i => i.severity !== 'mild') || user.medications.some(m => m.hasInteraction)) && (
-                                    <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-5 border border-red-200">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <AlertTriangle className="size-5 text-red-600" />
-                                            <h3 className="font-bold text-red-800">{t.overview.healthAlerts}</h3>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {user.currentImbalances.filter(i => i.severity !== 'mild').map((imbalance, idx) => (
-                                                <div key={idx} className="flex items-start gap-3 bg-white rounded-xl p-3 border border-red-100">
-                                                    <div className={`size-8 rounded-lg flex items-center justify-center ${DOSHA_COLORS[imbalance.dosha].bg}`}>
-                                                        {imbalance.dosha === 'Vata' && <Wind className="size-4 text-blue-600" />}
-                                                        {imbalance.dosha === 'Pitta' && <Flame className="size-4 text-amber-600" />}
-                                                        {imbalance.dosha === 'Kapha' && <Droplets className="size-4 text-teal-600" />}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-semibold text-gray-800">{imbalance.dosha} Imbalance</span>
-                                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SEVERITY_COLORS[imbalance.severity].bg} ${SEVERITY_COLORS[imbalance.severity].text}`}>
-                                                                {SEVERITY_COLORS[imbalance.severity].label}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-600 mt-1">{imbalance.symptoms.join(', ')}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {user.medications.filter(m => m.hasInteraction).map((med, idx) => (
-                                                <div key={idx} className="flex items-start gap-3 bg-white rounded-xl p-3 border border-orange-100">
-                                                    <div className="size-8 rounded-lg flex items-center justify-center bg-orange-100">
-                                                        <Pill className="size-4 text-orange-600" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <span className="font-semibold text-gray-800">Medication Interaction</span>
-                                                        <p className="text-sm text-gray-600 mt-1">{med.name}: {med.interactionWarning}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Quick Actions */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                    <h3 className="font-bold text-gray-800 mb-4">{t.overview.quickActions}</h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        <Link href="/chat" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 hover:shadow-md hover:scale-[1.02] transition-all">
-                                            <div className="size-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white">
-                                                <MessageSquare className="size-6" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-700 text-center">{t.overview.newConsultation}</span>
-                                        </Link>
-                                        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 hover:shadow-md hover:scale-[1.02] transition-all">
-                                            <div className="size-12 rounded-xl bg-blue-500 flex items-center justify-center text-white">
-                                                <Brain className="size-6" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-700 text-center">{t.overview.takeDoshaQuiz}</span>
-                                        </button>
-                                        <Link href="/encyclopedia" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-green-50 to-lime-50 border border-green-100 hover:shadow-md hover:scale-[1.02] transition-all">
-                                            <div className="size-12 rounded-xl bg-green-500 flex items-center justify-center text-white">
-                                                <Leaf className="size-6" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-700 text-center">{t.overview.viewRemedies}</span>
-                                        </Link>
-                                        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 hover:shadow-md hover:scale-[1.02] transition-all">
-                                            <div className="size-12 rounded-xl bg-purple-500 flex items-center justify-center text-white">
-                                                <TrendingUp className="size-6" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-700 text-center">{t.overview.trackProgress}</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Recent Activity */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="font-bold text-gray-800">{t.overview.recentActivity}</h3>
-                                        <button className="text-sm text-emerald-600 font-medium hover:underline">{t.overview.viewAll}</button>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {user.recentActivity.slice(0, 4).map((activity) => (
-                                            <div key={activity.id} className="flex items-start gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                                                <div className="size-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                                                    {ACTIVITY_ICONS[activity.icon]}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-medium text-gray-800 truncate">{activity.title}</p>
-                                                    <p className="text-sm text-gray-500 truncate">{activity.description}</p>
-                                                </div>
-                                                <div className="text-xs text-gray-400 whitespace-nowrap">
-                                                    {new Date(activity.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
+            {/* Hero Header */}
+            <div className="bg-[#057A55] text-white py-8 px-6 lg:px-10 overflow-hidden relative shadow-lg rounded-b-3xl">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+                
+                <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4">
+                    
+                    {/* Stats Container - Flex Row with Dividers */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6 sm:gap-8 lg:gap-12 w-full md:w-auto">
+                        
+                        {/* Wellness Score */}
+                        <div className="flex items-center gap-5">
+                            {/* Circular Gauge SVG */}
+                            <div className="relative size-24 shrink-0 flex items-center justify-center rounded-full bg-emerald-800/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                                <svg className="size-full rotate-[-90deg] absolute inset-0" viewBox="0 0 100 100">
+                                    {/* Background track */}
+                                    <circle cx="50" cy="50" r="45" fill="transparent" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
+                                    {/* Progress track */}
+                                    <circle cx="50" cy="50" r="45" fill="transparent" stroke="#34D399" strokeWidth="6" strokeDasharray="283" strokeDashoffset={283 - (283 * user.healthMetrics[user.healthMetrics.length - 1].overallWellness) / 100} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+                                </svg>
+                                <span className="text-2xl font-bold z-10">{user.healthMetrics[user.healthMetrics.length - 1].overallWellness}%</span>
                             </div>
-
-                            {/* Right Column */}
-                            <div className="space-y-6">
-                                {/* Dosha Constitution */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="font-bold text-gray-800">{t.overview.yourPrakriti}</h3>
-                                        <button className="text-sm text-emerald-600 font-medium hover:underline">{t.overview.retakeQuiz}</button>
-                                    </div>
-                                    <div className="flex justify-center">
-                                        <DoshaChart
-                                            vata={user.doshaConstitution.vata}
-                                            pitta={user.doshaConstitution.pitta}
-                                            kapha={user.doshaConstitution.kapha}
-                                            size="medium"
-                                        />
-                                    </div>
-                                    <p className="text-center text-sm text-gray-500 mt-4">
-                                        <span className="font-semibold text-amber-600">Pitta-Vata</span> dominant constitution
-                                    </p>
-                                </div>
-
-                                {/* Seasonal Tips */}
-                                <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Sun className="size-5 text-orange-500" />
-                                        <h3 className="font-bold text-gray-800">{t.overview.seasonalTips}</h3>
-                                    </div>
-                                    <ul className="space-y-2">
-                                        {seasonalTips[0].tips.slice(0, 3).map((tip, idx) => (
-                                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                                                <span className="text-orange-400 mt-1">•</span>
-                                                {tip}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {/* Saved Remedies Preview */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="font-bold text-gray-800">{t.overview.savedRemedies}</h3>
-                                        <button onClick={() => setActiveTab('saved')} className="text-sm text-emerald-600 font-medium hover:underline">{t.overview.viewAll}</button>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {savedItems.slice(0, 4).map((remedy) => (
-                                            <Link
-                                                key={remedy.id}
-                                                href={`/encyclopedia/${remedy.item_id}`}
-                                                className="group relative aspect-square rounded-xl overflow-hidden"
-                                            >
-                                                <Image
-                                                    src={remedy.image_url || '/placeholder.jpg'}
-                                                    alt={remedy.name}
-                                                    fill
-                                                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                                <div className="absolute bottom-2 left-2 right-2">
-                                                    <p className="text-white text-sm font-medium truncate">{remedy.name}</p>
-                                                </div>
-                                                <div className="absolute top-2 right-2">
-                                                    <Star className="size-4 text-yellow-400 fill-yellow-400" />
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-emerald-100/90 text-xs font-medium tracking-wide uppercase mb-1">{t.hero.wellnessScore || 'Wellness Score'}</span>
+                                <span className="text-xl font-semibold mb-0.5">Good</span>
+                                <span className="text-xs text-emerald-100/80 mb-2">Keep it up!</span>
+                                <span className="inline-flex items-center text-[10px] font-medium bg-emerald-500/30 text-emerald-100 px-2 py-0.5 rounded-full">↑ 8% vs last month</span>
                             </div>
                         </div>
-                    )}
 
-                    {/* Health Profile Tab */}
-                    {activeTab === 'health' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Health Conditions */}
+                        {/* Divider */}
+                        <div className="hidden sm:block w-px bg-white/20"></div>
+
+                        {/* Active Imbalances */}
+                        <div className="flex flex-col justify-center">
+                            <div className="flex items-center gap-1.5 mb-1.5 text-emerald-100/90 text-xs font-medium tracking-wide uppercase">
+                                <Activity className="size-3.5" />
+                                <span>{t.hero.activeImbalances || 'Active Imbalances'}</span>
+                            </div>
+                            <span className="text-3xl font-bold mb-1">{user.currentImbalances.length}</span>
+                            <div className="flex flex-col gap-0.5 text-xs text-emerald-100/80">
+                                {user.currentImbalances.slice(0,2).map((imb, i) => (
+                                    <span key={i}>{imb.dosha} ({SEVERITY_COLORS[imb.severity].label})</span>
+                                ))}
+                            </div>
+                            <Link href="#health-alerts" className="text-xs font-medium mt-2 hover:text-white transition-colors flex items-center gap-1">
+                                View Details <ChevronRight className="size-3" />
+                            </Link>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="hidden sm:block w-px bg-white/20"></div>
+
+                        {/* Chat Summary */}
+                        <div className="flex flex-col justify-center">
+                            <div className="flex items-center gap-1.5 mb-1.5 text-emerald-100/90 text-xs font-medium tracking-wide uppercase">
+                                <MessageSquare className="size-3.5" />
+                                <span>Chat Summary</span>
+                            </div>
+                            <span className="text-3xl font-bold mb-1">24</span>
+                            <div className="flex flex-col gap-0.5 text-xs text-emerald-100/80">
+                                <span>Conversations</span>
+                                <span>This Month</span>
+                            </div>
+                            <Link href="/chat" className="text-xs font-medium mt-2 hover:text-white transition-colors flex items-center gap-1">
+                                View History <ChevronRight className="size-3" />
+                            </Link>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="hidden sm:block w-px bg-white/20"></div>
+
+                        {/* Saved Remedies */}
+                        <div className="flex flex-col justify-center">
+                            <div className="flex items-center gap-1.5 mb-1.5 text-emerald-100/90 text-xs font-medium tracking-wide uppercase">
+                                <Bookmark className="size-3.5" />
+                                <span>{t.hero.savedRemedies || 'Saved Remedies'}</span>
+                            </div>
+                            <span className="text-3xl font-bold mb-1">{savedItems.length}</span>
+                            <div className="flex flex-col gap-0.5 text-xs text-emerald-100/80">
+                                <span>Remedies</span>
+                                <span>In Your Library</span>
+                            </div>
+                            <Link href="#saved" className="text-xs font-medium mt-2 hover:text-white transition-colors flex items-center gap-1">
+                                View Library <ChevronRight className="size-3" />
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Right Side Quote & Illustration */}
+                    <div className="hidden xl:flex items-center bg-white/10 backdrop-blur-md rounded-2xl p-5 max-w-[400px] gap-4 border border-white/10">
+                        <Quote className="size-8 text-emerald-300/50 shrink-0 self-start" />
+                        <div>
+                            <p className="text-sm font-medium leading-relaxed italic mb-3">
+                                &ldquo;{wellnessQuote.text}&rdquo;
+                            </p>
+                            <p className="text-xs text-emerald-200">— {wellnessQuote.author}</p>
+                        </div>
+                        {/* Custom SVG Illustration for Mortar and Pestle */}
+                        <div className="shrink-0 relative size-20 drop-shadow-2xl opacity-90">
+                            <svg viewBox="0 0 100 100" className="w-full h-full text-amber-200/90" fill="currentColor">
+                                <path d="M20,60 Q50,90 80,60 Q80,50 50,50 Q20,50 20,60" fill="#E1C699" />
+                                <path d="M25,60 Q50,85 75,60" fill="none" stroke="#C8A97E" strokeWidth="4" />
+                                {/* Pestle */}
+                                <path d="M65,20 L55,55 L45,55 L35,20 C35,15 65,15 65,20" fill="#8B7355" />
+                                <path d="M60,20 L55,50" stroke="#705C44" strokeWidth="3" />
+                                {/* Leaves */}
+                                <path d="M50,45 Q70,30 80,45 Q65,60 50,45" fill="#34D399" />
+                                <path d="M45,40 Q25,20 20,35 Q35,50 45,40" fill="#10B981" />
+                            </svg>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 px-4 sm:px-6 py-8 safe-area-bottom bg-[#F8F9FA]">
+                <div className="max-w-7xl mx-auto space-y-5">
+                    
+                    {/* Top Row: Health Alerts & Prakriti */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        
+                        {/* Left Column (Alerts & Quick Actions) */}
+                        <div className="lg:col-span-2 space-y-5">
+                            
+                            {/* Health Overview */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Heart className="size-5 text-red-500" />
-                                    <h3 className="font-bold text-gray-800">{t.health.conditions}</h3>
+                                <div className="flex items-center gap-3 mb-6">
+                                    <Activity className="size-6 text-emerald-600" />
+                                    <div>
+                                        <h3 className="font-bold text-gray-800 text-lg">Health Overview</h3>
+                                        <p className="text-sm text-gray-500">Your body's signals at a glance</p>
+                                    </div>
                                 </div>
-                                <div className="space-y-3">
-                                    {user.healthConditions.map((condition, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
-                                            <div>
-                                                <p className="font-medium text-gray-800">{condition.name}</p>
-                                                <p className="text-xs text-gray-500">{t.health.since} {new Date(condition.since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                                    {/* Card 1: Pitta */}
+                                    <div className="bg-white rounded-2xl p-5 border border-orange-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow h-44">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                                                <Flame className="size-5 text-orange-500" />
                                             </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[condition.status].bg} ${STATUS_COLORS[condition.status].text}`}>
+                                            <span className="text-gray-900 font-bold">Pitta</span>
+                                        </div>
+                                        <div className="mt-4">
+                                            <h4 className="text-orange-500 font-bold text-lg leading-tight">Moderate</h4>
+                                            <p className="text-sm text-gray-500">Needs Balance</p>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-3">
+                                            <div className="flex-1 bg-orange-50 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-orange-500 h-full rounded-full" style={{ width: '40%' }}></div>
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-600 w-8 text-right shrink-0">40%</span>
+                                        </div>
+                                    </div>
+                                    {/* Card 2: Vata */}
+                                    <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow h-44">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                                                <Wind className="size-5 text-blue-500" />
+                                            </div>
+                                            <span className="text-gray-900 font-bold">Vata</span>
+                                        </div>
+                                        <div className="mt-4">
+                                            <h4 className="text-blue-500 font-bold text-lg leading-tight">Balanced</h4>
+                                            <p className="text-sm text-gray-500">Good</p>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-3">
+                                            <div className="flex-1 bg-blue-50 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-blue-500 h-full rounded-full" style={{ width: '35%' }}></div>
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-600 w-8 text-right shrink-0">35%</span>
+                                        </div>
+                                    </div>
+                                    {/* Card 3: Kapha */}
+                                    <div className="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow h-44">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                                                <Leaf className="size-5 text-emerald-600" />
+                                            </div>
+                                            <span className="text-gray-900 font-bold">Kapha</span>
+                                        </div>
+                                        <div className="mt-4">
+                                            <h4 className="text-emerald-600 font-bold text-lg leading-tight">Mild</h4>
+                                            <p className="text-sm text-gray-500">Slightly Elevated</p>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-3">
+                                            <div className="flex-1 bg-emerald-50 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-emerald-600 h-full rounded-full" style={{ width: '25%' }}></div>
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-600 w-8 text-right shrink-0">25%</span>
+                                        </div>
+                                    </div>
+                                    {/* Card 4: Agni */}
+                                    <div className="bg-white rounded-2xl p-5 border border-purple-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow h-44">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+                                                <Flame className="size-5 text-purple-500" />
+                                            </div>
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-gray-900 font-bold">Agni</span>
+                                                <span className="text-xs text-gray-500 font-medium">(Digestive Fire)</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <h4 className="text-purple-600 font-bold text-lg leading-tight">Good</h4>
+                                            <p className="text-sm text-gray-500">Strong</p>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-3">
+                                            <div className="flex-1 bg-purple-50 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-purple-500 h-full rounded-full" style={{ width: '80%' }}></div>
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-600 w-8 text-right shrink-0">80%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Health Alerts Component */}
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <ShieldAlert className="size-7 text-red-500 stroke-[1.5]" />
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 text-lg">Health Alerts</h3>
+                                        <p className="text-sm text-gray-500">Important insights for your wellbeing</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-4 max-h-[320px] overflow-y-auto glass-scrollbar pr-2 -mr-2">
+                                    {/* Alert 1 */}
+                                    <div className="flex items-center justify-between bg-orange-50/50 rounded-2xl p-5 border border-orange-100 transition-shadow">
+                                        <div className="flex items-start gap-4">
+                                            <div className="size-10 rounded-full bg-orange-100/80 flex items-center justify-center shrink-0">
+                                                <AlertTriangle className="size-5 text-orange-500" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <h4 className="font-semibold text-gray-900 text-base">Pitta Imbalance Detected</h4>
+                                                    <span className="text-[10px] font-semibold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Moderate</span>
+                                                </div>
+                                                <p className="text-sm text-gray-500">You may be experiencing acid reflux, skin irritation, or irritability.</p>
+                                            </div>
+                                        </div>
+                                        <button className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0">
+                                            View Remedies <ArrowRight className="size-4" />
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Alert 2 */}
+                                    <div className="flex items-center justify-between bg-amber-50/50 rounded-2xl p-5 border border-amber-100 transition-shadow">
+                                        <div className="flex items-start gap-4">
+                                            <div className="size-10 rounded-full bg-amber-100/80 flex items-center justify-center shrink-0">
+                                                <AlertTriangle className="size-5 text-amber-500" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-gray-900 text-base mb-1">Medication Interaction</h4>
+                                                <p className="text-sm text-gray-500">Amlodipine may interact with Licorice (Yashtimadhu).</p>
+                                            </div>
+                                        </div>
+                                        <button className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0">
+                                            Learn More <ArrowRight className="size-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Actions Component */}
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-0">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="font-bold text-slate-900 text-lg">Quick Actions</h3>
+                                    <div className="flex items-center gap-2">
+                                        <button className="size-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 text-gray-500 transition-colors border border-gray-100">
+                                            <ChevronLeft className="size-4" />
+                                        </button>
+                                        <button className="size-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 text-gray-500 transition-colors border border-gray-100">
+                                            <ChevronRight className="size-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 glass-scrollbar">
+                                    {/* Action 1 */}
+                                    <div className="flex-none w-[230px] flex items-center gap-3 p-4 rounded-2xl border border-emerald-100 bg-emerald-50/70 cursor-pointer hover:shadow-sm transition-all">
+                                        <div className="size-11 rounded-xl bg-emerald-100/80 flex items-center justify-center shrink-0">
+                                            <div className="size-7 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-sm">
+                                                <MessageSquare className="size-4" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm">Start New Chat</h4>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-tight">Ask your health question</p>
+                                        </div>
+                                    </div>
+                                    {/* Action 2 */}
+                                    <div className="flex-none w-[230px] flex items-center gap-3 p-4 rounded-2xl border border-slate-100 bg-slate-50 cursor-pointer hover:shadow-sm transition-all">
+                                        <div className="size-11 rounded-xl bg-orange-100/80 flex items-center justify-center shrink-0 text-orange-500">
+                                            <Activity className="size-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm">Dosha Analysis</h4>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-tight">Check your imbalance</p>
+                                        </div>
+                                    </div>
+                                    {/* Action 3 */}
+                                    <div className="flex-none w-[230px] flex items-center gap-3 p-4 rounded-2xl border border-emerald-100 bg-emerald-50/70 cursor-pointer hover:shadow-sm transition-all">
+                                        <div className="size-11 rounded-xl bg-green-100/80 flex items-center justify-center shrink-0 text-green-600">
+                                            <Utensils className="size-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm">Diet Planner</h4>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-tight">Personalized diet plan</p>
+                                        </div>
+                                    </div>
+                                    {/* Action 4 */}
+                                    <div className="flex-none w-[230px] flex items-center gap-3 p-4 rounded-2xl border border-rose-100 bg-rose-50/70 cursor-pointer hover:shadow-sm transition-all">
+                                        <div className="size-11 rounded-xl bg-rose-100/80 flex items-center justify-center shrink-0 text-rose-500">
+                                            <Bookmark className="size-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm">Save Remedy</h4>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-tight">Add to your library</p>
+                                        </div>
+                                    </div>
+                                    {/* Action 5 */}
+                                    <div className="flex-none w-[230px] flex items-center gap-3 p-4 rounded-2xl border border-violet-100 bg-violet-50/70 cursor-pointer hover:shadow-sm transition-all">
+                                        <div className="size-11 rounded-xl bg-violet-100/80 flex items-center justify-center shrink-0 text-violet-600">
+                                            <TrendingUp className="size-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-sm">Track Progress</h4>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-tight">View health trends</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Current Medications */}
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Pill className="size-5 text-purple-500" />
+                                    <h3 className="font-bold text-slate-800 text-lg">Current Medications</h3>
+                                </div>
+                                <div className="space-y-3 max-h-[250px] overflow-y-auto glass-scrollbar pr-2 -mr-2">
+                                    {user.medications.map((med, idx) => (
+                                        <div key={idx} className={`p-4 rounded-xl ${med.hasInteraction ? 'bg-red-50/50 border border-red-100' : 'bg-slate-50'}`}>
+                                            <div className="flex items-center justify-between mb-0.5">
+                                                <p className="font-semibold text-slate-800">{med.name}</p>
+                                                {med.hasInteraction && (
+                                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-100 text-red-700">
+                                                        <AlertTriangle className="size-3 text-orange-500" /> Interaction
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-slate-500">{med.dosage} • {med.frequency}</p>
+                                            {med.hasInteraction && (
+                                                <p className="text-xs font-medium text-red-600 mt-2">Avoid with {med.interactionWarning.replace('may interact with ', '').replace('Ashwagandha ', '')}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                        {/* Right Column (Your Prakriti & Health Panels) */}
+                        <div className="lg:col-span-1 space-y-5">
+                            
+                            {/* Daily Wellness Tip */}
+                            <div className="bg-[#EEF9F0] rounded-2xl p-6 shadow-sm flex items-center justify-between">
+                                <div className="pr-4 max-w-[75%]">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Quote className="size-6 text-[#007200] fill-[#007200]" />
+                                        <h3 className="font-bold text-[#007200] text-lg">Daily Wellness Tip</h3>
+                                    </div>
+                                    <p className="text-[#59786A] text-[15px] leading-relaxed font-medium">
+                                        Drink warm water with a few drops of lemon in the morning to boost digestion.
+                                    </p>
+                                </div>
+                                <div className="shrink-0 size-24 rounded-full bg-[#E1F3E7] flex items-center justify-center">
+                                     <Leaf className="size-10 text-[#007200] fill-[#007200]/20" />
+                                </div>
+                            </div>
+
+                            {/* Your Prakriti Card */}
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-bold text-gray-800 text-lg">Your Prakriti</h3>
+                                    <button className="text-xs text-gray-400 hover:text-emerald-600 font-medium transition-colors">Retake Quiz</button>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-6">Current mind-body constitution based on your latest assessment.</p>
+                                
+                                <div className="flex justify-center w-full">
+                                    <DoshaChart
+                                        vata={user.doshaConstitution.vata}
+                                        pitta={user.doshaConstitution.pitta}
+                                        kapha={user.doshaConstitution.kapha}
+                                        size="medium"
+                                    />
+                                </div>
+                            </div>
+                                                      {/* Health Conditions */}
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Heart className="size-5 text-red-500" />
+                                    <h3 className="font-bold text-slate-800 text-lg">Health Conditions</h3>
+                                </div>
+                                <div className="space-y-3 max-h-[250px] overflow-y-auto glass-scrollbar pr-2 -mr-2">
+                                    {user.healthConditions.map((condition, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
+                                            <div>
+                                                <p className="font-semibold text-slate-800">{condition.name}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{t.health.since} {new Date(condition.since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${condition.status === 'managed' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                                                 {condition.status.charAt(0).toUpperCase() + condition.status.slice(1)}
                                             </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Allergies */}
+                                                      {/* Allergies */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center justify-between mb-5">
                                     <div className="flex items-center gap-2">
                                         <AlertTriangle className="size-5 text-orange-500" />
-                                        <h3 className="font-bold text-gray-800">{t.health.allergies}</h3>
+                                        <h3 className="font-bold text-slate-800 text-lg">Allergies</h3>
                                     </div>
                                     <button
                                         onClick={() => setShowAddAllergy(!showAddAllergy)}
-                                        className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 transition-colors"
+                                        className="size-7 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-600 flex items-center justify-center transition-colors"
                                         title={language === 'hi' ? 'एलर्जी जोड़ें' : 'Add Allergy'}
                                     >
                                         <Plus className="size-4" />
@@ -336,10 +540,10 @@ export default function DashboardPage() {
 
                                 {/* Add Allergy Form */}
                                 {showAddAllergy && (
-                                    <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <div className="mb-4 p-4 bg-slate-50 rounded-xl border border-gray-100">
                                         <div className="space-y-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                                     {language === 'hi' ? 'एलर्जी का नाम' : 'Allergy Name'}
                                                 </label>
                                                 <input
@@ -347,28 +551,28 @@ export default function DashboardPage() {
                                                     value={newAllergyName}
                                                     onChange={(e) => setNewAllergyName(e.target.value)}
                                                     placeholder={language === 'hi' ? 'जैसे: मूंगफली, धूल...' : 'e.g., Peanuts, Dust...'}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                                     {language === 'hi' ? 'गंभीरता' : 'Severity'}
                                                 </label>
                                                 <select
                                                     value={newAllergySeverity}
                                                     onChange={(e) => setNewAllergySeverity(e.target.value as 'mild' | 'moderate' | 'severe')}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
                                                 >
                                                     <option value="mild">{language === 'hi' ? 'हल्का' : 'Mild'}</option>
                                                     <option value="moderate">{language === 'hi' ? 'मध्यम' : 'Moderate'}</option>
                                                     <option value="severe">{language === 'hi' ? 'गंभीर' : 'Severe'}</option>
                                                 </select>
                                             </div>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 pt-1">
                                                 <button
                                                     onClick={handleAddAllergy}
                                                     disabled={!newAllergyName.trim()}
-                                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium text-sm"
                                                 >
                                                     {language === 'hi' ? 'जोड़ें' : 'Add'}
                                                 </button>
@@ -378,7 +582,7 @@ export default function DashboardPage() {
                                                         setNewAllergyName('');
                                                         setNewAllergySeverity('mild');
                                                     }}
-                                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
                                                 >
                                                     {language === 'hi' ? 'रद्द करें' : 'Cancel'}
                                                 </button>
@@ -388,84 +592,85 @@ export default function DashboardPage() {
                                 )}
 
                                 <div className="flex flex-wrap gap-2">
-                                    {allergies.map((allergy, idx) => (
-                                        <span
-                                            key={idx}
-                                            className={`px-4 py-2 rounded-full text-sm font-medium ${SEVERITY_COLORS[allergy.severity].bg} ${SEVERITY_COLORS[allergy.severity].text} flex items-center gap-2 group`}
-                                        >
-                                            {allergy.name}
-                                            <span className="opacity-70">({language === 'hi' ? (allergy.severity === 'mild' ? 'हल्का' : allergy.severity === 'moderate' ? 'मध्यम' : 'गंभीर') : allergy.severity})</span>
-                                            <button
-                                                onClick={() => handleRemoveAllergy(idx)}
-                                                className="ml-1 size-4 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors"
-                                                title={language === 'hi' ? 'हटाएं' : 'Remove'}
+                                    {allergies.map((allergy, idx) => {
+                                        const isSevere = allergy.severity === 'severe';
+                                        const isModerate = allergy.severity === 'moderate';
+                                        
+                                        let bgClass = '';
+                                        let textClass = '';
+                                        let mutedTextClass = '';
+                                        
+                                        if (isSevere) {
+                                            bgClass = 'bg-red-100/70';
+                                            textClass = 'text-red-800';
+                                            mutedTextClass = 'text-red-600/80';
+                                        } else if (isModerate) {
+                                            bgClass = 'bg-orange-100/70';
+                                            textClass = 'text-orange-800';
+                                            mutedTextClass = 'text-orange-600/80';
+                                        } else {
+                                            bgClass = 'bg-amber-100/70';
+                                            textClass = 'text-amber-800';
+                                            mutedTextClass = 'text-amber-600/80';
+                                        }
+
+                                        return (
+                                            <span
+                                                key={idx}
+                                                className={`px-3 py-1.5 rounded-full text-sm font-medium ${bgClass} ${textClass} flex items-center gap-1.5 group`}
                                             >
-                                                <span className="text-xs leading-none">×</span>
-                                            </button>
-                                        </span>
-                                    ))}
+                                                {allergy.name}
+                                                <span className={`${mutedTextClass} font-normal text-xs`}>
+                                                    ({language === 'hi' ? (allergy.severity === 'mild' ? 'हल्का' : allergy.severity === 'moderate' ? 'मध्यम' : 'गंभीर') : allergy.severity})
+                                                </span>
+                                                <button
+                                                    onClick={() => handleRemoveAllergy(idx)}
+                                                    className="ml-0.5 size-4 rounded-full bg-black/5 hover:bg-black/15 flex items-center justify-center transition-colors"
+                                                    title={language === 'hi' ? 'हटाएं' : 'Remove'}
+                                                >
+                                                    <span className="text-[10px] leading-none opacity-60 hover:opacity-100">×</span>
+                                                </button>
+                                            </span>
+                                        );
+                                    })}
                                     {allergies.length === 0 && (
-                                        <p className="text-gray-500 text-sm italic">
+                                        <p className="text-slate-500 text-sm italic">
                                             {language === 'hi' ? 'कोई एलर्जी नहीं जोड़ी गई' : 'No allergies added'}
                                         </p>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Medications */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Pill className="size-5 text-purple-500" />
-                                    <h3 className="font-bold text-gray-800">{t.health.medications}</h3>
-                                </div>
-                                <div className="space-y-3">
-                                    {user.medications.map((med, idx) => (
-                                        <div key={idx} className={`p-3 rounded-xl ${med.hasInteraction ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <p className="font-medium text-gray-800">{med.name}</p>
-                                                {med.hasInteraction && (
-                                                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                                        ⚠️ {t.health.interaction}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-gray-500">{med.dosage} • {med.frequency}</p>
-                                            {med.hasInteraction && (
-                                                <p className="text-xs text-red-600 mt-1">{med.interactionWarning}</p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
                             {/* Lifestyle */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Dumbbell className="size-5 text-green-500" />
-                                    <h3 className="font-bold text-gray-800">{t.health.lifestyle}</h3>
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Dumbbell className="size-5 text-emerald-500" />
+                                    <h3 className="font-bold text-slate-800 text-lg">Lifestyle</h3>
                                 </div>
 
                                 {/* Activity Level */}
-                                <div className="mb-4">
-                                    <p className="text-sm text-gray-600 mb-2">{t.health.activityLevel}</p>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="mb-4 bg-slate-50 rounded-xl p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-sm font-semibold text-slate-800">Activity Level</p>
+                                        <span className="text-xs font-bold text-emerald-600 capitalize bg-emerald-100/50 px-2.5 py-1 rounded-md">{user.activityLevel}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1 h-2 bg-slate-200/60 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                                                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                                                 style={{ width: user.activityLevel === 'sedentary' ? '20%' : user.activityLevel === 'light' ? '40%' : user.activityLevel === 'moderate' ? '60%' : user.activityLevel === 'active' ? '80%' : '100%' }}
                                             />
                                         </div>
-                                        <span className="text-sm font-medium text-gray-700 capitalize">{user.activityLevel}</span>
                                     </div>
                                 </div>
 
                                 {/* Dietary Preferences */}
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-2">{t.health.dietaryPreferences}</p>
+                                <div className="bg-slate-50 rounded-xl p-4">
+                                    <p className="text-sm font-semibold text-slate-800 mb-3">Dietary Preferences</p>
                                     <div className="flex flex-wrap gap-2">
                                         {user.dietaryPreferences.map((pref, idx) => (
-                                            <span key={idx} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-sm font-medium">
-                                                <UtensilsCrossed className="size-3" />
+                                            <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium shadow-sm">
+                                                <UtensilsCrossed className="size-3.5 text-emerald-500" />
                                                 {pref}
                                             </span>
                                         ))}
@@ -473,226 +678,7 @@ export default function DashboardPage() {
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {/* Analytics Tab */}
-                    {activeTab === 'analytics' && (
-                        <div className="space-y-6">
-                            {/* Progress Chart */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div>
-                                        <h3 className="font-bold text-gray-800">{t.analytics.trends}</h3>
-                                        <p className="text-sm text-gray-500">{t.analytics.trackProgress}</p>
-                                    </div>
-                                    <select className="px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-emerald-100 focus:border-emerald-400">
-                                        <option>Last 7 days</option>
-                                        <option>Last 30 days</option>
-                                        <option>Last 3 months</option>
-                                    </select>
-                                </div>
-                                <ProgressChart data={user.healthMetrics} />
-                            </div>
-
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <Wind className="size-5 text-blue-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">{t.analytics.vataBalance}</span>
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800">{user.healthMetrics[user.healthMetrics.length - 1].vataBalance}%</p>
-                                    <p className="text-xs text-green-600 mt-1">↑ 10% this week</p>
-                                </div>
-                                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="size-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                                            <Flame className="size-5 text-amber-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">{t.analytics.pittaBalance}</span>
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800">{user.healthMetrics[user.healthMetrics.length - 1].pittaBalance}%</p>
-                                    <p className="text-xs text-green-600 mt-1">↑ 7% this week</p>
-                                </div>
-                                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="size-10 rounded-lg bg-teal-100 flex items-center justify-center">
-                                            <Droplets className="size-5 text-teal-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">{t.analytics.kaphaBalance}</span>
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800">{user.healthMetrics[user.healthMetrics.length - 1].kaphaBalance}%</p>
-                                    <p className="text-xs text-green-600 mt-1">↑ 5% this week</p>
-                                </div>
-                                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="size-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                            <Sparkles className="size-5 text-emerald-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">{t.analytics.overallWellness}</span>
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800">{user.healthMetrics[user.healthMetrics.length - 1].overallWellness}%</p>
-                                    <p className="text-xs text-green-600 mt-1">↑ 10% this week</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Saved Tab */}
-                    {activeTab === 'saved' && (
-                        <div className="space-y-6">
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <h3 className="font-bold text-gray-800 mb-4">{t.overview.savedRemedies}</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                    {savedItems.map((remedy) => (
-                                        <Link
-                                            key={remedy.id}
-                                            href={`/encyclopedia/${remedy.item_id}`}
-                                            className="group bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-all"
-                                        >
-                                            <div className="relative aspect-square">
-                                                <Image
-                                                    src={remedy.image_url || '/placeholder.jpg'}
-                                                    alt={remedy.name}
-                                                    fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                />
-                                                <button
-                                                    className="absolute top-2 right-2 size-8 rounded-full bg-white/90 flex items-center justify-center text-yellow-500 hover:text-red-500 transition-colors"
-                                                    onClick={(e) => e.preventDefault()}
-                                                >
-                                                    <Star className="size-4 fill-current" />
-                                                </button>
-                                            </div>
-                                            <div className="p-3">
-                                                <p className="font-medium text-gray-800">{remedy.name}</p>
-                                                <p className="text-xs text-gray-500">{remedy.category}</p>
-                                                <p className="text-xs text-gray-400 mt-1">Saved {new Date(remedy.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Settings Tab */}
-                    {activeTab === 'settings' && (
-                        <div className="max-w-2xl space-y-6">
-                            {/* Language */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Globe className="size-5 text-blue-500" />
-                                    <h3 className="font-bold text-gray-800">{t.settings.language}</h3>
-                                </div>
-                                <select
-                                    value={language}
-                                    onChange={(e) => setLanguage(e.target.value as 'en' | 'hi')}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-100 focus:border-emerald-400"
-                                >
-                                    <option value="en">English</option>
-                                    <option value="hi">Hindi</option>
-                                </select>
-                            </div>
-
-                            {/* Notifications */}
-                            <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-opacity duration-300`}>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <Bell className="size-5 text-purple-500" />
-                                        <h3 className="font-bold text-gray-800">{t.settings.notifications}</h3>
-                                    </div>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={notificationsEnabled} onChange={() => setNotificationsEnabled(!notificationsEnabled)} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                                    </label>
-                                </div>
-
-                                <div className={`space-y-4 ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                                    {Object.keys(notifications).map((type) => (
-                                        <label key={type} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                {type === 'email' && <Mail className="size-5 text-gray-500" />}
-                                                {type === 'push' && <Bell className="size-5 text-gray-500" />}
-                                                {type === 'sms' && <Smartphone className="size-5 text-gray-500" />}
-                                                <span className="font-medium text-gray-700">
-                                                    {type === 'email' ? t.settings.emailNotifications :
-                                                        type === 'push' ? t.settings.pushNotifications :
-                                                            t.settings.smsNotifications}
-                                                </span>
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={notifications[type as keyof typeof notifications]}
-                                                onChange={() => setNotifications(prev => ({ ...prev, [type]: !prev[type as keyof typeof notifications] }))}
-                                                className="size-5 rounded text-emerald-500 focus:ring-emerald-400"
-                                            />
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Privacy & Security */}
-                            <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-opacity duration-300`}>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <Shield className="size-5 text-green-500" />
-                                        <h3 className="font-bold text-gray-800">{t.settings.privacySecurity}</h3>
-                                    </div>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={privacyEnabled} onChange={() => setPrivacyEnabled(!privacyEnabled)} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                                    </label>
-                                </div>
-                                <div className={`space-y-3 ${!privacyEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                                    <button
-                                        onClick={() => alert('Change password functionality coming soon!')}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <span className="font-medium text-gray-700">{t.settings.changePassword}</span>
-                                        <ChevronRight className="size-5 text-gray-400" />
-                                    </button>
-                                    <button
-                                        onClick={() => alert('Data management portal coming soon!')}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <span className="font-medium text-gray-700">{t.settings.manageData}</span>
-                                        <ChevronRight className="size-5 text-gray-400" />
-                                    </button>
-                                    <button
-                                        onClick={() => alert('Your data is being prepared for download.')}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <span className="font-medium text-gray-700">{t.settings.downloadData}</span>
-                                        <ChevronRight className="size-5 text-gray-400" />
-                                    </button>
-                                    <button
-                                        onClick={() => confirm('Are you sure you want to delete your account? This action cannot be undone.')}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-red-50 hover:bg-red-100 transition-colors text-red-600"
-                                    >
-                                        <span className="font-medium">{t.settings.deleteAccount}</span>
-                                        <ChevronRight className="size-5" />
-                                    </button>
-
-                                    {/* Logout Button */}
-                                    <button
-                                        onClick={() => {
-                                            if (confirm(language === 'hi' ? 'क्या आप वाकई लॉग आउट करना चाहते हैं?' : 'Are you sure you want to logout?')) {
-                                                logout();
-                                            }
-                                        }}
-                                        className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-gray-800 hover:bg-gray-900 transition-colors text-white font-semibold mt-4"
-                                    >
-                                        <LogOut className="size-5" />
-                                        <span>{language === 'hi' ? 'लॉग आउट' : 'Logout'}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    </div>
                 </div>
             </div>
         </div>

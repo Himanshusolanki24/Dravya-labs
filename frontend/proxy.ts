@@ -34,17 +34,8 @@ export async function proxy(request: NextRequest) {
     // Refresh the auth session (keeps cookies valid)
     await supabase.auth.getUser();
 
-<<<<<<< HEAD
     // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
     // Uncomment the blocks below when ready for production.
-=======
-    // Protected routes — redirect to login if not authenticated
-    const protectedPaths = ['/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id'];
-    const isProtectedRoute = protectedPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
-    );
->>>>>>> ac09a43 (Landing Page Modified)
-
     // // Protected routes — redirect to login if not authenticated
     // const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id', '/profile', '/treatment', '/feedback'];
     // const isProtectedRoute = protectedPaths.some(path =>

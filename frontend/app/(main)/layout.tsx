@@ -11,14 +11,16 @@ export default function MainLayout({
 }) {
     return (
         <SidebarProvider defaultOpen={true}>
-            <div className="bg-[var(--chat-bg-light)] text-[var(--chat-text-primary)] overflow-hidden h-screen flex w-full relative selection:bg-[var(--chat-primary)] selection:text-black">
+            <div className="bg-[#16826B] text-[var(--chat-text-primary)] overflow-hidden h-screen flex w-full relative selection:bg-[var(--chat-primary)] selection:text-black pt-2 pr-4 pb-4 pl-0">
                 <AppSidebar />
-                <SidebarInset className="flex-1 flex flex-col h-full min-w-0 relative transition-all duration-300">
+                <div className="flex-1 flex flex-col h-full min-w-0">
                     <Topbar />
-                    <main className="flex-1 overflow-auto">
-                        {children}
-                    </main>
-                </SidebarInset>
+                    <SidebarInset className="flex-1 relative transition-all duration-300 bg-white rounded-[2rem] overflow-hidden shadow-2xl border-0">
+                        <main className="h-full overflow-auto hide-scrollbar">
+                            {children}
+                        </main>
+                    </SidebarInset>
+                </div>
             </div>
         </SidebarProvider>
     );

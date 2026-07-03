@@ -77,9 +77,9 @@ function FormInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-2 ${error
-                    ? 'border-red-300 focus:ring-red-200'
-                    : 'border-gray-200 focus:border-emerald-400 focus:ring-emerald-100'
+                className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-4 ${error
+                    ? 'border-red-300 focus:ring-red-100'
+                    : 'border-gray-200 focus:border-[#007200] focus:ring-[#007200]/10'
                     }`}
             />
             {error && <span className="text-xs text-red-500">{error}</span>}
@@ -291,8 +291,8 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                     <React.Fragment key={s.num}>
                         <div className="flex flex-col items-center gap-1.5">
                             <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300 ${step >= s.num
-                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-600 shadow-sm'
+                                className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm font-bold transition-all duration-300 ${step >= s.num
+                                    ? 'border-transparent bg-[#007200] text-white shadow-sm'
                                     : 'border-gray-200 bg-white text-gray-400'
                                     }`}
                             >
@@ -306,7 +306,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                         </div>
                         {i < steps.length - 1 && (
                             <div className="mx-2 mb-5 h-0.5 flex-1">
-                                <div className={`h-full rounded-full transition-all duration-500 ${step > s.num ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+                                <div className={`h-full rounded-full transition-all duration-500 ${step > s.num ? 'bg-[#007200]' : 'bg-gray-200'}`} />
                             </div>
                         )}
                     </React.Fragment>
@@ -314,7 +314,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white rounded-3xl border border-gray-100 p-8 sm:p-10 shadow-sm">
                 {/* Step 1: Basic Profile */}
                 {step === 1 && (
                     <div className="space-y-5">
@@ -333,9 +333,9 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                             <div className="flex flex-wrap gap-3">
                                 {['Male', 'Female', 'Other'].map((g) => (
                                     <button key={g} type="button" onClick={() => updateField('basic_profile', 'gender', g.toLowerCase())}
-                                        className={`rounded-xl border px-5 py-2.5 text-sm font-medium transition-all duration-200 ${formData.basic_profile.gender === g.toLowerCase()
-                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300'
+                                        className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-all duration-200 ${formData.basic_profile.gender === g.toLowerCase()
+                                            ? 'border-transparent bg-[#007200]/10 text-[#007200]'
+                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                                             }`}
                                     >{g}</button>
                                 ))}
@@ -360,12 +360,12 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                     { value: 'active', label: '🏃 Active', desc: 'Intense exercise 6-7 days' },
                                 ].map((a) => (
                                     <button key={a.value} type="button" onClick={() => updateField('basic_profile', 'activity_level', a.value)}
-                                        className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition-all duration-200 ${formData.basic_profile.activity_level === a.value
-                                            ? 'border-emerald-500 bg-emerald-50 shadow-sm'
-                                            : 'border-gray-200 bg-white hover:border-emerald-300'
+                                        className={`flex flex-col items-start rounded-2xl border px-5 py-4 text-left transition-all duration-200 ${formData.basic_profile.activity_level === a.value
+                                            ? 'border-transparent bg-[#007200]/10'
+                                            : 'border-gray-200 bg-white hover:bg-gray-50'
                                             }`}
                                     >
-                                        <span className={`text-sm font-medium ${formData.basic_profile.activity_level === a.value ? 'text-emerald-700' : 'text-gray-700'}`}>{a.label}</span>
+                                        <span className={`text-sm font-medium ${formData.basic_profile.activity_level === a.value ? 'text-[#007200]' : 'text-gray-700'}`}>{a.label}</span>
                                         <span className="text-xs text-gray-400">{a.desc}</span>
                                     </button>
                                 ))}
@@ -415,9 +415,9 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                         { value: 'vegan', label: '🌱 Vegan' },
                                     ].map((d) => (
                                         <button key={d.value} type="button" onClick={() => updateField('diet_info', 'diet_type', d.value)}
-                                            className={`rounded-xl border px-5 py-2.5 text-sm font-medium transition-all duration-200 ${formData.diet_info.diet_type === d.value
-                                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
-                                                : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300'
+                                            className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-all duration-200 ${formData.diet_info.diet_type === d.value
+                                                ? 'border-transparent bg-[#007200]/10 text-[#007200]'
+                                                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                                                 }`}
                                         >{d.label}</button>
                                     ))}
@@ -448,13 +448,13 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 const isSelected = formData.medical_history.conditions.includes(condition);
                                 return (
                                     <button key={condition} type="button" onClick={() => toggleCondition(condition)}
-                                        className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all duration-200 ${isSelected
-                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300'
+                                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 ${isSelected
+                                            ? 'border-transparent bg-[#007200]/10 text-[#007200]'
+                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                                             }`}
                                     >
                                         <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${isSelected
-                                            ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300 bg-transparent'
+                                            ? 'border-transparent bg-[#007200]' : 'border-gray-300 bg-transparent'
                                             }`}>
                                             {isSelected && (
                                                 <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,7 +473,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 <textarea value={formData.medical_history.injury_history}
                                     onChange={(e) => updateField('medical_history', 'injury_history', e.target.value)}
                                     placeholder="Describe any past injuries..." rows={3}
-                                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10"
                                 />
                             </div>
                             <div className="flex flex-col gap-1.5">
@@ -481,7 +481,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 <textarea value={formData.medical_history.surgery_history}
                                     onChange={(e) => updateField('medical_history', 'surgery_history', e.target.value)}
                                     placeholder="Describe any past surgeries..." rows={3}
-                                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10"
                                 />
                             </div>
                         </div>
@@ -492,7 +492,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 <div className="pt-0.5">
                                     <button type="button" onClick={() => updateField('medical_history', 'consent', !formData.medical_history.consent)}
                                         className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${formData.medical_history.consent
-                                            ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300 bg-transparent'
+                                            ? 'border-transparent bg-[#007200]' : 'border-gray-300 bg-transparent'
                                             }`}
                                     >
                                         {formData.medical_history.consent && (
@@ -526,7 +526,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                 <div className="mt-8 flex items-center justify-between">
                     {step > 1 ? (
                         <button type="button" onClick={prevStep}
-                            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-600 transition-all hover:border-emerald-300 hover:text-gray-800"
+                            className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-50 hover:text-gray-800"
                         >
                             <ChevronLeft className="size-4" /> Previous
                         </button>
@@ -534,13 +534,13 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 
                     {step < 3 ? (
                         <button type="button" onClick={nextStep}
-                            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all hover:shadow-xl hover:shadow-emerald-300"
+                            className="flex items-center gap-2 rounded-2xl bg-[#007200] hover:bg-[#006400] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all"
                         >
                             Next Step <ChevronRight className="size-4" />
                         </button>
                     ) : (
                         <button type="button" onClick={submitForm} disabled={isSubmitting}
-                            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all hover:shadow-xl hover:shadow-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-2xl bg-[#007200] hover:bg-[#006400] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {isSubmitting ? (
                                 <><Loader2 className="size-4 animate-spin" /> Saving...</>
@@ -604,15 +604,10 @@ export default function ProfilePage() {
                 } catch (e) {
                     console.error('Failed to logout API', e);
                 }
-<<<<<<< HEAD:frontend/app/(main)/profile/page.tsx
-                await supabase.auth.signOut();
-                // window.location.href = '/auth/login';
-=======
                 if (isSupabaseConfigured) {
                     await supabase.auth.signOut();
                 }
                 window.location.href = '/auth/login';
->>>>>>> c265e37 (Make some changes):frontend/app/profile/page.tsx
                 return;
             } else if (res.status === 404) {
                 // No profile yet — show form
@@ -674,24 +669,19 @@ export default function ProfilePage() {
     const showForm = !profileData || isEditing;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
+        <div className="min-h-screen bg-[#F8F9FA]">
             {/* Page Header */}
-            <div className="px-4 sm:px-6 lg:px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
-                <div className="max-w-3xl mx-auto">
-                    <div className="flex items-center gap-4">
-                        <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                            <User className="size-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                {showForm ? 'Complete Your Health Profile' : 'My Health Profile'}
-                            </h1>
-                            <p className="text-gray-500 text-sm">
-                                {showForm
-                                    ? 'Fill in your details for personalized Ayurvedic recommendations'
-                                    : 'Your health data at a glance'}
-                            </p>
-                        </div>
+            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                            {showForm ? 'Complete Your Health Profile' : 'My Health Profile'}
+                        </h1>
+                        <p className="text-gray-500 text-sm">
+                            {showForm
+                                ? 'Fill in your details for personalized Ayurvedic recommendations'
+                                : 'Your health data at a glance'}
+                        </p>
                     </div>
                 </div>
             </div>

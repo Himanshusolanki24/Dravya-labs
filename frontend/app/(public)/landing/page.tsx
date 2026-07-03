@@ -23,12 +23,10 @@ export default function LandingPage() {
                         muted
                         loop
                         playsInline
-<<<<<<< HEAD:frontend/app/(public)/landing/page.tsx
-                        className="hero-video"
-                        suppressHydrationWarning
-=======
+                        preload="auto"
+                        poster="/logo.png"
                         className="hero-video opacity-80"
->>>>>>> ac09a43 (Landing Page Modified):frontend/app/landing/page.tsx
+                        suppressHydrationWarning
                     >
                         <source src="/homebg.mp4" type="video/mp4" />
                     </video>

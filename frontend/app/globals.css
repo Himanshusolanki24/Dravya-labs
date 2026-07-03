@@ -642,6 +642,34 @@ section {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Hide main body scrollbar to remove from the side */
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Glass Scrollbar Utility */
+.glass-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.glass-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.glass-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.glass-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
 }
 
 /* ====================================
@@ -953,4 +981,52 @@ section {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Active Nav Item Cutout Effect */
+.nav-item-active {
+  position: relative;
+  background-color: white !important;
+  color: #23493f !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 9999px !important;
+  border-bottom-left-radius: 9999px !important;
+}
+
+.nav-item-active::before,
+.nav-item-active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nav-item-active::before {
+  top: -20px;
+  background: radial-gradient(circle at top left, transparent 19.5px, white 20px);
+}
+
+.nav-item-active::after {
+  bottom: -20px;
+  background: radial-gradient(circle at bottom left, transparent 19.5px, white 20px);
+}
+
+/* ─── Skeleton Shimmer Animation ─── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Page Fade In ─── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }

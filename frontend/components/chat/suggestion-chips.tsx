@@ -70,19 +70,19 @@ export default function SuggestionChips({
               group relative flex items-center gap-2.5 px-5 py-3 rounded-full
               font-medium text-sm sm:text-base
               border transition-all duration-500 ease-out
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[#16826B] focus-visible:ring-offset-2
               animate-wellness-slide-up
               ${isSelected
-                                ? 'bg-emerald-50 border-emerald-300 text-emerald-700 shadow-lg shadow-emerald-100/50'
-                                : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-600 hover:shadow-md hover:shadow-emerald-50'
+                                ? 'bg-[#16826B]/10 border-[#16826B] text-[#16826B] shadow-lg shadow-[#16826B]/20'
+                                : 'bg-white border-gray-200 text-gray-600 hover:border-[#16826B]/50 hover:bg-[#16826B]/5 hover:text-[#16826B] hover:shadow-md hover:shadow-[#16826B]/10'
                             }
             `}
                         style={{ animationDelay: `${150 + index * 50}ms` }}
                     >
                         <Icon
                             className={`size-4 sm:size-5 transition-all duration-500 ${isSelected
-                                    ? 'text-emerald-600 scale-110'
-                                    : 'text-gray-400 group-hover:text-emerald-500 group-hover:scale-110'
+                                    ? 'text-[#16826B] scale-110'
+                                    : 'text-gray-400 group-hover:text-[#16826B] group-hover:scale-110'
                                 }`}
                             strokeWidth={1.5}
                         />
@@ -91,7 +91,7 @@ export default function SuggestionChips({
                         {/* Selection indicator */}
                         <span
                             className={`
-                absolute inset-0 rounded-full border-2 border-emerald-400 
+                absolute inset-0 rounded-full border-2 border-[#16826B] 
                 transition-all duration-500 ease-out
                 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
               `}

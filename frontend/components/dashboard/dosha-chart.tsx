@@ -66,57 +66,68 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
 };
 
 export default function DoshaChart({ vata, pitta, kapha, size = 'medium' }: DoshaChartProps) {
+    // Reorder data to match the design (Pitta Orange on left, Vata Blue top right, Kapha Green bottom right)
     const data = [
-        { name: 'Vata', value: vata, color: DOSHA_COLORS.Vata },
-        { name: 'Pitta', value: pitta, color: DOSHA_COLORS.Pitta },
-        { name: 'Kapha', value: kapha, color: DOSHA_COLORS.Kapha },
+        { name: 'Pitta', value: pitta, color: '#F8971C' }, // Bright Orange
+        { name: 'Vata', value: vata, color: '#3282F6' },   // Bright Blue
+        { name: 'Kapha', value: kapha, color: '#21C482' }, // Bright Green
     ];
 
     const dimensions = {
-        small: { width: 150, height: 150, innerRadius: 30, outerRadius: 55 },
-        medium: { width: 200, height: 200, innerRadius: 40, outerRadius: 75 },
-        large: { width: 280, height: 280, innerRadius: 55, outerRadius: 100 },
+        small: { width: 200, height: 120, innerRadius: 25, outerRadius: 50 },
+        medium: { width: 320, height: 160, innerRadius: 35, outerRadius: 70 },
+        large: { width: 400, height: 200, innerRadius: 45, outerRadius: 90 },
     };
 
-    const { innerRadius, outerRadius } = dimensions[size];
+    const { innerRadius, outerRadius, width, height } = dimensions[size];
 
     return (
-        <div className="flex flex-col items-center">
-            <ResponsiveContainer width={dimensions[size].width} height={dimensions[size].height}>
-                <PieChart>
-                    <Pie
-                        data={data}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={innerRadius}
-                        outerRadius={outerRadius}
-                        paddingAngle={3}
-                        dataKey="value"
-                        labelLine={false}
-                        label={renderCustomLabel}
-                    >
-                        {data.map((entry, index) => (
-                            <Cell
-                                key={`cell-${index}`}
-                                fill={entry.color}
-                                stroke="white"
-                                strokeWidth={2}
-                            />
-                        ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-            </ResponsiveContainer>
-            <div className="flex gap-4 mt-2">
-                {data.map((dosha) => (
-                    <div key={dosha.name} className="flex items-center gap-1.5">
-                        <div
-                            className="size-3 rounded-full"
-                            style={{ backgroundColor: dosha.color }}
-                        />
-                        <span className="text-xs font-medium text-gray-600">{dosha.name}</span>
-                    </div>
-                ))}
+        <div className="flex items-center justify-between w-full pr-4">
+            {/* Chart Side */}
+            <div className="relative flex-shrink-0">
+                <ResponsiveContainer width={height * 1.2} height={height}>
+                    <PieChart>
+                        <Pie
+                            data={data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={innerRadius}
+                            outerRadius={outerRadius}
+                            paddingAngle={2}
+                            dataKey="value"
+                            startAngle={90}
+                            endAngle={-270}
+                            stroke="none"
+                            labelLine={false}
+                            label={renderCustomLabel}
+                        >
+                            {data.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                    style={{ outline: 'none' }}
+                                />
+                            ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+
+            {/* Legend Side */}
+            <div className="flex flex-col gap-3 justify-center">
+                <div className="flex items-center gap-2">
+                    <div className="size-3 rounded-full bg-[#3282F6]"></div>
+                    <span className="text-sm font-semibold text-gray-700">Vata</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="size-3 rounded-full bg-[#F8971C]"></div>
+                    <span className="text-sm font-semibold text-gray-700">Pitta</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="size-3 rounded-full bg-[#21C482]"></div>
+                    <span className="text-sm font-semibold text-gray-700">Kapha</span>
+                </div>
             </div>
         </div>
     );

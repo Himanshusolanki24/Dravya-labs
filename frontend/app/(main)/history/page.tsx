@@ -132,32 +132,26 @@ export default function HistoryPage() {
     const clearSearch = () => setSearchQuery('');
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
+        <div className="flex-1 flex flex-col min-h-screen bg-[#F8F9FA]">
             {/* Header */}
-            <div className="px-6 py-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white">
+            <div className="px-6 pt-8 pb-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                <Clock className="size-6" />
-                            </div>
-                            <div>
-                                <h1 className="text-2xl sm:text-3xl font-bold">Consultation History</h1>
-                                <p className="text-emerald-100 text-sm mt-1">
-                                    View and manage your past Ayurvedic health consultations
-                                </p>
-                            </div>
+                        <div className="flex flex-col gap-1">
+                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Consultation History</h1>
+                            <p className="text-gray-500 text-sm">
+                                View and manage your past Ayurvedic health consultations
+                            </p>
                         </div>
-
                         {/* Stats */}
                         <div className="hidden sm:flex gap-4">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center min-w-[100px]">
-                                <p className="text-3xl font-bold">{totalSessions}</p>
-                                <p className="text-xs text-emerald-100">Total Sessions</p>
+                            <div className="bg-white rounded-2xl border border-gray-100 px-6 py-3 text-center min-w-[100px] shadow-sm">
+                                <p className="text-2xl font-bold text-gray-900">{totalSessions}</p>
+                                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mt-0.5">Total Sessions</p>
                             </div>
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center min-w-[100px]">
-                                <p className="text-3xl font-bold">{thisWeekCount}</p>
-                                <p className="text-xs text-emerald-100">This Week</p>
+                            <div className="bg-white rounded-2xl border border-gray-100 px-6 py-3 text-center min-w-[100px] shadow-sm">
+                                <p className="text-2xl font-bold text-gray-900">{thisWeekCount}</p>
+                                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mt-0.5">This Week</p>
                             </div>
                         </div>
                     </div>
@@ -165,18 +159,18 @@ export default function HistoryPage() {
             </div>
 
             {/* Search and Filters Bar */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                <div className="max-w-6xl mx-auto px-6 py-4">
-                    <div className="flex items-center gap-4">
+            <div className="sticky top-0 z-40 bg-[#F8F9FA] pb-4">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
                         {/* Search */}
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+                        <div className="flex-1 relative w-full">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search consultations..."
-                                className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                className="w-full pl-12 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#007200]/10 focus:border-[#007200] transition-all shadow-sm"
                             />
                             {searchQuery && (
                                 <button
@@ -189,21 +183,23 @@ export default function HistoryPage() {
                         </div>
 
                         {/* Filter Buttons */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
-                        >
-                            <Filter className="size-4" />
-                            <span>Filters</span>
-                        </button>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+                            >
+                                <Filter className="size-4" />
+                                <span className="font-medium text-sm">Filters</span>
+                            </button>
 
-                        <button
-                            onClick={clearSearch}
-                            className="flex items-center gap-2 px-4 py-3 text-red-500 hover:text-red-600 transition-colors"
-                        >
-                            <Trash2 className="size-4" />
-                            <span>Clear All</span>
-                        </button>
+                            <button
+                                onClick={clearSearch}
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-red-500 hover:text-red-600 transition-colors bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-red-50"
+                            >
+                                <Trash2 className="size-4" />
+                                <span className="font-medium text-sm">Clear</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -235,7 +231,7 @@ export default function HistoryPage() {
                                             This Week <span className="text-gray-400 font-normal">({groupedConsultations.thisWeek.length})</span>
                                         </h2>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex flex-col gap-3">
                                         {groupedConsultations.thisWeek.map((consultation) => (
                                             <ConsultationCard key={consultation.id} consultation={consultation} />
                                         ))}
@@ -252,7 +248,7 @@ export default function HistoryPage() {
                                             This Month <span className="text-gray-400 font-normal">({groupedConsultations.thisMonth.length})</span>
                                         </h2>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="flex flex-col gap-3">
                                         {groupedConsultations.thisMonth.map((consultation) => (
                                             <ConsultationCard key={consultation.id} consultation={consultation} />
                                         ))}
@@ -269,7 +265,7 @@ export default function HistoryPage() {
                                             Older <span className="text-gray-400 font-normal">({groupedConsultations.older.length})</span>
                                         </h2>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="flex flex-col gap-3">
                                         {groupedConsultations.older.map((consultation) => (
                                             <ConsultationCard key={consultation.id} consultation={consultation} />
                                         ))}
@@ -284,65 +280,55 @@ export default function HistoryPage() {
     );
 }
 
-// Consultation Card Component
 function ConsultationCard({ consultation }: { consultation: typeof consultationsData[0] }) {
     const severityStyle = severityColors[consultation.severity] || severityColors.mild;
     const doshaStyle = doshaColors[consultation.dosha] || doshaColors.Vata;
 
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:scale-[1.01] transition-all duration-200 group">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-                <div className="flex items-start gap-3">
-                    <div className="size-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                        <MessageSquare className="size-5 text-emerald-600" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
-                            {consultation.title}
-                        </h3>
-                        <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                            <Clock className="size-3" />
-                            {consultation.timeAgo}
-                        </p>
-                    </div>
+        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group flex flex-col md:flex-row md:items-center gap-5 cursor-pointer hover:bg-gray-50/50">
+            {/* Header / Icon */}
+            <div className="flex items-start gap-4 md:w-1/4 shrink-0">
+                <div className="size-12 rounded-2xl bg-[#007200]/10 flex items-center justify-center shrink-0">
+                    <MessageSquare className="size-5 text-[#007200]" />
                 </div>
-                <button className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all">
-                    <Trash2 className="size-4" />
-                </button>
+                <div className="flex flex-col justify-center h-12">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-[#007200] transition-colors leading-tight line-clamp-1">
+                        {consultation.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-1 font-medium">
+                        <Clock className="size-3" />
+                        {consultation.timeAgo}
+                    </p>
+                </div>
             </div>
 
-            {/* Description */}
-            <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                {consultation.description}
-            </p>
-
-            {/* Symptoms */}
-            <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2">Symptoms:</p>
-                <p className="text-sm text-gray-700">
-                    {consultation.symptoms.join(', ')}
+            {/* Description & Symptoms */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <p className="text-sm text-gray-600 mb-1.5 truncate">
+                    {consultation.description}
                 </p>
+                <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
+                    <span className="font-medium text-gray-400">Symptoms:</span>
+                    <span className="truncate">{consultation.symptoms.join(', ')}</span>
+                </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${severityStyle.bg} ${severityStyle.text}`}>
-                    ◉ {consultation.severity.charAt(0).toUpperCase() + consultation.severity.slice(1)}
+            {/* Badges & Actions */}
+            <div className="flex items-center gap-3 shrink-0 md:justify-end mt-2 md:mt-0">
+                <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${severityStyle.bg} ${severityStyle.text}`}>
+                    {consultation.severity}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${doshaStyle.bg} ${doshaStyle.text}`}>
-                    ✦ {consultation.dosha}
+                <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${doshaStyle.bg} ${doshaStyle.text}`}>
+                    {consultation.dosha}
                 </span>
+                
+                <Link
+                    href={`/chat`}
+                    className="ml-2 size-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 group-hover:border-[#007200] group-hover:bg-[#007200] group-hover:text-white transition-all shadow-sm"
+                >
+                    <ChevronRight className="size-5" />
+                </Link>
             </div>
-
-            {/* View Link */}
-            <Link
-                href={`/chat`}
-                className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
-            >
-                View Full Consultation
-                <ChevronRight className="size-4" />
-            </Link>
         </div>
     );
 }

@@ -153,9 +153,10 @@ export default function Login() {
           background-position: center;
           background-repeat: no-repeat;
           position: relative;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
           margin: 0;
-          padding: 0;
+          padding: 20px 0;
         }
 
         .login-page::before {
@@ -173,7 +174,7 @@ export default function Login() {
         .login-container {
           background: rgba(134, 194, 155, 0.9);
           backdrop-filter: blur(16px);
-          padding: 32px 36px;
+          padding: 24px 28px;
           border-radius: 24px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2),
                       0 0 0 1px rgba(255, 255, 255, 0.3) inset,
@@ -183,7 +184,7 @@ export default function Login() {
           position: relative;
           animation: fadeIn 0.6s ease-out;
           z-index: 10;
-          margin: 20px;
+          margin: 10px;
         }
 
         @keyframes fadeIn {
@@ -229,7 +230,7 @@ export default function Login() {
         .login-title {
           color: white;
           text-align: center;
-          margin-bottom: 24px;
+          margin-bottom: 14px;
           font-size: 26px;
           font-weight: 600;
           text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -237,34 +238,36 @@ export default function Login() {
         }
 
         .form-group {
-          margin-bottom: 18px;
+          margin-bottom: 12px;
         }
 
         .form-label {
           display: block;
           color: white;
-          margin-bottom: 6px;
-          font-size: 13px;
+          margin-bottom: 5px;
+          font-size: 13.5px;
           font-weight: 500;
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .form-input {
           width: 100%;
-          padding: 12px 14px;
-          border: none;
-          border-radius: 10px;
+          padding: 10px 14px;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 12px;
           font-size: 14px;
-          background: rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.85);
+          color: #333;
           transition: all 0.3s ease;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
           box-sizing: border-box;
         }
 
         .form-input:focus {
           outline: none;
           background: white;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+          border-color: rgba(255, 255, 255, 0.8);
+          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.05);
           transform: translateY(-1px);
         }
 
@@ -272,7 +275,7 @@ export default function Login() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 18px;
+          margin-bottom: 14px;
           font-size: 13px;
         }
 
@@ -304,23 +307,23 @@ export default function Login() {
         .login-btn {
           width: 100%;
           padding: 12px;
-          background: linear-gradient(135deg, #7ac943 0%, #5fb82e 100%);
+          background: linear-gradient(135deg, #16826B 0%, #116251 100%);
           color: white;
           border: none;
-          border-radius: 10px;
+          border-radius: 12px;
           font-size: 15px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 6px 20px rgba(122, 201, 67, 0.4);
+          box-shadow: 0 6px 20px rgba(22, 130, 107, 0.4);
           text-transform: uppercase;
           letter-spacing: 1px;
         }
 
         .login-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(122, 201, 67, 0.5);
-          background: linear-gradient(135deg, #8ad451 0%, #6fc935 100%);
+          box-shadow: 0 8px 25px rgba(22, 130, 107, 0.5);
+          background: linear-gradient(135deg, #18987d 0%, #137460 100%);
         }
 
         .login-btn:active {
@@ -329,7 +332,7 @@ export default function Login() {
 
         .divider {
           text-align: center;
-          margin: 18px 0;
+          margin: 12px 0;
           position: relative;
         }
 
@@ -563,9 +566,9 @@ export default function Login() {
           <div className="leaf"></div>
         </div>
 
-        <div className="login-container">
-          <img src="/loginlogo.png" alt="Dravya Labs Logo" className="login-logo" />
-          <h2 className="login-title">Login Form</h2>
+        <div className="login-container" style={{ paddingTop: "10px" }}>
+          <img src="/Full logo.png" alt="Dravya Labs Logo" className="login-logo" style={{ filter: "brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.15))", width: "180px", display: "block", margin: "0 auto 5px auto", transform: "translateX(6px)" }} />
+          <h2 className="login-title" style={{ marginTop: 0 }}>Welcome Back</h2>
 
           {errors.general && (
             <div style={{
