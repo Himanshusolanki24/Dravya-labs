@@ -175,9 +175,10 @@ export default function Signup() {
           background-position: center;
           background-repeat: no-repeat;
           position: relative;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
           margin: 0;
-          padding: 0;
+          padding: 20px 0;
         }
 
         .signup-page::before {
@@ -195,19 +196,17 @@ export default function Signup() {
         .signup-container {
           background: rgba(134, 194, 155, 0.85);
           backdrop-filter: blur(12px);
-          padding: 30px 25px;
+          padding: 20px 25px;
           border-radius: 25px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
                       0 0 0 1px rgba(255, 255, 255, 0.3) inset,
                       0 -5px 20px rgba(255, 255, 255, 0.2) inset;
           width: 90%;
           max-width: 420px;
-          max-height: 90vh;
-          overflow-y: visible;
           position: relative;
           animation: fadeIn 0.6s ease-out;
           z-index: 10;
-          margin: 20px;
+          margin: 10px;
         }
 
         @keyframes fadeIn {
@@ -253,8 +252,8 @@ export default function Signup() {
         .signup-title {
           color: white;
           text-align: center;
-          margin-bottom: 20px;
-          font-size: 24px;
+          margin-bottom: 12px;
+          font-size: 22px;
           font-weight: 600;
           text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
           letter-spacing: 0.5px;
@@ -263,18 +262,18 @@ export default function Signup() {
         .form-row {
           display: flex;
           gap: 12px;
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .form-group {
-          margin-bottom: 15px;
+          margin-bottom: 10px;
           flex: 1;
         }
 
         .form-label {
           display: block;
           color: white;
-          margin-bottom: 5px;
+          margin-bottom: 4px;
           font-size: 13px;
           font-weight: 500;
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -282,27 +281,29 @@ export default function Signup() {
 
         .form-input {
           width: 100%;
-          padding: 10px 12px;
-          border: none;
-          border-radius: 10px;
-          font-size: 13px;
-          background: rgba(255, 255, 255, 0.9);
+          padding: 10px 14px;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 12px;
+          font-size: 14px;
+          background: rgba(255, 255, 255, 0.85);
+          color: #333;
           transition: all 0.3s ease;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
           box-sizing: border-box;
         }
 
         .form-input:focus {
           outline: none;
           background: white;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-          transform: none;
+          border-color: rgba(255, 255, 255, 0.8);
+          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+          transform: translateY(-1px);
         }
 
         .terms-section {
           display: flex;
           align-items: center;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           font-size: 12px;
         }
 
@@ -327,33 +328,33 @@ export default function Signup() {
         .signup-btn {
           width: 100%;
           padding: 12px;
-          background: linear-gradient(135deg, #7ac943 0%, #5fb82e 100%);
+          background: linear-gradient(135deg, #16826B 0%, #116251 100%);
           color: white;
           border: none;
-          border-radius: 10px;
+          border-radius: 12px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 6px 20px rgba(122, 201, 67, 0.4);
+          box-shadow: 0 6px 20px rgba(22, 130, 107, 0.4);
           text-transform: uppercase;
           letter-spacing: 1px;
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .signup-btn:hover {
-          box-shadow: 0 8px 25px rgba(122, 201, 67, 0.5);
-          background: linear-gradient(135deg, #8ad451 0%, #6fc935 100%);
-          transform: none;
+          box-shadow: 0 8px 25px rgba(22, 130, 107, 0.5);
+          background: linear-gradient(135deg, #18987d 0%, #137460 100%);
+          transform: translateY(-1px);
         }
 
         .signup-btn:active {
-          transform: none;
+          transform: translateY(1px);
         }
 
         .divider {
           text-align: center;
-          margin: 15px 0;
+          margin: 10px 0;
           position: relative;
         }
 
@@ -390,7 +391,7 @@ export default function Signup() {
           justify-content: center;
           gap: 10px;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .google-btn:hover {
@@ -525,8 +526,9 @@ export default function Signup() {
           <div className="leaf"></div>
         </div>
 
-        <div className="signup-container">
-          <h2 className="signup-title">Create Account</h2>
+        <div className="signup-container" style={{ paddingTop: "10px" }}>
+          <img src="/Full logo.png" alt="Dravya Labs Logo" className="signup-logo" style={{ filter: "brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.15))", width: "180px", display: "block", margin: "0 auto 5px auto", transform: "translateX(6px)" }} />
+          <h2 className="signup-title" style={{ marginTop: 0 }}>Create Account</h2>
 
           {errors.general && (
             <div style={{

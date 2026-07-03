@@ -61,39 +61,43 @@ export default function EncyclopediaPage() {
     return (
         <div className="flex-1 flex flex-col h-full overflow-auto bg-gradient-to-b from-gray-50 to-white">
             {/* Header Section */}
-            <div className="px-6 py-8 bg-gradient-to-br from-emerald-50 via-teal-50/50 to-green-50/30 border-b border-emerald-100/50">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="size-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200">
-                            <Leaf className="size-7 text-white" />
+            <div className="relative px-6 py-5 border-b border-emerald-100/50 overflow-hidden bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-green-50/80 shrink-0">
+                {/* Decorative abstract background elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-300/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-20 w-72 h-72 bg-teal-300/10 rounded-full blur-3xl translate-y-1/3"></div>
+                
+                <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200 shrink-0">
+                            <Leaf className="size-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
+                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent leading-tight">
                                 {t.encyclopedia.title}
                             </h1>
-                            <p className="text-gray-500 mt-1">
+                            <p className="text-sm text-gray-500 mt-0.5">
                                 {t.encyclopedia.subtitle.replace('{count}', String(herbs.length))}
                             </p>
                         </div>
                     </div>
 
                     {/* Search Bar */}
-                    <div className="max-w-2xl">
-                        <div className="flex items-center bg-white rounded-2xl px-5 py-4 border border-gray-200 shadow-sm focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100 transition-all">
-                            <Search className="size-5 text-gray-400" />
+                    <div className="w-full md:max-w-[320px] shrink-0">
+                        <div className="flex items-center bg-white/80 backdrop-blur-md rounded-xl px-4 py-2.5 border border-emerald-100 shadow-sm focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100/50 transition-all">
+                            <Search className="size-4 text-emerald-600" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t.encyclopedia.searchPlaceholder}
-                                className="flex-1 ml-3 text-base bg-transparent border-none focus:outline-none placeholder:text-gray-400"
+                                className="flex-1 ml-3 text-sm bg-transparent border-none focus:outline-none placeholder:text-gray-400 text-gray-800"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="text-gray-400 hover:text-gray-600 p-1"
+                                    className="text-gray-400 hover:text-emerald-600 p-0.5 transition-colors"
                                 >
-                                    <X className="size-4" />
+                                    <X className="size-3.5" />
                                 </button>
                             )}
                         </div>
@@ -102,7 +106,7 @@ export default function EncyclopediaPage() {
             </div>
 
             {/* Filter Section */}
-            <div className="px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+            <div className="px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10 shrink-0">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center justify-between mb-4">
                         <button
@@ -124,51 +128,40 @@ export default function EncyclopediaPage() {
                     </div>
 
                     {showFilters && (
-                        <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4 mb-2">
                             {/* Dosha Filters */}
-                            <div>
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">{t.encyclopedia.byDoshaBalance}</span>
-                                <div className="flex flex-wrap gap-2">
-                                    {doshaOptions.map(dosha => {
-                                        const isSelected = selectedDoshas.includes(dosha);
-                                        const colors = {
-                                            Vata: isSelected ? 'bg-blue-500 text-white border-blue-500' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
-                                            Pitta: isSelected ? 'bg-amber-500 text-white border-amber-500' : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100',
-                                            Kapha: isSelected ? 'bg-teal-500 text-white border-teal-500' : 'bg-teal-50 text-teal-600 border-teal-200 hover:bg-teal-100',
-                                        };
-                                        return (
-                                            <button
-                                                key={dosha}
-                                                onClick={() => toggleDosha(dosha)}
-                                                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${colors[dosha as keyof typeof colors]}`}
-                                            >
-                                                {dosha}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                            <div className="flex-1 max-w-[200px]">
+                                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">{t.encyclopedia.byDoshaBalance}</label>
+                                <select 
+                                    value={selectedDoshas.length > 0 ? selectedDoshas[0] : 'All'}
+                                    onChange={(e) => {
+                                        if (e.target.value === 'All') setSelectedDoshas([]);
+                                        else setSelectedDoshas([e.target.value]);
+                                    }}
+                                    className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none hover:bg-gray-100 transition-colors"
+                                >
+                                    <option value="All">All Doshas</option>
+                                    {doshaOptions.map(dosha => (
+                                        <option key={dosha} value={dosha}>{dosha}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             {/* Category Filters */}
-                            <div>
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">{t.encyclopedia.byCategory}</span>
-                                <div className="flex flex-wrap gap-2">
+                            <div className="flex-1 max-w-[250px]">
+                                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">{t.encyclopedia.byCategory}</label>
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none hover:bg-gray-100 transition-colors"
+                                >
                                     {categories.map(category => {
                                         const translatedCategory = (t.encyclopedia.categories as Record<string, string>)[category] || category;
                                         return (
-                                            <button
-                                                key={category}
-                                                onClick={() => setSelectedCategory(category)}
-                                                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${selectedCategory === category
-                                                    ? 'bg-emerald-500 text-white border-emerald-500'
-                                                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:border-gray-300'
-                                                    }`}
-                                            >
-                                                {translatedCategory}
-                                            </button>
+                                            <option key={category} value={category}>{translatedCategory}</option>
                                         );
                                     })}
-                                </div>
+                                </select>
                             </div>
                         </div>
                     )}

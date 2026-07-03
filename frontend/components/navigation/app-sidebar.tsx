@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import {
-    LayoutDashboard, Settings, BookOpen, MessageCircle,
-    HelpCircle, Clock, User, MessageSquare, ChevronDown,
-    Plus, Trash2, Pill
+    LayoutGrid, Settings, BookOpen, MessageSquare,
+    HelpCircle, Clock, User, FileText, ChevronDown,
+    Plus, Trash2, FlaskConical, LogOut
 } from 'lucide-react';
 import {
     Sidebar,
@@ -32,13 +33,13 @@ interface NavItem {
 }
 
 const mainNavItems: NavItem[] = [
-    { icon: MessageCircle, label: 'Chat', href: '/chat' },
+    { icon: MessageSquare, label: 'Chat', href: '/chat' },
     { icon: BookOpen, label: 'Encyclopedia', href: '/encyclopedia' },
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+    { icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
     { icon: Clock, label: 'History', href: '/history' },
-    { icon: Pill, label: 'Treatment', href: '/treatment' },
+    { icon: FlaskConical, label: 'Treatment', href: '/treatment' },
     { icon: User, label: 'Profile', href: '/profile' },
-    { icon: MessageSquare, label: 'Feedback', href: '/feedback' },
+    { icon: FileText, label: 'Feedback', href: '/feedback' },
 ];
 
 const secondaryNavItems: NavItem[] = [
@@ -123,64 +124,65 @@ function ChatHistorySection() {
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsOpen(!isOpen); }}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl hover:bg-white/5"
             >
                 <div className="flex items-center gap-1.5">
                     <ChevronDown
                         className={`size-3 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}
+                        strokeWidth={2.5}
                     />
                     <span className="uppercase tracking-wider font-medium">Chat History</span>
                 </div>
                 <button
                     onClick={handleNewChat}
-                    className="p-1 rounded-md hover:bg-emerald-100 hover:text-emerald-600 transition-colors"
+                    className="p-1 rounded-md hover:bg-white/10 hover:text-white transition-colors"
                     title="New Chat"
                 >
-                    <Plus className="size-3.5" />
+                    <Plus className="size-3.5" strokeWidth={2.5} />
                 </button>
             </div>
 
             {/* Dropdown content */}
             {isOpen && (
-                <div className="mx-2 mb-2 max-h-52 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50/50">
+                <div className="mx-2 mb-2 max-h-52 overflow-y-auto rounded-lg border border-white/5 bg-white/5 hide-scrollbar">
                     {isLoading ? (
                         <div className="p-3 text-center">
                             <div className="flex justify-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                <span className="w-1.5 h-1.5 bg-[var(--chat-primary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="w-1.5 h-1.5 bg-[var(--chat-primary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="w-1.5 h-1.5 bg-[var(--chat-primary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                             </div>
                         </div>
                     ) : sessions.length === 0 ? (
-                        <div className="p-3 text-center text-xs text-gray-400">
+                        <div className="p-3 text-center text-xs text-white/40">
                             No chat history yet
                         </div>
                     ) : (
                         <ul className="py-1">
                             {sessions.map((session) => (
                                 <li key={session.session_id}>
-                                    <div
+                                        <div
                                         onClick={() => handleSelectSession(session.session_id)}
                                         role="button"
                                         tabIndex={0}
                                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectSession(session.session_id); }}
-                                        className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-emerald-50 transition-colors group/item cursor-pointer"
+                                        className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-white/10 transition-colors group/item cursor-pointer"
                                     >
-                                        <MessageCircle className="size-3.5 mt-0.5 text-gray-400 shrink-0" />
+                                        <MessageSquare className="size-3.5 mt-0.5 text-white/40 shrink-0" strokeWidth={2.5} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-700 truncate">
+                                            <p className="text-xs font-medium text-white/80 truncate">
                                                 {session.title}
                                             </p>
-                                            <p className="text-[10px] text-gray-400">
+                                            <p className="text-[10px] text-white/40">
                                                 {formatDate(session.updated_at)}
                                             </p>
                                         </div>
                                         <button
                                             onClick={(e) => handleDeleteSession(e, session.session_id)}
-                                            className="p-0.5 rounded opacity-0 group-hover/item:opacity-100 hover:bg-red-100 hover:text-red-500 transition-all"
+                                            className="p-0.5 rounded opacity-0 group-hover/item:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all"
                                             title="Delete"
                                         >
-                                            <Trash2 className="size-3" />
+                                            <Trash2 className="size-3.5" strokeWidth={2} />
                                         </button>
                                     </div>
                                 </li>
@@ -193,47 +195,159 @@ function ChatHistorySection() {
     );
 }
 
+// ─── User Profile Widget ────────────────────────────────────
+
+function UserProfileWidget() {
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    setUser(user);
+                }
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, []);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/auth/login');
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center gap-3 px-3 py-2 mx-3 mb-3 rounded-xl bg-white/5 border border-white/5 animate-pulse group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:mx-1">
+                <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                <div className="flex flex-col gap-2 w-full group-data-[collapsible=icon]:hidden">
+                    <div className="h-3 bg-white/10 rounded w-2/3" />
+                    <div className="h-2 bg-white/10 rounded w-1/2" />
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-between px-3 py-2 mx-3 mb-3 mt-2 rounded-xl bg-white/5 border border-white/10 group group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:mx-1">
+                <div className="flex items-center gap-3 min-w-0 group-data-[collapsible=icon]:gap-0">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/40 font-bold shrink-0">
+                        ?
+                    </div>
+                    <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+                        <span className="text-sm font-medium text-white truncate">Guest</span>
+                        <span className="text-[10px] text-white/40 truncate">Not logged in</span>
+                    </div>
+                </div>
+                <button 
+                    onClick={() => router.push('/auth/login')}
+                    className="px-2 py-1 rounded text-xs font-medium bg-white/10 hover:bg-white/20 text-white transition-all shrink-0 group-data-[collapsible=icon]:hidden"
+                >
+                    Log In
+                </button>
+            </div>
+        );
+    }
+
+    const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+    const initial = name.charAt(0).toUpperCase();
+
+    return (
+        <div className="flex items-center justify-between px-3 py-2 mx-3 mb-3 mt-2 rounded-xl bg-white/5 border border-white/10 group group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:mx-1">
+            <div className="flex items-center gap-3 min-w-0 group-data-[collapsible=icon]:gap-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2bee7c] to-[#10b981] flex items-center justify-center text-black font-bold shrink-0">
+                    {initial}
+                </div>
+                <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-medium text-white truncate">{name}</span>
+                    <span className="text-[10px] text-white/40 truncate">{user.email}</span>
+                </div>
+            </div>
+            <button 
+                onClick={handleSignOut}
+                className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all text-white/40 shrink-0 group-data-[collapsible=icon]:hidden"
+                title="Sign Out"
+            >
+                <LogOut className="size-4" strokeWidth={2} />
+            </button>
+        </div>
+    );
+}
+
 // ─── Main Sidebar ───────────────────────────────────────────
 
 export default function AppSidebar() {
+    const pathname = usePathname();
+    const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
     return (
-        <Sidebar collapsible="icon" className="border-r border-[var(--chat-border)]">
+        <Sidebar 
+            collapsible="icon" 
+            className="border-none [&_[data-sidebar=sidebar]]:!bg-transparent [&_[data-sidebar=sidebar]]:border-none text-white" 
+        >
             {/* Logo Header */}
-            <SidebarHeader className="h-16 flex items-center justify-center border-b border-[var(--chat-border)]">
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+            <SidebarHeader className="h-24 flex items-center justify-center border-none py-0">
+                <Link href="/" className="flex items-center justify-center gap-3 w-full">
+                    {/* Collapsed Logo (Icon only) */}
+                    <div className="size-12 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-white/10 p-1 hidden group-data-[collapsible=icon]:flex mx-auto">
                         <Image
                             src="/logo.png"
                             alt="Dravya Labs"
                             width={40}
                             height={40}
-                            className="object-contain"
+                            className="object-contain brightness-0 invert"
                         />
                     </div>
-                    <span className="font-bold text-lg text-[var(--chat-text-primary)] group-data-[collapsible=icon]:hidden">
-                        Dravya Labs
-                    </span>
+                    {/* Expanded Full Logo */}
+                    <div className="w-full flex items-center justify-center shrink-0 overflow-hidden group-data-[collapsible=icon]:hidden">
+                        <Image
+                            src="/Full logo.png"
+                            alt="Dravya Labs"
+                            width={200}
+                            height={80}
+                            className="object-contain w-[180px] h-auto brightness-0 invert"
+                        />
+                    </div>
                 </Link>
             </SidebarHeader>
 
             {/* Main Navigation */}
-            <SidebarContent className="pt-4">
-                <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs text-gray-400 uppercase tracking-wider">
-                        Main Menu
+            <SidebarContent className="pl-3 pr-0 [&::-webkit-scrollbar]:hidden scrollbar-none">
+                <SidebarGroup className="pt-0 pr-0">
+                    <SidebarGroupLabel className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2 group-data-[collapsible=icon]:hidden">
+                        Navigation
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu>
-                            {mainNavItems.map((item) => (
+                        <SidebarMenu className="gap-1">
+                            {mainNavItems.map((item) => {
+                                const active = isActive(item.href);
+                                return (
                                 <React.Fragment key={item.label}>
                                     <SidebarMenuItem>
                                         <SidebarMenuButton
                                             asChild
                                             tooltip={item.label}
-                                            className="text-gray-600 hover:bg-[var(--chat-primary)]/10 hover:text-[var(--chat-primary-dark)]"
+                                            className={`rounded-l-xl rounded-r-none transition-all h-10 ${active ? 'nav-item-active font-bold group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!h-10' : 'text-white/60 hover:bg-white/10 hover:text-white mr-3 rounded-r-xl group-data-[collapsible=icon]:!w-[calc(100%-0.75rem)] group-data-[collapsible=icon]:!h-10'}`}
                                         >
                                             <Link href={item.href}>
-                                                <item.icon className="size-5" />
+                                                <item.icon className={`size-4 mr-1 ${active ? 'text-[#10b981]' : ''}`} strokeWidth={2.5} />
                                                 <span>{item.label}</span>
                                             </Link>
                                         </SidebarMenuButton>
@@ -243,52 +357,44 @@ export default function AppSidebar() {
                                         <ChatHistorySection />
                                     )}
                                 </React.Fragment>
-                            ))}
+                            )})}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs text-gray-400 uppercase tracking-wider">
+                <SidebarGroup className="pt-0 pr-0">
+                    <SidebarGroupLabel className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2 mt-4 group-data-[collapsible=icon]:hidden">
                         Settings
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu>
-                            {secondaryNavItems.map((item) => (
+                        <SidebarMenu className="gap-1">
+                            {secondaryNavItems.map((item) => {
+                                const active = isActive(item.href);
+                                return (
                                 <SidebarMenuItem key={item.label}>
                                     <SidebarMenuButton
                                         asChild
                                         tooltip={item.label}
-                                        className="text-gray-500 hover:bg-[var(--chat-bg-light)] hover:text-[var(--chat-text-primary)]"
+                                        className={`rounded-l-xl rounded-r-none transition-all h-10 ${active ? 'nav-item-active font-bold group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!h-10' : 'text-white/60 hover:bg-white/10 hover:text-white mr-3 rounded-r-xl group-data-[collapsible=icon]:!w-[calc(100%-0.75rem)] group-data-[collapsible=icon]:!h-10'}`}
                                     >
                                         <Link href={item.href}>
-                                            <item.icon className="size-5" />
+                                            <item.icon className={`size-4 mr-1 ${active ? 'text-[#10b981]' : ''}`} strokeWidth={2.5} />
                                             <span>{item.label}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            ))}
+                            )})}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
 
-            {/* Footer with Support */}
-            <SidebarFooter className="border-t border-[var(--chat-border)]">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            asChild
-                            tooltip="Support"
-                            className="text-gray-500 hover:bg-[var(--chat-bg-light)] hover:text-[var(--chat-text-primary)]"
-                        >
-                            <Link href="/support">
-                                <HelpCircle className="size-5" />
-                                <span>Support</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+            {/* Footer with Support & Profile */}
+            <SidebarFooter className="border-none pb-2 px-0 group-data-[collapsible=icon]:px-0">
+
+                
+                {/* Dynamic User Profile Widget */}
+                <UserProfileWidget />
             </SidebarFooter>
 
             <SidebarRail />

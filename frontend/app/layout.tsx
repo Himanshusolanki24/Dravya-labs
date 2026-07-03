@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 import { LanguageProvider } from "@/context/LanguageContext";
 import { SavedItemsProvider } from "@/context/SavedItemsContext";
 import { UserProvider } from "@/context/UserContext";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 
 export default function RootLayout({
   children,
@@ -16,16 +17,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
-        <UserProvider>
-          <LanguageProvider>
-            <SavedItemsProvider>
-              {children}
-            </SavedItemsProvider>
-          </LanguageProvider>
-        </UserProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <ReactQueryProvider>
+          <UserProvider>
+            <LanguageProvider>
+              <SavedItemsProvider>
+                {children}
+              </SavedItemsProvider>
+            </LanguageProvider>
+          </UserProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
 }
+

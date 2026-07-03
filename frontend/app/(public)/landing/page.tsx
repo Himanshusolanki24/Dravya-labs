@@ -24,6 +24,8 @@ export default function LandingPage() {
                         muted
                         loop
                         playsInline
+                        preload="auto"
+                        poster="/logo.png"
                         className="hero-video"
                         suppressHydrationWarning
                     >

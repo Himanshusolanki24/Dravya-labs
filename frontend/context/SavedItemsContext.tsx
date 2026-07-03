@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
+import { useAuthStore } from '@/store/useAuthStore';
+
 // Define SavedItem type
 export interface SavedItem {
     id: string; // The database ID (UUID)
@@ -27,31 +29,24 @@ const SavedItemsContext = createContext<SavedItemsContextType | undefined>(undef
 export function SavedItemsProvider({ children }: { children: React.ReactNode }) {
     const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-
-    useEffect(() => {
-        // Get user from localStorage (set by UserContext)
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                const parsed = JSON.parse(storedUser);
-                if (parsed.id) setUserId(parsed.id);
-            } catch (e) {
-                console.error("Failed to parse user from localstorage", e);
-            }
-        }
-    }, []);
+    
+    // Get userId from the new Zustand auth store
+    const user = useAuthStore(state => state.user);
+    const userId = user?.id;
 
     const refreshSavedItems = useCallback(async () => {
         if (!userId) return;
-        if (!isSupabaseConfigured) {
-            // Load from localStorage
+        const loadFromLocalStorage = () => {
             try {
                 const stored = localStorage.getItem('savedItems');
                 if (stored) setSavedItems(JSON.parse(stored));
             } catch (e) {
                 console.error("Failed to load saved items from localStorage", e);
             }
+        };
+
+        if (!isSupabaseConfigured) {
+            loadFromLocalStorage();
             return;
         }
         setIsLoading(true);
@@ -63,12 +58,18 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error("Error fetching saved items:", error);
+                if (error.message && error.message.includes("Could not find the table")) {
+                    // Fallback to localStorage if the database schema isn't set up yet
+                    console.warn("Supabase table 'saved_items' not found. Falling back to localStorage.");
+                    loadFromLocalStorage();
+                } else {
+                    console.error("Error fetching saved items:", error.message || error);
+                }
             } else {
                 setSavedItems(data || []);
             }
-        } catch (error) {
-            console.error("Error fetching saved items:", error);
+        } catch (error: any) {
+            console.error("Error fetching saved items:", error?.message || error);
         } finally {
             setIsLoading(false);
         }

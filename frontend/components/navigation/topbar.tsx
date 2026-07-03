@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Search, MessageSquarePlus, User, Stethoscope } from 'lucide-react';
+import { Search, Stethoscope, Plus } from 'lucide-react';
 
 interface TopbarProps {
     showSearch?: boolean;
@@ -16,69 +16,46 @@ export default function Topbar({
     showNewChat = true
 }: TopbarProps) {
     return (
-        <header className="h-16 shrink-0 bg-white/95 backdrop-blur-md border-b border-[var(--chat-border)] flex items-center justify-between px-4 lg:px-6 z-40 relative shadow-sm">
-            <div className="flex items-center gap-3">
-                {/* Sidebar Toggle - works on all screen sizes */}
-                <SidebarTrigger className="text-gray-500 hover:text-gray-900" />
+        <header className="h-14 shrink-0 bg-transparent flex items-center justify-between z-40 relative pb-2">
+            <div className="flex items-center gap-4">
+                {/* Sidebar Toggle */}
+                <SidebarTrigger className="text-white/70 hover:text-white" />
 
-                {/* Logo */}
-                <Link href="/" className="flex items-center">
-                    <Image
-                        src="/Full logo.png"
-                        alt="Dravya Labs"
-                        width={140}
-                        height={40}
-                        className="h-8 w-auto object-contain"
-                        priority
-                    />
-                </Link>
-            </div>
-
-            <div className="flex items-center gap-3 sm:gap-4">
-                {/* Search Bar */}
+                {/* Search Bar - Left Aligned */}
                 {showSearch && (
-                    <div className="hidden md:flex items-center bg-[var(--chat-bg-light)] rounded-lg px-3 py-1.5 border border-[var(--chat-border)] focus-within:border-[var(--chat-primary)]/50 focus-within:ring-2 focus-within:ring-[var(--chat-primary)]/20 transition-all">
+                    <div className="hidden md:flex items-center bg-white rounded-full px-4 py-2 shadow-sm">
                         <Search className="size-4 text-gray-400" />
                         <input
                             type="text"
-                            className="bg-transparent border-none focus:ring-0 focus:outline-none text-xs font-medium text-gray-700 w-32 lg:w-48 placeholder:text-gray-400 p-0 ml-2 h-auto leading-none"
-                            placeholder="Search..."
+                            className="bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium text-gray-800 w-[200px] lg:w-[280px] placeholder:text-gray-400 p-0 ml-3 h-auto leading-none"
+                            placeholder='Try searching "insights"'
                         />
                     </div>
                 )}
+            </div>
 
-                {/* Find Doctor Button */}
+            <div className="flex items-center gap-3">
+                {/* Find Doctor Icon */}
                 <Link
                     href="/doctor"
-                    className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all text-blue-700 text-xs font-bold shadow-sm hover:shadow-md active:scale-95"
+                    className="flex items-center justify-center size-10 rounded-full bg-white shadow-sm hover:shadow-md transition-all active:scale-95"
+                    title="Find Doctor"
                 >
-                    <Stethoscope className="size-4" />
-                    <span className="hidden sm:inline">Find Doctor</span>
+                    <div className="size-[28px] rounded-full bg-gradient-to-tr from-emerald-300 to-teal-400 flex items-center justify-center shadow-inner">
+                        <Stethoscope className="size-4 text-emerald-950" />
+                    </div>
                 </Link>
 
-                {/* New Chat Button */}
+                {/* New Chat Circular Button */}
                 {showNewChat && (
                     <Link
                         href="/chat"
-                        className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-[var(--chat-primary)] hover:bg-[var(--chat-primary-dark)] transition-all text-[var(--chat-text-primary)] text-xs font-bold shadow-sm hover:shadow-md active:scale-95"
+                        className="flex items-center justify-center size-10 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] hover:shadow-[0_0_18px_rgba(16,185,129,0.6)] transition-all active:scale-95"
+                        title="New Chat"
                     >
-                        <MessageSquarePlus className="size-4" />
-                        <span className="hidden sm:inline">New Chat</span>
+                        <Plus className="size-5" />
                     </Link>
                 )}
-
-                {/* Divider */}
-                <div className="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
-
-                {/* User Avatar */}
-                <Link
-                    href="/profile"
-                    className="size-9 rounded-full bg-gradient-to-tr from-[var(--chat-primary)] to-[var(--chat-accent-emerald)] p-[2px] cursor-pointer hover:scale-105 transition-transform shadow-sm"
-                >
-                    <div className="size-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                        <User className="size-5 text-gray-600" />
-                    </div>
-                </Link>
             </div>
         </header>
     );

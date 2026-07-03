@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, Paperclip, ArrowUp } from 'lucide-react';
+import { Mic, Send, Sparkles, Bot, Plus, Lightbulb, ImageIcon, Search, Link as LinkIcon } from 'lucide-react';
 import { translations } from '@/lib/translations';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -20,10 +20,8 @@ export default function ChatInput({
     const { language } = useLanguage();
     const t = translations[language];
 
-    // Use provided placeholder or fallback to translated default
-    const inputPlaceholder = placeholder || t.chat.placeholder;
+    const inputPlaceholder = placeholder || 'Ask anything';
 
-    // Auto-resize textarea
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
@@ -51,35 +49,14 @@ export default function ChatInput({
     const hasContent = message.trim().length > 0;
 
     return (
-        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pb-4 sm:pb-8 pt-2 sm:pt-4 animate-wellness-fade-in animation-delay-300 safe-area-bottom">
-            {/* Input Container with Glow Effect */}
-            <div
-                className={`
-          chat-input-container relative transition-all duration-700 ease-out
-          ${isFocused ? 'transform scale-[1.01]' : ''}
-        `}
-            >
-                {/* Ambient Glow */}
-                <div
-                    className={`
-            absolute -inset-1 rounded-3xl blur-xl transition-all duration-700 ease-out
-            bg-gradient-to-r from-emerald-200/30 via-teal-200/20 to-emerald-200/30
-            ${isFocused ? 'opacity-80 -inset-2' : 'opacity-40'}
-          `}
-                    aria-hidden="true"
-                />
-
-                {/* Main Input Card */}
-                <div
-                    className={`
-            relative flex flex-col bg-white rounded-2xl border transition-all duration-500 ease-out
-            ${isFocused
-                            ? 'border-emerald-300 shadow-xl shadow-emerald-100/50'
-                            : 'border-gray-200 shadow-lg shadow-gray-100/50'
-                        }
-          `}
-                >
-                    {/* Textarea */}
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 pt-2 animate-wellness-fade-in animation-delay-300 relative z-10">
+            <div className={`bg-white rounded-full p-1.5 pl-4 pr-1.5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-200 transition-all duration-300 ${isFocused ? 'shadow-[0_4px_25px_rgba(16,185,129,0.15)] border-emerald-300' : 'hover:border-gray-300 hover:shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)]'}`}>
+                {/* Middle Input Row */}
+                <div className="flex items-center gap-2">
+                    <button className="flex items-center justify-center size-9 text-gray-400 hover:text-emerald-500 transition-colors focus:outline-none shrink-0">
+                        <Plus className="size-5" />
+                    </button>
+                    
                     <textarea
                         ref={textareaRef}
                         value={message}
@@ -87,76 +64,35 @@ export default function ChatInput({
                         onKeyDown={handleKeyDown}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        className="
-              w-full min-h-[20px] max-h-[200px] resize-none overflow-hidden 
-              rounded-t-2xl text-gray-800 focus:outline-none border-none bg-transparent 
-              placeholder:text-gray-400 px-4 sm:px-5 py-3 sm:py-4 text-base font-medium leading-relaxed
-              transition-all duration-300
-            "
+                        className="flex-1 min-h-[22px] max-h-[120px] resize-none overflow-hidden bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800 placeholder:text-gray-400 text-[15px] leading-relaxed py-1.5 px-1 my-0.5"
                         placeholder={inputPlaceholder}
-                        aria-label="Type your health concern"
+                        aria-label="Type your message"
+                        rows={1}
                     />
 
-                    {/* Action Bar */}
-                    <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50/80 rounded-b-2xl border-t border-gray-100">
-                        {/* Left Actions */}
-                        <div className="flex items-center gap-1">
-                            {/* Voice Input */}
-                            <button
-                                className="
-                  flex items-center justify-center p-2.5 rounded-xl
-                  text-gray-400 hover:text-emerald-600 hover:bg-emerald-50
-                  transition-all duration-300 ease-out
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
-                "
-                                title={t.chat.voiceInput}
-                                aria-label={t.chat.voiceInput}
-                            >
-                                <Mic className="size-5" strokeWidth={1.5} />
-                            </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                            className="flex items-center justify-center size-9 text-gray-400 hover:text-emerald-500 transition-colors focus:outline-none"
+                            title={t.chat.voiceInput}
+                            aria-label={t.chat.voiceInput}
+                        >
+                            <Mic className="size-5" strokeWidth={1.5} />
+                        </button>
 
-                            {/* Attach File */}
-                            <button
-                                className="
-                  flex items-center justify-center p-2.5 rounded-xl
-                  text-gray-400 hover:text-emerald-600 hover:bg-emerald-50
-                  transition-all duration-300 ease-out
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
-                "
-                                title={t.chat.attachFile}
-                                aria-label={t.chat.attachFile}
-                            >
-                                <Paperclip className="size-5" strokeWidth={1.5} />
-                            </button>
-                        </div>
-
-                        {/* Send Button */}
                         <button
                             onClick={handleSend}
                             disabled={!hasContent}
                             aria-label={t.chat.send}
-                            className={`
-                flex items-center justify-center gap-2 rounded-xl h-10 sm:h-11 px-4 sm:px-5 touch-target
-                text-sm font-semibold transition-all duration-500 ease-out
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2
-                ${hasContent
-                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200 active:scale-95'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                }
-              `}
+                            className={`flex items-center justify-center size-9 rounded-full transition-all duration-300 focus:outline-none ${hasContent ? 'bg-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)] hover:shadow-[0_0_18px_rgba(16,185,129,0.7)] hover:bg-emerald-400 hover:scale-105' : 'bg-gray-100 border border-gray-200/50 text-gray-400 cursor-not-allowed'}`}
                         >
-                            <span className="hidden sm:inline">{t.chat.send}</span>
-                            <ArrowUp
-                                className={`size-4 transition-transform duration-300 ${hasContent ? 'translate-y-0' : ''}`}
-                                strokeWidth={2}
-                            />
+                            <Send className="size-4 ml-0.5" strokeWidth={2} />
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Disclaimer */}
-            <p className="text-center text-xs text-gray-400 mt-4 font-medium animate-wellness-fade-in animation-delay-400">
+            <p className="text-center text-xs text-gray-400 mt-4 font-medium">
                 {t.chat.disclaimer}
             </p>
         </div>

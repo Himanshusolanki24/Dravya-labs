@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Star, Send, Loader2, CheckCircle2, MessageSquare,
-    ThumbsUp, Sparkles, Bug, Lightbulb, Heart,
-    ChevronDown,
-} from 'lucide-react';
+    SlStar, SlPaperPlane, SlRefresh, SlCheck, SlBubble,
+    SlLike, SlMagicWand, SlWrench, SlBulb, SlHeart,
+    SlArrowDown
+} from 'react-icons/sl';
 import { useUser } from '@/context/UserContext';
 import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase';
 
@@ -21,11 +21,11 @@ interface Review {
 }
 
 const CATEGORIES = [
-    { value: 'general', label: 'General Feedback', icon: <MessageSquare className="size-4" />, color: 'emerald' },
-    { value: 'feature', label: 'Feature Request', icon: <Lightbulb className="size-4" />, color: 'amber' },
-    { value: 'bug', label: 'Bug Report', icon: <Bug className="size-4" />, color: 'red' },
-    { value: 'praise', label: 'Appreciation', icon: <Heart className="size-4" />, color: 'pink' },
-    { value: 'improvement', label: 'Improvement', icon: <Sparkles className="size-4" />, color: 'purple' },
+    { value: 'general', label: 'General Feedback', icon: <SlBubble className="size-4" />, color: 'emerald' },
+    { value: 'feature', label: 'Feature Request', icon: <SlBulb className="size-4" />, color: 'amber' },
+    { value: 'bug', label: 'Bug Report', icon: <SlWrench className="size-4" />, color: 'red' },
+    { value: 'praise', label: 'Appreciation', icon: <SlHeart className="size-4" />, color: 'pink' },
+    { value: 'improvement', label: 'Improvement', icon: <SlMagicWand className="size-4" />, color: 'purple' },
 ];
 
 // ─── Star Rating Component ──────────────────────────────────
@@ -45,10 +45,10 @@ function StarRating({ rating, onRate, size = 'lg' }: { rating: number; onRate?: 
                     disabled={!onRate}
                     className={`transition-all duration-200 ${onRate ? 'cursor-pointer hover:scale-110 active:scale-95' : 'cursor-default'}`}
                 >
-                    <Star
+                    <SlStar
                         className={`${starSize} transition-colors duration-200 ${(hover || rating) >= star
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'fill-transparent text-gray-300'
+                            ? 'text-amber-400'
+                            : 'text-gray-300'
                             }`}
                     />
                 </button>
@@ -66,7 +66,7 @@ function ReviewCard({ review }: { review: Review }) {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    <div className="size-10 rounded-full bg-[#007200]/10 flex items-center justify-center text-[#007200] font-bold text-sm shadow-sm">
                         {review.user_name?.charAt(0)?.toUpperCase() || 'A'}
                     </div>
                     <div>
@@ -75,7 +75,7 @@ function ReviewCard({ review }: { review: Review }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium flex items-center gap-1">
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-gray-500 font-medium flex items-center gap-1.5">
                         {cat.icon} {cat.label}
                     </span>
                 </div>
@@ -143,10 +143,18 @@ export default function FeedbackPage() {
                 .order('created_at', { ascending: false })
                 .limit(20);
 
-            if (error) throw error;
+            if (error) {
+                // Handle case where table might not exist yet
+                if (error.code === '42P01' || error.message?.includes('schema cache') || error.message?.includes('Could not find the table')) {
+                    setReviews([]);
+                    return;
+                }
+                throw error;
+            }
+            
             setReviews(data || []);
-        } catch (err) {
-            console.error('Failed to fetch reviews:', err);
+        } catch (err: any) {
+            console.error('Failed to fetch reviews:', err?.message || err);
         } finally {
             setIsLoadingReviews(false);
         }
@@ -226,48 +234,43 @@ export default function FeedbackPage() {
     // ─── Loading State ───────────────────────────────────────
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
-                <Loader2 className="size-10 text-emerald-600 animate-spin" />
+            <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
+                <SlRefresh className="size-10 text-[#007200] animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
+        <div className="min-h-screen bg-[#F8F9FA]">
             {/* Page Header */}
-            <div className="px-4 sm:px-6 lg:px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center gap-4">
-                        <div className="size-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                            <MessageSquare className="size-6 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Share Your Feedback</h1>
-                            <p className="text-gray-500 text-sm">Help us improve Dravya Labs with your thoughts and suggestions</p>
-                        </div>
+            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+                <div className="max-w-5xl mx-auto">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Feedback & Suggestions</h1>
+                        <p className="text-gray-500 text-sm">Help us improve your experience with Dravya Labs.</p>
                     </div>
                 </div>
             </div>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
-                <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="px-4 sm:px-6 lg:px-8 py-4">
+                <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
 
                     {/* ─── FORM COLUMN ─── */}
                     <div className="lg:col-span-3 space-y-6">
                         {/* Submit Success Banner */}
                         {submitSuccess && (
-                            <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
-                                <p className="text-sm font-medium text-emerald-700">
-                                    Thank you! Your feedback has been submitted successfully. 🎉
+                            <div className="flex items-center gap-3 rounded-2xl bg-[#007200]/10 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <SlCheck className="size-5 text-[#007200] shrink-0" />
+                                <p className="text-sm font-medium text-[#007200]">
+                                    Thank you! Your feedback has been submitted successfully.
                                 </p>
                             </div>
                         )}
 
                         {/* Form Card */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                             {/* Star Rating Section */}
-                            <div className="px-6 py-8 text-center bg-gradient-to-b from-gray-50/80 to-white border-b border-gray-100">
+                            <div className="px-6 py-8 text-center border-b border-gray-50">
                                 <p className="text-sm font-medium text-gray-600 mb-3">How would you rate your experience?</p>
                                 <div className="flex justify-center">
                                     <StarRating rating={rating} onRate={setRating} />
@@ -286,15 +289,15 @@ export default function FeedbackPage() {
                                 {/* Category Selector */}
                                 <div>
                                     <label className="text-sm font-medium text-gray-600 mb-2 block">Feedback Category</label>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-2.5">
                                         {CATEGORIES.map((cat) => (
                                             <button
                                                 key={cat.value}
                                                 type="button"
                                                 onClick={() => setCategory(cat.value)}
-                                                className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all duration-200 ${category === cat.value
-                                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
-                                                    : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300'
+                                                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 ${category === cat.value
+                                                    ? 'border-transparent bg-[#007200]/10 text-[#007200]'
+                                                    : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {cat.icon}
@@ -312,7 +315,7 @@ export default function FeedbackPage() {
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="Give your feedback a title..."
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                                        className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10"
                                     />
                                 </div>
 
@@ -326,7 +329,7 @@ export default function FeedbackPage() {
                                         onChange={(e) => setReviewText(e.target.value)}
                                         placeholder="Tell us what you think... What do you love? What could be better?"
                                         rows={5}
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none"
+                                        className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10 resize-none"
                                     />
                                 </div>
 
@@ -342,12 +345,12 @@ export default function FeedbackPage() {
                                     type="button"
                                     onClick={handleSubmit}
                                     disabled={isSubmitting || !isAuthenticated}
-                                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all hover:shadow-xl hover:shadow-emerald-300 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+                                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#007200] hover:bg-[#006400] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                                 >
                                     {isSubmitting ? (
-                                        <><Loader2 className="size-4 animate-spin" /> Submitting...</>
+                                        <><SlRefresh className="size-4 animate-spin" /> Submitting...</>
                                     ) : (
-                                        <><Send className="size-4" /> Submit Feedback</>
+                                        <><SlPaperPlane className="size-4" /> Submit Feedback</>
                                     )}
                                 </button>
 
@@ -363,8 +366,8 @@ export default function FeedbackPage() {
                     {/* ─── REVIEWS COLUMN ─── */}
                     <div className="lg:col-span-2 space-y-4">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                <ThumbsUp className="size-5 text-emerald-600" />
+                            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
+                                <SlLike className="size-5 text-[#007200]" />
                                 Recent Reviews
                             </h2>
                             {reviews.length > 0 && (
@@ -376,12 +379,12 @@ export default function FeedbackPage() {
 
                         {isLoadingReviews ? (
                             <div className="flex justify-center py-12">
-                                <Loader2 className="size-8 text-emerald-500 animate-spin" />
+                                <SlRefresh className="size-8 text-[#007200] animate-spin" />
                             </div>
                         ) : reviews.length === 0 ? (
-                            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-sm">
-                                <div className="size-16 mx-auto rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
-                                    <MessageSquare className="size-8 text-gray-400" />
+                            <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center shadow-sm">
+                                <div className="size-16 mx-auto rounded-full bg-gray-50 flex items-center justify-center mb-4">
+                                    <SlBubble className="size-8 text-gray-300" />
                                 </div>
                                 <p className="text-sm font-medium text-gray-700">No reviews yet</p>
                                 <p className="text-xs text-gray-400 mt-1">Be the first to share your feedback!</p>
@@ -397,10 +400,10 @@ export default function FeedbackPage() {
                                 {reviews.length > 4 && (
                                     <button
                                         onClick={() => setShowAllReviews(!showAllReviews)}
-                                        className="w-full flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-all"
+                                        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
                                     >
                                         {showAllReviews ? 'Show Less' : `View All ${reviews.length} Reviews`}
-                                        <ChevronDown className={`size-4 transition-transform ${showAllReviews ? 'rotate-180' : ''}`} />
+                                        <SlArrowDown className={`size-3 transition-transform ${showAllReviews ? 'rotate-180' : ''}`} />
                                     </button>
                                 )}
                             </>
