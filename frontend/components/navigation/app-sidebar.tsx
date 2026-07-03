@@ -196,102 +196,157 @@ function ChatHistorySection() {
 // ─── Main Sidebar ───────────────────────────────────────────
 
 export default function AppSidebar() {
+    const pathname = usePathname();
+    const { user } = useUser();
+
     return (
-        <Sidebar collapsible="icon" className="border-r border-[var(--chat-border)]">
-            {/* Logo Header */}
-            <SidebarHeader className="h-16 flex items-center justify-center border-b border-[var(--chat-border)]">
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-                        <Image
-                            src="/logo.png"
-                            alt="Dravya Labs"
-                            width={40}
-                            height={40}
-                            className="object-contain"
-                        />
+        <>
+            <style dangerouslySetInnerHTML={{__html: `
+                /* Override shadcn sidebar inner background */
+                [data-sidebar="sidebar"] {
+                    background-color: #1A3B28 !important;
+                    border-right: none !important;
+                }
+                .dravya-sidebar-active {
+                    background-color: #F1F5F0;
+                    color: #267F37 !important;
+                    position: relative;
+                    border-top-left-radius: 24px;
+                    border-bottom-left-radius: 24px;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                    font-weight: 700;
+                }
+                .dravya-sidebar-active::before {
+                    content: '';
+                    position: absolute;
+                    top: -24px;
+                    right: 0;
+                    width: 24px;
+                    height: 24px;
+                    background-color: transparent;
+                    border-bottom-right-radius: 24px;
+                    box-shadow: 10px 10px 0 0 #F1F5F0;
+                    pointer-events: none;
+                }
+                .dravya-sidebar-active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -24px;
+                    right: 0;
+                    width: 24px;
+                    height: 24px;
+                    background-color: transparent;
+                    border-top-right-radius: 24px;
+                    box-shadow: 10px -10px 0 0 #F1F5F0;
+                    pointer-events: none;
+                }
+            `}} />
+            <Sidebar collapsible="icon" className="border-none">
+                {/* Profile/User Header */}
+                <SidebarHeader className="h-24 flex items-center justify-center pt-6 pb-4 border-b border-white/10">
+                    {user ? (
+                        <div className="flex items-center gap-3 w-full px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                            {user.avatarUrl ? (
+                                <img
+                                    src={user.avatarUrl}
+                                    alt={user.fullName || 'User'}
+                                    className="size-10 rounded-full object-cover border border-white/20 shrink-0"
+                                />
+                            ) : (
+                                <div className="size-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20 text-white font-bold shrink-0">
+                                    {(user.fullName || user.email || 'U').charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+                                <span className="text-sm font-semibold text-white truncate">
+                                    {user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User'}
+                                </span>
+                                <span className="text-xs text-white/60 truncate">
+                                    {user.email}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3 w-full px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                            <div className="size-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20 text-white font-bold shrink-0">
+                                G
+                            </div>
+                            <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+                                <span className="text-sm font-semibold text-white truncate">
+                                    Guest User
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </SidebarHeader>
+
+                {/* Main Navigation */}
+                <SidebarContent className="pt-8 px-0">
+                    <SidebarGroup className="px-0">
+                        <SidebarGroupContent className="px-0">
+                            <SidebarMenu className="gap-2 px-0">
+                                {mainNavItems.map((item, index) => {
+                                    const isActive = pathname.startsWith(item.href);
+                                    
+                                    // Dummy notification badges based on image
+                                    let badge = null;
+                                    if (item.label === 'Chat') badge = '1';
+                                    if (item.label === 'History') badge = '3';
+                                    
+                                    return (
+                                        <React.Fragment key={item.label}>
+                                            <SidebarMenuItem className="px-0 pl-4">
+                                                <SidebarMenuButton
+                                                    asChild
+                                                    tooltip={item.label}
+                                                    className={`transition-all duration-300 py-6 pr-4 ${
+                                                        isActive 
+                                                            ? 'dravya-sidebar-active w-[calc(100%+4px)]' 
+                                                            : 'text-white/70 hover:text-white hover:bg-white/5 rounded-xl mr-4'
+                                                    }`}
+                                                >
+                                                    <Link href={item.href} className="flex items-center justify-between w-full">
+                                                        <div className="flex items-center gap-4">
+                                                            <item.icon className={`size-5 shrink-0 ${isActive ? 'text-[#267F37]' : 'text-white/70'}`} />
+                                                            <span className="text-[15px]">{item.label}</span>
+                                                        </div>
+                                                        {badge && (
+                                                            <span className={`flex items-center justify-center size-6 rounded-full text-xs font-bold ${isActive ? 'bg-[#267F37] text-white' : 'bg-white/10 text-white/90'}`}>
+                                                                {badge}
+                                                            </span>
+                                                        )}
+                                                    </Link>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                </SidebarContent>
+
+                {/* Footer with Bird/Illustration and Button */}
+                <SidebarFooter className="p-4 pb-8 relative overflow-hidden mt-auto">
+                    {/* Abstract overlapping circles as bird placeholder (Dravya labs theme) */}
+                    <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-gradient-to-tr from-green-400 to-[#267F37] rounded-full blur-2xl opacity-40 group-data-[collapsible=icon]:hidden pointer-events-none"></div>
+                    <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-gradient-to-tr from-yellow-300 to-green-500 rounded-full blur-xl opacity-30 group-data-[collapsible=icon]:hidden pointer-events-none"></div>
+                    
+                    <div className="relative z-10 w-full group-data-[collapsible=icon]:hidden flex justify-center py-4">
+                        <span className="text-xl font-bold text-white tracking-wide shadow-sm">Dravya Labs</span>
                     </div>
-                    <span className="font-bold text-lg text-[var(--chat-text-primary)] group-data-[collapsible=icon]:hidden">
-                        Dravya Labs
-                    </span>
-                </Link>
-            </SidebarHeader>
+                    
+                    {/* Collapsed state mini placeholder */}
+                    <div className="hidden group-data-[collapsible=icon]:flex relative z-10 w-full justify-center py-4">
+                        <div className="size-8 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">DL</span>
+                        </div>
+                    </div>
+                </SidebarFooter>
 
-            {/* Main Navigation */}
-            <SidebarContent className="pt-4">
-                <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs text-gray-400 uppercase tracking-wider">
-                        Main Menu
-                    </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {mainNavItems.map((item) => (
-                                <React.Fragment key={item.label}>
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            tooltip={item.label}
-                                            className="text-gray-600 hover:bg-[var(--chat-primary)]/10 hover:text-[var(--chat-primary-dark)]"
-                                        >
-                                            <Link href={item.href}>
-                                                <item.icon className="size-5" />
-                                                <span>{item.label}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                    {/* Chat History dropdown right after Chat item */}
-                                    {item.label === 'Chat' && (
-                                        <ChatHistorySection />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-
-                <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs text-gray-400 uppercase tracking-wider">
-                        Settings
-                    </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {secondaryNavItems.map((item) => (
-                                <SidebarMenuItem key={item.label}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        tooltip={item.label}
-                                        className="text-gray-500 hover:bg-[var(--chat-bg-light)] hover:text-[var(--chat-text-primary)]"
-                                    >
-                                        <Link href={item.href}>
-                                            <item.icon className="size-5" />
-                                            <span>{item.label}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-
-            {/* Footer with Support */}
-            <SidebarFooter className="border-t border-[var(--chat-border)]">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            asChild
-                            tooltip="Support"
-                            className="text-gray-500 hover:bg-[var(--chat-bg-light)] hover:text-[var(--chat-text-primary)]"
-                        >
-                            <Link href="/support">
-                                <HelpCircle className="size-5" />
-                                <span>Support</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarFooter>
-
-            <SidebarRail />
-        </Sidebar>
+                <SidebarRail />
+            </Sidebar>
+        </>
     );
 }

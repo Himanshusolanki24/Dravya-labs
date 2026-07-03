@@ -9,7 +9,8 @@ import {
     Sparkles, Leaf, MessageSquare, Brain, TrendingUp,
     Bell, Mail, Smartphone, Globe, ChevronRight, Edit3,
     Shield, Pill, UtensilsCrossed, Dumbbell, Star,
-    BookOpen, Quote, Sun, Wind, Droplets, Flame, Plus, LogOut
+    BookOpen, Quote, Sun, Wind, Droplets, Flame, Plus, LogOut,
+    Target
 } from 'lucide-react';
 import { mockUserData, wellnessQuote, seasonalTips, type Allergy } from '@/lib/user-data';
 
@@ -113,83 +114,13 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
-            {/* Hero Header */}
-            <div className="px-4 sm:px-6 py-6 sm:py-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white safe-area-top">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-                        {/* Profile Section */}
-                        <div className="flex items-center gap-3 sm:gap-5">
-                            <div className="relative">
-                                <div className="size-16 sm:size-20 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm p-1 shadow-xl">
-                                    <img
-                                        src={user.profile.avatarUrl}
-                                        alt={user.profile.name}
-                                        className="size-full rounded-xl object-cover"
-                                    />
-                                </div>
-                                <button className="absolute -bottom-1 -right-1 size-7 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                                    <Edit3 className="size-3.5" />
-                                </button>
-                            </div>
-                            <div>
-                                <p className="text-emerald-100 text-sm font-medium">{greetingText} 🌿</p>
-                                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{displayName}</h1>
-                                <p className="text-emerald-100 text-sm mt-1">
-                                    {displayAge} years • {displayGender.charAt(0).toUpperCase() + displayGender.slice(1)} • {displayLocation}
-                                </p>
-                            </div>
-                        </div>
+        <div className="flex-1 flex flex-col min-h-screen bg-[#F1F5F0] p-2 sm:p-4 lg:p-4">
+            {/* The Main Floating Card */}
+            <div className="w-full flex-1 mx-auto bg-gradient-to-br from-[#FFFdfa] to-[#F3F8EC] rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/50 overflow-hidden flex flex-col relative">
 
-                        {/* Quick Stats - Horizontally scrollable on mobile */}
-                        <div className="flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar pb-1">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-center min-w-[85px] sm:min-w-[100px] flex-shrink-0">
-                                <p className="text-3xl font-bold">{user.healthMetrics[user.healthMetrics.length - 1].overallWellness}%</p>
-                                <p className="text-xs text-emerald-100">{t.hero.wellnessScore}</p>
-                            </div>
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-center min-w-[85px] sm:min-w-[100px] flex-shrink-0">
-                                <p className="text-2xl sm:text-3xl font-bold">{user.currentImbalances.length}</p>
-                                <p className="text-xs text-emerald-100">{t.hero.activeImbalances}</p>
-                            </div>
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-center min-w-[85px] sm:min-w-[100px] flex-shrink-0">
-                                <p className="text-2xl sm:text-3xl font-bold">{savedItems.length}</p>
-                                <p className="text-xs text-emerald-100">{t.hero.savedRemedies}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Wellness Quote - Hidden on very small screens */}
-                    <div className="mt-4 sm:mt-6 bg-white/10 backdrop-blur-sm rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 hidden sm:flex items-center gap-3">
-                        <Quote className="size-5 text-emerald-200 shrink-0" />
-                        <p className="text-xs sm:text-sm italic text-emerald-50">&ldquo;{wellnessQuote.text}&rdquo; — <span className="font-medium">{wellnessQuote.author}</span></p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tab Navigation - Mobile optimized */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                    <div className="flex overflow-x-auto hide-scrollbar mobile-scroll-snap">
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4 border-b-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors touch-target ${activeTab === tab.id
-                                    ? 'border-emerald-500 text-emerald-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                            >
-                                {tab.icon}
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 safe-area-bottom">
-                <div className="max-w-7xl mx-auto">
+                {/* Dashboard Content */}
+                <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto h-full">
                     {/* Overview Tab */}
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -761,6 +692,7 @@ export default function DashboardPage() {
                             </div>
                         </div>
                     )}
+                </div>
                 </div>
             </div>
         </div>
