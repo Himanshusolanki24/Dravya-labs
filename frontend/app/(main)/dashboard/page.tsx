@@ -10,7 +10,7 @@ import {
     Bell, Mail, Smartphone, Globe, ChevronRight, Edit3,
     Shield, Pill, UtensilsCrossed, Dumbbell, Star,
     BookOpen, Quote, Sun, Wind, Droplets, Flame, Plus, LogOut,
-    ShieldAlert, ArrowRight, ChevronLeft, Utensils
+    Target, ShieldAlert, ArrowRight, ChevronLeft, Utensils
 } from 'lucide-react';
 import { mockUserData, wellnessQuote, seasonalTips, type Allergy } from '@/lib/user-data';
 import { Skeleton } from '@/components/ui/skeleton-loader';
@@ -455,7 +455,7 @@ export default function DashboardPage() {
                                             </div>
                                             <p className="text-sm text-slate-500">{med.dosage} • {med.frequency}</p>
                                             {med.hasInteraction && (
-                                                <p className="text-xs font-medium text-red-600 mt-2">Avoid with {med.interactionWarning.replace('may interact with ', '').replace('Ashwagandha ', '')}</p>
+                                                <p className="text-xs font-medium text-red-600 mt-2">Avoid with {med.interactionWarning?.replace('may interact with ', '').replace('Ashwagandha ', '')}</p>
                                             )}
                                         </div>
                                     ))}

@@ -36,7 +36,6 @@ export async function proxy(request: NextRequest) {
 
     // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
     // Uncomment the blocks below when ready for production.
-
     // // Protected routes — redirect to login if not authenticated
     // const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id', '/profile', '/treatment', '/feedback'];
     // const isProtectedRoute = protectedPaths.some(path =>

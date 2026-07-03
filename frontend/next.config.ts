@@ -4,10 +4,7 @@ import { resolve } from "path";
 const projectDir = import.meta.dirname ?? resolve(".");
 
 const nextConfig: NextConfig = {
-  devIndicators: {
-    appIsrStatus: false,
-    buildActivityPosition: 'bottom-right',
-  },
+
   turbopack: {
     root: projectDir,
     resolveAlias: {
