@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 // User profile interface (same as existing UserContext)
-export interface UserProfile {
+export interface IUserProfile {
     id: string;
     email: string;
     firstName?: string;
@@ -28,24 +28,24 @@ export interface UserProfile {
     createdAt?: string;
 }
 
-interface AuthState {
-    user: UserProfile | null;
+interface IAuthState {
+    user: IUserProfile | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     isHydrated: boolean;
 
     // Actions
-    setUser: (user: UserProfile | null) => void;
+    setUser: (user: IUserProfile | null) => void;
     setLoading: (loading: boolean) => void;
     setHydrated: (hydrated: boolean) => void;
-    login: (userData: Partial<UserProfile>) => void;
+    login: (userData: Partial<IUserProfile>) => void;
     logout: () => Promise<void>;
-    updateProfile: (profileData: Partial<UserProfile>) => void;
+    updateProfile: (profileData: Partial<IUserProfile>) => void;
     completeProfile: (profileData: { fullName: string; age: number; gender: 'male' | 'female' | 'other'; location: string }) => void;
     signInWithGoogle: () => Promise<void>;
 }
 
-const mockUser: UserProfile = {
+const MOCK_USER: IUserProfile = {
     id: 'mock-user-id-12345',
     email: 'dev-user@dravyalabs.com',
     fullName: 'Dev User',
@@ -59,7 +59,7 @@ const mockUser: UserProfile = {
 };
 
 // Helper: map a Supabase DB row (snake_case) to our UserProfile (camelCase)
-function mapDbRowToProfile(row: Record<string, unknown>): Partial<UserProfile> {
+function mapDbRowToProfile(row: Record<string, unknown>): Partial<IUserProfile> {
     return {
         id: row.id as string,
         email: row.email as string,
@@ -84,7 +84,7 @@ function mapDbRowToProfile(row: Record<string, unknown>): Partial<UserProfile> {
     };
 }
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create<IAuthState>()(
     persist(
         (set, get) => ({
             user: null,
@@ -97,7 +97,7 @@ export const useAuthStore = create<AuthState>()(
             setHydrated: (isHydrated) => set({ isHydrated }),
 
             login: (userData) => {
-                const newUser: UserProfile = {
+                const newUser: IUserProfile = {
                     id: userData.id || '',
                     email: userData.email || '',
                     firstName: userData.firstName,
@@ -174,7 +174,7 @@ export const useAuthStore = create<AuthState>()(
                     state.setLoading(false);
                     // If no persisted user, load the mock user for dev
                     if (!state.user) {
-                        state.setUser(mockUser);
+                        state.setUser(MOCK_USER);
                     }
                 }
             },
@@ -232,7 +232,7 @@ async function syncUserFromDb(
 
         if (existingProfile) {
             const mapped = mapDbRowToProfile(existingProfile);
-            const profileUser: UserProfile = {
+            const profileUser: IUserProfile = {
                 id: supabaseId,
                 email: email,
                 isProfileComplete: false,
@@ -249,7 +249,7 @@ async function syncUserFromDb(
             };
             await supabase.from('users').upsert(newRow, { onConflict: 'id' });
 
-            const newUser: UserProfile = {
+            const newUser: IUserProfile = {
                 id: supabaseId,
                 email: email,
                 fullName: newRow.full_name,

@@ -30,7 +30,7 @@ const timeIcons: Record<string, React.ElementType> = {
 function EmptyState() {
     const router = useRouter();
     return (
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30 min-h-screen">
             <div className="text-center max-w-md animate-wellness-slide-up">
                 <div className="size-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
                     <Stethoscope className="size-12 text-emerald-600" />
@@ -56,7 +56,7 @@ function EmptyState() {
 // ─── Loading State ───────────────────────────────────────────
 function GeneratingState() {
     return (
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30 min-h-screen">
             <div className="text-center animate-wellness-fade-in">
                 <div className="size-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center animate-wellness-breathe">
                     <Leaf className="size-10 text-emerald-600" />
@@ -164,7 +164,7 @@ function DayCard({
     const progressPct = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
 
     return (
-        <div className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${allDone ? 'border-emerald-300 shadow-emerald-100' : 'border-gray-200'} shadow-sm hover:shadow-md`}>
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl border transition-all duration-300 overflow-hidden ${allDone ? 'border-emerald-400/40 shadow-emerald-100/50' : 'border-white/50'} shadow-sm hover:shadow-md hover:bg-white`}>
             {/* Day Header */}
             <button
                 onClick={onToggleExpand}
@@ -209,8 +209,8 @@ function DayCard({
                                 key={task.id}
                                 onClick={() => onToggleTask(task.id)}
                                 className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-all duration-200 text-left ${isCompleted
-                                    ? 'bg-emerald-50/60 border-emerald-200'
-                                    : `hover:${cat.bg} border-gray-100 hover:border-gray-200`
+                                    ? 'bg-emerald-50/60 border-emerald-200/50'
+                                    : `hover:${cat.bg} border-slate-100 hover:border-slate-200 bg-white/40 hover:bg-white`
                                     }`}
                             >
                                 {/* Checkbox */}
@@ -410,19 +410,25 @@ function TreatmentPageContent() {
     const overallProgress = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-emerald-50/30 via-green-50/20 to-teal-50/30">
-            {/* Header */}
-            <div className="px-4 sm:px-6 py-6 sm:py-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
+            {/* Header Section */}
+            <div className="bg-[#057A55] text-white py-8 px-6 lg:px-10 overflow-hidden relative shadow-lg rounded-b-3xl shrink-0">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+                
+                <div className="max-w-4xl mx-auto relative z-10">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <Leaf className="size-5" />
-                                <span className="text-emerald-200 text-xs uppercase tracking-wider font-medium">Treatment Plan</span>
+                                <div className="size-8 rounded-lg bg-emerald-800/30 flex items-center justify-center shrink-0">
+                                    <Leaf className="size-4 text-emerald-300" />
+                                </div>
+                                <span className="text-emerald-300 text-xs uppercase tracking-wider font-bold">Treatment Plan</span>
                             </div>
-                            <h1 className="text-2xl sm:text-3xl font-bold capitalize">{plan.condition}</h1>
-                            <p className="text-emerald-100 text-sm mt-1">{plan.overview}</p>
-                            <div className="flex items-center gap-3 mt-2 text-emerald-200 text-xs">
+                            <h1 className="text-2xl sm:text-3xl font-bold capitalize text-white mt-1">{plan.condition}</h1>
+                            <p className="text-emerald-100/90 text-sm mt-1 max-w-xl">{plan.overview}</p>
+                            <div className="flex items-center gap-3 mt-3 text-emerald-200 text-xs font-semibold">
                                 <span className="flex items-center gap-1"><Calendar className="size-3" /> {plan.duration_days} days</span>
                                 <span className="flex items-center gap-1"><Clock className="size-3" /> Review after {plan.review_after_days} days</span>
                             </div>
@@ -433,30 +439,32 @@ function TreatmentPageContent() {
             </div>
 
             {/* Stats Bar */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm">
-                            <span className="text-gray-500">
-                                <span className="font-semibold text-emerald-600">{completedCount}</span>/{totalTasks} tasks completed
-                            </span>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${plan.severity === 'urgent' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                {plan.severity}
-                            </span>
+            <div className="sticky top-0 z-40 pb-2 mt-6">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6">
+                    <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm p-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm font-semibold text-slate-700">
+                                <span>
+                                    <span className="font-bold text-emerald-600">{completedCount}</span>/{totalTasks} tasks completed
+                                </span>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${plan.severity === 'urgent' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                    {plan.severity}
+                                </span>
+                            </div>
+                            <button
+                                onClick={generatePlan}
+                                className="text-xs text-slate-400 hover:text-emerald-600 flex items-center gap-1 font-bold transition-colors"
+                            >
+                                <RefreshCw className="size-3" /> Regenerate
+                            </button>
                         </div>
-                        <button
-                            onClick={generatePlan}
-                            className="text-xs text-gray-400 hover:text-emerald-600 flex items-center gap-1 transition-colors"
-                        >
-                            <RefreshCw className="size-3" /> Regenerate
-                        </button>
-                    </div>
-                    {/* Overall progress bar */}
-                    <div className="w-full h-1.5 bg-gray-200 rounded-full mt-2 overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
-                            style={{ width: `${overallProgress}%` }}
-                        />
+                        {/* Overall progress bar */}
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
+                                style={{ width: `${overallProgress}%` }}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -478,25 +486,25 @@ function TreatmentPageContent() {
 
                 {/* Review Section */}
                 <div className="max-w-4xl mx-auto mt-8">
-                    <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                    <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/50 p-5 sm:p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
                             <Stethoscope className="size-5 text-emerald-600" />
                             Treatment Review
                         </h3>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-slate-500 mb-4">
                             After completing your treatment period, get an AI review of your progress.
                         </p>
 
                         {/* Feedback Input */}
                         <div className="mb-4">
-                            <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                            <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
                                 How are you feeling? (optional)
                             </label>
                             <textarea
                                 value={userFeedback}
                                 onChange={(e) => setUserFeedback(e.target.value)}
                                 placeholder="Describe any changes in your condition... e.g. 'The acne has reduced', 'Still seeing symptoms', etc."
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none shadow-sm"
                                 rows={3}
                             />
                         </div>

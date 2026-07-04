@@ -132,50 +132,60 @@ export default function HistoryPage() {
     const clearSearch = () => setSearchQuery('');
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-[#F8F9FA]">
-            {/* Header */}
-            <div className="px-6 pt-8 pb-4">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Consultation History</h1>
-                            <p className="text-gray-500 text-sm">
+        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
+            {/* Header Section */}
+            <div className="bg-[#057A55] text-white py-8 px-6 lg:px-10 overflow-hidden relative shadow-lg rounded-b-3xl shrink-0">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+                
+                <div className="max-w-6xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="size-12 rounded-2xl bg-emerald-800/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
+                            <Clock className="size-6 text-emerald-300" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                                Consultation History
+                            </h1>
+                            <p className="text-sm text-emerald-100/80 mt-0.5">
                                 View and manage your past Ayurvedic health consultations
                             </p>
                         </div>
-                        {/* Stats */}
-                        <div className="hidden sm:flex gap-4">
-                            <div className="bg-white rounded-2xl border border-gray-100 px-6 py-3 text-center min-w-[100px] shadow-sm">
-                                <p className="text-2xl font-bold text-gray-900">{totalSessions}</p>
-                                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mt-0.5">Total Sessions</p>
-                            </div>
-                            <div className="bg-white rounded-2xl border border-gray-100 px-6 py-3 text-center min-w-[100px] shadow-sm">
-                                <p className="text-2xl font-bold text-gray-900">{thisWeekCount}</p>
-                                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mt-0.5">This Week</p>
-                            </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex gap-4">
+                        <div className="bg-emerald-800/30 border border-emerald-700/50 backdrop-blur-md rounded-2xl px-5 py-2 text-center min-w-[100px] shadow-sm">
+                            <p className="text-2xl font-bold text-white">{totalSessions}</p>
+                            <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider mt-0.5">Total Sessions</p>
+                        </div>
+                        <div className="bg-emerald-800/30 border border-emerald-700/50 backdrop-blur-md rounded-2xl px-5 py-2 text-center min-w-[100px] shadow-sm">
+                            <p className="text-2xl font-bold text-white">{thisWeekCount}</p>
+                            <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider mt-0.5">This Week</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Search and Filters Bar */}
-            <div className="sticky top-0 z-40 bg-[#F8F9FA] pb-4">
+            <div className="sticky top-0 z-40 pb-4 mt-6">
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row items-center gap-4">
                         {/* Search */}
                         <div className="flex-1 relative w-full">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search consultations..."
-                                className="w-full pl-12 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#007200]/10 focus:border-[#007200] transition-all shadow-sm"
+                                className="w-full pl-12 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={clearSearch}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                 >
                                     <X className="size-4" />
                                 </button>
@@ -186,7 +196,7 @@ export default function HistoryPage() {
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:border-emerald-500/20 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/10 transition-colors shadow-sm"
                             >
                                 <Filter className="size-4" />
                                 <span className="font-medium text-sm">Filters</span>
@@ -194,7 +204,7 @@ export default function HistoryPage() {
 
                             <button
                                 onClick={clearSearch}
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-red-500 hover:text-red-600 transition-colors bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-red-50"
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-red-500 hover:text-red-600 transition-colors bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-red-50"
                             >
                                 <Trash2 className="size-4" />
                                 <span className="font-medium text-sm">Clear</span>
@@ -205,16 +215,16 @@ export default function HistoryPage() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 px-6 py-8">
+            <div className="flex-1 px-6 py-4">
                 <div className="max-w-6xl mx-auto">
                     {filteredConsultations.length === 0 ? (
                         /* Empty State */
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                        <div className="bg-white/70 backdrop-blur-md rounded-2xl p-12 text-center shadow-sm border border-white/50">
                             <div className="size-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                <Search className="size-10 text-gray-400" />
+                                <Search className="size-10 text-slate-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">No consultations found</h3>
-                            <p className="text-gray-500 max-w-md mx-auto">
+                            <h3 className="text-xl font-semibold text-slate-800 mb-2">No consultations found</h3>
+                            <p className="text-slate-500 max-w-md mx-auto">
                                 {searchQuery
                                     ? `No consultations match "${searchQuery}". Try a different search term.`
                                     : "You haven't had any consultations yet. Start a chat to begin!"}
@@ -226,9 +236,9 @@ export default function HistoryPage() {
                             {groupedConsultations.thisWeek.length > 0 && (
                                 <section>
                                     <div className="flex items-center gap-2 mb-4">
-                                        <Calendar className="size-5 text-gray-500" />
-                                        <h2 className="text-lg font-semibold text-gray-800">
-                                            This Week <span className="text-gray-400 font-normal">({groupedConsultations.thisWeek.length})</span>
+                                        <Calendar className="size-5 text-slate-500" />
+                                        <h2 className="text-lg font-semibold text-slate-800">
+                                            This Week <span className="text-slate-400 font-normal">({groupedConsultations.thisWeek.length})</span>
                                         </h2>
                                     </div>
                                     <div className="flex flex-col gap-3">
@@ -243,9 +253,9 @@ export default function HistoryPage() {
                             {groupedConsultations.thisMonth.length > 0 && (
                                 <section>
                                     <div className="flex items-center gap-2 mb-4">
-                                        <Calendar className="size-5 text-gray-500" />
-                                        <h2 className="text-lg font-semibold text-gray-800">
-                                            This Month <span className="text-gray-400 font-normal">({groupedConsultations.thisMonth.length})</span>
+                                        <Calendar className="size-5 text-slate-500" />
+                                        <h2 className="text-lg font-semibold text-slate-800">
+                                            This Month <span className="text-slate-400 font-normal">({groupedConsultations.thisMonth.length})</span>
                                         </h2>
                                     </div>
                                     <div className="flex flex-col gap-3">
@@ -260,9 +270,9 @@ export default function HistoryPage() {
                             {groupedConsultations.older.length > 0 && (
                                 <section>
                                     <div className="flex items-center gap-2 mb-4">
-                                        <Calendar className="size-5 text-gray-500" />
-                                        <h2 className="text-lg font-semibold text-gray-800">
-                                            Older <span className="text-gray-400 font-normal">({groupedConsultations.older.length})</span>
+                                        <Calendar className="size-5 text-slate-500" />
+                                        <h2 className="text-lg font-semibold text-slate-800">
+                                            Older <span className="text-slate-400 font-normal">({groupedConsultations.older.length})</span>
                                         </h2>
                                     </div>
                                     <div className="flex flex-col gap-3">
@@ -285,17 +295,17 @@ function ConsultationCard({ consultation }: { consultation: typeof consultations
     const doshaStyle = doshaColors[consultation.dosha] || doshaColors.Vata;
 
     return (
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group flex flex-col md:flex-row md:items-center gap-5 cursor-pointer hover:bg-gray-50/50">
+        <div className="bg-white/80 rounded-3xl p-5 shadow-sm border border-white/60 hover:shadow-md hover:shadow-emerald-100/30 transition-all duration-200 group flex flex-col md:flex-row md:items-center gap-5 cursor-pointer hover:bg-white hover:scale-[1.005]">
             {/* Header / Icon */}
             <div className="flex items-start gap-4 md:w-1/4 shrink-0">
-                <div className="size-12 rounded-2xl bg-[#007200]/10 flex items-center justify-center shrink-0">
-                    <MessageSquare className="size-5 text-[#007200]" />
+                <div className="size-12 rounded-2xl bg-emerald-100/50 flex items-center justify-center shrink-0">
+                    <MessageSquare className="size-5 text-emerald-600" />
                 </div>
                 <div className="flex flex-col justify-center h-12">
-                    <h3 className="font-semibold text-gray-900 group-hover:text-[#007200] transition-colors leading-tight line-clamp-1">
+                    <h3 className="font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors leading-tight line-clamp-1">
                         {consultation.title}
                     </h3>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-1 font-medium">
+                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-1 font-medium">
                         <Clock className="size-3" />
                         {consultation.timeAgo}
                     </p>
@@ -304,11 +314,11 @@ function ConsultationCard({ consultation }: { consultation: typeof consultations
 
             {/* Description & Symptoms */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <p className="text-sm text-gray-600 mb-1.5 truncate">
+                <p className="text-sm text-slate-600 mb-1.5 truncate">
                     {consultation.description}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
-                    <span className="font-medium text-gray-400">Symptoms:</span>
+                <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+                    <span className="font-medium text-slate-400">Symptoms:</span>
                     <span className="truncate">{consultation.symptoms.join(', ')}</span>
                 </div>
             </div>
@@ -324,7 +334,7 @@ function ConsultationCard({ consultation }: { consultation: typeof consultations
                 
                 <Link
                     href={`/chat`}
-                    className="ml-2 size-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 group-hover:border-[#007200] group-hover:bg-[#007200] group-hover:text-white transition-all shadow-sm"
+                    className="ml-2 size-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:border-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
                 >
                     <ChevronRight className="size-5" />
                 </Link>

@@ -163,7 +163,7 @@ export default function HerbCard({
                 {/* View Details Link */}
                 <div className="mt-4 pt-3 border-t border-gray-100">
                     <Link
-                        href={`/ensyclopedia/${herbId}`}
+                        href={`/encyclopedia/${herbId}`}
                         className="w-full text-center text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors flex items-center justify-center gap-2 group/btn"
                     >
                         <span>{language === 'hi' ? 'विवरण देखें' : 'Explore Details'}</span>

@@ -204,7 +204,7 @@ export default function DravyaIDPage() {
                                             </div>
 
                                             <Link
-                                                href={`/ensyclopedia/${result.id}`}
+                                                href={`/encyclopedia/${result.id}`}
                                                 className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-200"
                                             >
                                                 <Leaf className="size-5" />
@@ -225,7 +225,7 @@ export default function DravyaIDPage() {
                             {recentIdentifications.map((item) => (
                                 <Link
                                     key={item.id}
-                                    href={`/ensyclopedia/${item.id}`}
+                                    href={`/encyclopedia/${item.id}`}
                                     className="group flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 transition-colors"
                                 >
                                     <div className="relative size-14 rounded-lg overflow-hidden shrink-0">

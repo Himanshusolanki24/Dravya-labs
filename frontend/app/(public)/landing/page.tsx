@@ -439,7 +439,7 @@ export default function LandingPage() {
                             <h4 className="text-lg font-bold mb-6 text-green-400">Quick Links</h4>
                             <ul className="space-y-3">
                                 {[
-                                    { label: 'Encyclopedia', href: '/ensyclopedia' },
+                                    { label: 'Encyclopedia', href: '/encyclopedia' },
                                     { label: 'AI Consultation', href: '/chat' },
                                     { label: 'Plant Identifier', href: '/dravya-id' },
                                     { label: 'Dashboard', href: '/dashboard' },

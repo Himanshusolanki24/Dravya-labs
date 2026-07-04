@@ -12,6 +12,7 @@ import {
 import { useUser } from '@/context/UserContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { useProfileQuery } from '@/hooks/useProfileQuery';
 import dynamic from 'next/dynamic';
 
 const HealthStatsCharts = dynamic(() => import('@/components/profile/HealthStatsCharts'), { ssr: false });
@@ -69,7 +70,7 @@ function FormInput({
 }) {
     return (
         <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-600">
+            <label className="text-sm font-semibold text-slate-650">
                 {label} {required && <span className="text-red-400">*</span>}
             </label>
             <input
@@ -77,9 +78,9 @@ function FormInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-4 ${error
+                className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all duration-200 focus:ring-4 ${error
                     ? 'border-red-300 focus:ring-red-100'
-                    : 'border-gray-200 focus:border-[#007200] focus:ring-[#007200]/10'
+                    : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10 shadow-sm'
                     }`}
             />
             {error && <span className="text-xs text-red-500">{error}</span>}
@@ -88,16 +89,29 @@ function FormInput({
 }
 
 // ─── Info card for display mode ──────────────────────────────
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number | null | undefined }) {
+function InfoItem({
+    icon, label, value, theme = 'emerald'
+}: {
+    icon: React.ReactNode; label: string; value: string | number | null | undefined;
+    theme?: 'emerald' | 'rose' | 'amber' | 'purple';
+}) {
     if (!value && value !== 0) return null;
+    const themeStyles = {
+        emerald: { bg: 'bg-emerald-100/50 text-emerald-750 border-emerald-500/10' },
+        rose: { bg: 'bg-rose-100/50 text-rose-750 border-rose-500/10' },
+        amber: { bg: 'bg-amber-100/50 text-amber-750 border-amber-500/10' },
+        purple: { bg: 'bg-purple-100/50 text-purple-750 border-purple-500/10' },
+    };
+    const style = themeStyles[theme] || themeStyles.emerald;
+
     return (
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
-            <div className="size-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/40 border border-white/60 hover:bg-white hover:border-slate-200/50 transition-all shadow-sm">
+            <div className={`size-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 border ${style.bg}`}>
                 {icon}
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
-                <p className="text-sm font-semibold text-gray-800 mt-0.5">{String(value)}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+                <p className="text-sm font-bold text-slate-850 mt-0.5">{String(value)}</p>
             </div>
         </div>
     );
@@ -125,24 +139,26 @@ function ProfileDisplay({ profile, onEdit }: { profile: ProfileData; onEdit: () 
             <HealthStatsCharts profile={profile} />
 
             {/* Header Card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 p-6 sm:p-8 text-white shadow-xl">
-                <div className="absolute -right-16 -top-16 size-48 rounded-full bg-white/5 blur-2xl" />
-                <div className="absolute -left-10 -bottom-10 size-40 rounded-full bg-white/5 blur-2xl" />
+            <div className="relative overflow-hidden rounded-3xl bg-[#057A55] p-6 sm:p-8 text-white shadow-xl">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-60 h-60 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+                
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className="size-16 sm:size-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold shadow-lg">
                             {bp.full_name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold">{bp.full_name}</h1>
-                            <p className="text-emerald-100 text-sm mt-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white">{bp.full_name}</h1>
+                            <p className="text-emerald-100/90 text-sm mt-1">
                                 {bp.age} years • {bp.gender?.charAt(0).toUpperCase() + bp.gender?.slice(1)} • {bp.location || 'Location not set'}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onEdit}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-xl transition-all font-medium text-sm border border-white/20"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-xl transition-all font-semibold text-sm border border-white/20"
                     >
                         <Edit3 className="size-4" />
                         Edit Profile
@@ -151,55 +167,55 @@ function ProfileDisplay({ profile, onEdit }: { profile: ProfileData; onEdit: () 
             </div>
 
             {/* Basic Info */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-gray-100">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 overflow-hidden">
+                <div className="px-5 py-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-b border-white/50">
                     <div className="flex items-center gap-2">
-                        <User className="size-5 text-emerald-600" />
-                        <h2 className="font-bold text-gray-800">Basic Information</h2>
+                        <User className="size-5 text-emerald-700" />
+                        <h2 className="font-bold text-slate-800">Basic Information</h2>
                     </div>
                 </div>
                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <InfoItem icon={<User className="size-4" />} label="Full Name" value={bp.full_name} />
-                    <InfoItem icon={<Activity className="size-4" />} label="Age" value={`${bp.age} years`} />
-                    <InfoItem icon={<Ruler className="size-4" />} label="Height" value={bp.height ? `${bp.height} cm` : null} />
-                    <InfoItem icon={<Weight className="size-4" />} label="Weight" value={bp.weight ? `${bp.weight} kg` : null} />
-                    <InfoItem icon={<MapPin className="size-4" />} label="Location" value={bp.location} />
-                    <InfoItem icon={<Briefcase className="size-4" />} label="Occupation" value={bp.occupation} />
-                    <InfoItem icon={<Zap className="size-4" />} label="Activity Level" value={activityLabel} />
+                    <InfoItem icon={<User className="size-4" />} label="Full Name" value={bp.full_name} theme="emerald" />
+                    <InfoItem icon={<Activity className="size-4" />} label="Age" value={`${bp.age} years`} theme="emerald" />
+                    <InfoItem icon={<Ruler className="size-4" />} label="Height" value={bp.height ? `${bp.height} cm` : null} theme="emerald" />
+                    <InfoItem icon={<Weight className="size-4" />} label="Weight" value={bp.weight ? `${bp.weight} kg` : null} theme="emerald" />
+                    <InfoItem icon={<MapPin className="size-4" />} label="Location" value={bp.location} theme="emerald" />
+                    <InfoItem icon={<Briefcase className="size-4" />} label="Occupation" value={bp.occupation} theme="emerald" />
+                    <InfoItem icon={<Zap className="size-4" />} label="Activity Level" value={activityLabel} theme="emerald" />
                 </div>
             </div>
 
             {/* Health Metrics */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-rose-50 to-pink-50 border-b border-gray-100">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 overflow-hidden">
+                <div className="px-5 py-4 bg-gradient-to-r from-rose-500/10 to-pink-500/10 border-b border-white/50">
                     <div className="flex items-center gap-2">
-                        <Heart className="size-5 text-rose-500" />
-                        <h2 className="font-bold text-gray-800">Health Metrics</h2>
+                        <Heart className="size-5 text-rose-600" />
+                        <h2 className="font-bold text-slate-800">Health Metrics</h2>
                     </div>
                 </div>
                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <InfoItem icon={<Heart className="size-4" />} label="Blood Pressure" value={hm.blood_pressure} />
-                    <InfoItem icon={<Droplets className="size-4" />} label="Blood Sugar (Fasting)" value={hm.blood_sugar_fasting} />
-                    <InfoItem icon={<Droplets className="size-4" />} label="Blood Sugar (Post-meal)" value={hm.blood_sugar_post_meal} />
-                    <InfoItem icon={<Activity className="size-4" />} label="Cholesterol" value={hm.cholesterol} />
-                    <InfoItem icon={<Activity className="size-4" />} label="Thyroid Levels" value={hm.thyroid_levels} />
-                    <InfoItem icon={<Heart className="size-4" />} label="Heart Rate" value={hm.heart_rate} />
-                    <InfoItem icon={<Moon className="size-4" />} label="Sleep Duration" value={hm.sleep_duration} />
+                    <InfoItem icon={<Heart className="size-4" />} label="Blood Pressure" value={hm.blood_pressure} theme="rose" />
+                    <InfoItem icon={<Droplets className="size-4" />} label="Blood Sugar (Fasting)" value={hm.blood_sugar_fasting} theme="rose" />
+                    <InfoItem icon={<Droplets className="size-4" />} label="Blood Sugar (Post-meal)" value={hm.blood_sugar_post_meal} theme="rose" />
+                    <InfoItem icon={<Activity className="size-4" />} label="Cholesterol" value={hm.cholesterol} theme="rose" />
+                    <InfoItem icon={<Activity className="size-4" />} label="Thyroid Levels" value={hm.thyroid_levels} theme="rose" />
+                    <InfoItem icon={<Heart className="size-4" />} label="Heart Rate" value={hm.heart_rate} theme="rose" />
+                    <InfoItem icon={<Moon className="size-4" />} label="Sleep Duration" value={hm.sleep_duration} theme="rose" />
                     {hm.stress_level && (
-                        <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50/80">
-                            <div className="size-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/40 border border-white/60 hover:bg-white hover:border-slate-200/50 transition-all shadow-sm">
+                            <div className="size-9 rounded-lg bg-rose-100/50 border border-rose-500/10 flex items-center justify-center text-rose-650 shrink-0 mt-0.5">
                                 <Brain className="size-4" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Stress Level</p>
+                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Stress Level</p>
                                 <div className="flex items-center gap-2 mt-1.5">
-                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-amber-400"
+                                            className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-rose-450"
                                             style={{ width: `${(hm.stress_level / 10) * 100}%` }}
                                         />
                                     </div>
-                                    <span className="text-sm font-bold text-gray-700">{hm.stress_level}/10</span>
+                                    <span className="text-sm font-bold text-slate-800">{hm.stress_level}/10</span>
                                 </div>
                             </div>
                         </div>
@@ -208,38 +224,38 @@ function ProfileDisplay({ profile, onEdit }: { profile: ProfileData; onEdit: () 
             </div>
 
             {/* Diet Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-100">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 overflow-hidden">
+                <div className="px-5 py-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-b border-white/50">
                     <div className="flex items-center gap-2">
-                        <UtensilsCrossed className="size-5 text-amber-600" />
-                        <h2 className="font-bold text-gray-800">Diet Information</h2>
+                        <UtensilsCrossed className="size-5 text-amber-700" />
+                        <h2 className="font-bold text-slate-800">Diet Information</h2>
                     </div>
                 </div>
                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Diet Type" value={dietLabel} />
-                    <InfoItem icon={<AlertTriangle className="size-4" />} label="Food Allergies" value={di.food_allergies} />
-                    <InfoItem icon={<Droplets className="size-4" />} label="Daily Water Intake" value={di.daily_water_intake} />
-                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Diet Pattern" value={di.current_diet_pattern} />
-                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Cheat Meal Frequency" value={di.cheat_meal_frequency} />
-                    <InfoItem icon={<Pill className="size-4" />} label="Supplements" value={di.supplements} />
+                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Diet Type" value={dietLabel} theme="amber" />
+                    <InfoItem icon={<AlertTriangle className="size-4" />} label="Food Allergies" value={di.food_allergies} theme="amber" />
+                    <InfoItem icon={<Droplets className="size-4" />} label="Daily Water Intake" value={di.daily_water_intake} theme="amber" />
+                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Diet Pattern" value={di.current_diet_pattern} theme="amber" />
+                    <InfoItem icon={<UtensilsCrossed className="size-4" />} label="Cheat Meal Frequency" value={di.cheat_meal_frequency} theme="amber" />
+                    <InfoItem icon={<Pill className="size-4" />} label="Supplements" value={di.supplements} theme="amber" />
                 </div>
             </div>
 
             {/* Medical History */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-5 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-gray-100">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 overflow-hidden">
+                <div className="px-5 py-4 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border-b border-white/50">
                     <div className="flex items-center gap-2">
-                        <Shield className="size-5 text-purple-600" />
-                        <h2 className="font-bold text-gray-800">Medical History</h2>
+                        <Shield className="size-5 text-purple-700" />
+                        <h2 className="font-bold text-slate-800">Medical History</h2>
                     </div>
                 </div>
                 <div className="p-5 space-y-4">
                     {mh.conditions.length > 0 && (
                         <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Conditions</p>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Conditions</p>
                             <div className="flex flex-wrap gap-2">
                                 {mh.conditions.map((c) => (
-                                    <span key={c} className="px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 text-sm font-medium border border-purple-200">
+                                    <span key={c} className="px-3 py-1.5 rounded-full bg-purple-500/10 text-purple-700 text-sm font-semibold border border-purple-500/20 shadow-sm">
                                         {c}
                                     </span>
                                 ))}
@@ -247,21 +263,20 @@ function ProfileDisplay({ profile, onEdit }: { profile: ProfileData; onEdit: () 
                         </div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <InfoItem icon={<AlertTriangle className="size-4" />} label="Injury History" value={mh.injury_history} />
-                        <InfoItem icon={<Pill className="size-4" />} label="Surgery History" value={mh.surgery_history} />
+                        <InfoItem icon={<AlertTriangle className="size-4" />} label="Injury History" value={mh.injury_history} theme="purple" />
+                        <InfoItem icon={<Pill className="size-4" />} label="Surgery History" value={mh.surgery_history} theme="purple" />
                     </div>
                 </div>
             </div>
 
             {/* Security Badge */}
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-400 pb-4">
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-semibold pb-4">
                 <Lock className="size-3.5 text-emerald-500" />
-                <span>🔒 Your data is stored securely</span>
+                <span>Your data is stored securely</span>
             </div>
         </div>
     );
 }
-
 
 // ═══════════════════════════════════════════════════════════════
 // ONBOARDING FORM COMPONENT (embedded in profile page)
@@ -292,21 +307,21 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                         <div className="flex flex-col items-center gap-1.5">
                             <div
                                 className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm font-bold transition-all duration-300 ${step >= s.num
-                                    ? 'border-transparent bg-[#007200] text-white shadow-sm'
-                                    : 'border-gray-200 bg-white text-gray-400'
+                                    ? 'border-transparent bg-[#057A55] text-white shadow-sm'
+                                    : 'border-slate-200 bg-white text-slate-400'
                                     }`}
                             >
                                 {step > s.num ? (
-                                    <CheckCircle2 className="size-5 text-emerald-500" />
+                                    <CheckCircle2 className="size-5 text-white animate-pulse" />
                                 ) : s.num}
                             </div>
-                            <span className={`text-xs font-medium transition-colors ${step >= s.num ? 'text-emerald-600' : 'text-gray-400'}`}>
+                            <span className={`text-xs font-semibold transition-colors ${step >= s.num ? 'text-emerald-700' : 'text-slate-400'}`}>
                                 {s.label}
                             </span>
                         </div>
                         {i < steps.length - 1 && (
                             <div className="mx-2 mb-5 h-0.5 flex-1">
-                                <div className={`h-full rounded-full transition-all duration-500 ${step > s.num ? 'bg-[#007200]' : 'bg-gray-200'}`} />
+                                <div className={`h-full rounded-full transition-all duration-500 ${step > s.num ? 'bg-[#057A55]' : 'bg-slate-250'}`} />
                             </div>
                         )}
                     </React.Fragment>
@@ -314,13 +329,13 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-3xl border border-gray-100 p-8 sm:p-10 shadow-sm">
+            <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/50 p-8 sm:p-10 shadow-sm">
                 {/* Step 1: Basic Profile */}
                 {step === 1 && (
                     <div className="space-y-5">
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">👤 Basic Profile</h2>
-                            <p className="mt-1 text-sm text-gray-500">Tell us about yourself to personalize your wellness journey.</p>
+                            <h2 className="text-xl font-bold text-slate-800">👤 Basic Profile</h2>
+                            <p className="mt-1 text-sm text-slate-500 font-medium">Tell us about yourself to personalize your wellness journey.</p>
                         </div>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <FormInput label="Full Name" value={formData.basic_profile.full_name} onChange={(v) => updateField('basic_profile', 'full_name', v)} placeholder="Enter your full name" error={errors['basic_profile.full_name']} required />
@@ -329,13 +344,13 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 
                         {/* Gender */}
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-gray-600">Gender <span className="text-red-400">*</span></label>
+                            <label className="text-sm font-semibold text-slate-650">Gender <span className="text-red-400">*</span></label>
                             <div className="flex flex-wrap gap-3">
                                 {['Male', 'Female', 'Other'].map((g) => (
                                     <button key={g} type="button" onClick={() => updateField('basic_profile', 'gender', g.toLowerCase())}
-                                        className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-all duration-200 ${formData.basic_profile.gender === g.toLowerCase()
-                                            ? 'border-transparent bg-[#007200]/10 text-[#007200]'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                        className={`rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${formData.basic_profile.gender === g.toLowerCase()
+                                            ? 'border-transparent bg-emerald-500/10 text-emerald-700 shadow-sm'
+                                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                                             }`}
                                     >{g}</button>
                                 ))}
@@ -352,7 +367,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 
                         {/* Activity Level */}
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-gray-600">Daily Activity Level</label>
+                            <label className="text-sm font-semibold text-slate-650">Daily Activity Level</label>
                             <div className="flex flex-wrap gap-3">
                                 {[
                                     { value: 'sedentary', label: '🪑 Sedentary', desc: 'Little or no exercise' },
@@ -361,12 +376,12 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 ].map((a) => (
                                     <button key={a.value} type="button" onClick={() => updateField('basic_profile', 'activity_level', a.value)}
                                         className={`flex flex-col items-start rounded-2xl border px-5 py-4 text-left transition-all duration-200 ${formData.basic_profile.activity_level === a.value
-                                            ? 'border-transparent bg-[#007200]/10'
-                                            : 'border-gray-200 bg-white hover:bg-gray-50'
+                                            ? 'border-transparent bg-emerald-500/10 shadow-sm'
+                                            : 'border-slate-200 bg-white hover:bg-slate-50'
                                             }`}
                                     >
-                                        <span className={`text-sm font-medium ${formData.basic_profile.activity_level === a.value ? 'text-[#007200]' : 'text-gray-700'}`}>{a.label}</span>
-                                        <span className="text-xs text-gray-400">{a.desc}</span>
+                                        <span className={`text-sm font-bold ${formData.basic_profile.activity_level === a.value ? 'text-emerald-700' : 'text-slate-700'}`}>{a.label}</span>
+                                        <span className="text-xs text-slate-400 mt-0.5">{a.desc}</span>
                                     </button>
                                 ))}
                             </div>
@@ -378,8 +393,8 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                 {step === 2 && (
                     <div className="space-y-8">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">🩺 Health Metrics</h2>
-                            <p className="mt-1 text-sm text-gray-500">Share your vital stats for a personalized health analysis.</p>
+                            <h2 className="text-xl font-bold text-slate-800">🩺 Health Metrics</h2>
+                            <p className="mt-1 text-sm text-slate-500 font-medium">Share your vital stats for a personalized health analysis.</p>
                             <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
                                 <FormInput label="Blood Pressure" value={formData.health_metrics.blood_pressure} onChange={(v) => updateField('health_metrics', 'blood_pressure', v)} placeholder="e.g. 120/80 mmHg" />
                                 <FormInput label="Blood Sugar (Fasting)" value={formData.health_metrics.blood_sugar_fasting} onChange={(v) => updateField('health_metrics', 'blood_sugar_fasting', v)} placeholder="e.g. 90 mg/dL" />
@@ -390,24 +405,24 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                 <FormInput label="Sleep Duration" value={formData.health_metrics.sleep_duration} onChange={(v) => updateField('health_metrics', 'sleep_duration', v)} placeholder="e.g. 7 hours" />
                             </div>
                             <div className="mt-5 flex flex-col gap-2">
-                                <label className="text-sm font-medium text-gray-600">
-                                    Stress Level: <span className="text-emerald-600 font-bold">{formData.health_metrics.stress_level}/10</span>
+                                <label className="text-sm font-semibold text-slate-650">
+                                    Stress Level: <span className="text-emerald-700 font-bold">{formData.health_metrics.stress_level}/10</span>
                                 </label>
                                 <input type="range" min={1} max={10} value={formData.health_metrics.stress_level}
                                     onChange={(e) => updateField('health_metrics', 'stress_level', parseInt(e.target.value, 10))}
-                                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-emerald-500"
+                                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-emerald-500"
                                 />
-                                <div className="flex justify-between text-xs text-gray-400">
+                                <div className="flex justify-between text-xs text-slate-400 font-semibold">
                                     <span>Low</span><span>High</span>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">🥗 Diet Information</h2>
-                            <p className="mt-1 text-sm text-gray-500">Help us understand your dietary habits and preferences.</p>
+                            <h2 className="text-xl font-bold text-slate-800">🥗 Diet Information</h2>
+                            <p className="mt-1 text-sm text-slate-500 font-medium">Help us understand your dietary habits and preferences.</p>
                             <div className="mt-5 flex flex-col gap-2">
-                                <label className="text-sm font-medium text-gray-600">Diet Type</label>
+                                <label className="text-sm font-semibold text-slate-650">Diet Type</label>
                                 <div className="flex flex-wrap gap-3">
                                     {[
                                         { value: 'vegetarian', label: '🥬 Vegetarian' },
@@ -415,9 +430,9 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                         { value: 'vegan', label: '🌱 Vegan' },
                                     ].map((d) => (
                                         <button key={d.value} type="button" onClick={() => updateField('diet_info', 'diet_type', d.value)}
-                                            className={`rounded-full border px-6 py-2.5 text-sm font-medium transition-all duration-200 ${formData.diet_info.diet_type === d.value
-                                                ? 'border-transparent bg-[#007200]/10 text-[#007200]'
-                                                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                            className={`rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${formData.diet_info.diet_type === d.value
+                                                ? 'border-transparent bg-emerald-500/10 text-emerald-700 shadow-sm'
+                                                : 'border-slate-200 bg-white text-slate-600 hover:bg-gray-50'
                                                 }`}
                                         >{d.label}</button>
                                     ))}
@@ -440,21 +455,21 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                 {step === 3 && (
                     <div className="space-y-6">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">🏥 Medical History</h2>
-                            <p className="mt-1 text-sm text-gray-500">Select any conditions that apply. Your data is stored securely.</p>
+                            <h2 className="text-xl font-bold text-slate-800">🏥 Medical History</h2>
+                            <p className="mt-1 text-sm text-slate-500 font-medium">Select any conditions that apply. Your data is stored securely.</p>
                         </div>
                         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                             {CONDITIONS.map((condition) => {
                                 const isSelected = formData.medical_history.conditions.includes(condition);
                                 return (
                                     <button key={condition} type="button" onClick={() => toggleCondition(condition)}
-                                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 ${isSelected
-                                            ? 'border-transparent bg-[#007200]/10 text-[#007200]'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 ${isSelected
+                                            ? 'border-transparent bg-emerald-500/10 text-emerald-700 shadow-sm'
+                                            : 'border-slate-200 bg-white text-slate-655 hover:bg-gray-50'
                                             }`}
                                     >
                                         <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${isSelected
-                                            ? 'border-transparent bg-[#007200]' : 'border-gray-300 bg-transparent'
+                                            ? 'border-transparent bg-emerald-600' : 'border-slate-300 bg-transparent'
                                             }`}>
                                             {isSelected && (
                                                 <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,30 +484,30 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                         </div>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-medium text-gray-600">Injury Details (if any)</label>
+                                <label className="text-sm font-semibold text-slate-650">Injury Details (if any)</label>
                                 <textarea value={formData.medical_history.injury_history}
                                     onChange={(e) => updateField('medical_history', 'injury_history', e.target.value)}
                                     placeholder="Describe any past injuries..." rows={3}
-                                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10"
+                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm"
                                 />
                             </div>
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-medium text-gray-600">Surgery History (if any)</label>
+                                <label className="text-sm font-semibold text-slate-650">Surgery History (if any)</label>
                                 <textarea value={formData.medical_history.surgery_history}
                                     onChange={(e) => updateField('medical_history', 'surgery_history', e.target.value)}
                                     placeholder="Describe any past surgeries..." rows={3}
-                                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#007200] focus:ring-4 focus:ring-[#007200]/10"
+                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Consent */}
-                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                        <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-5">
                             <label className="flex cursor-pointer items-start gap-3">
                                 <div className="pt-0.5">
                                     <button type="button" onClick={() => updateField('medical_history', 'consent', !formData.medical_history.consent)}
                                         className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${formData.medical_history.consent
-                                            ? 'border-transparent bg-[#007200]' : 'border-gray-300 bg-transparent'
+                                            ? 'border-transparent bg-emerald-600' : 'border-slate-300 bg-transparent'
                                             }`}
                                     >
                                         {formData.medical_history.consent && (
@@ -502,10 +517,10 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                                         )}
                                     </button>
                                 </div>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-slate-600 font-medium">
                                     I consent to the secure storage of my health data. My data will be stored securely
                                     and used only for personalized health recommendations.{' '}
-                                    <span className="text-emerald-600 underline">Privacy Policy</span>
+                                    <span className="text-emerald-600 font-bold hover:underline cursor-pointer">Privacy Policy</span>
                                 </span>
                             </label>
                             {errors['medical_history.consent'] && (
@@ -517,7 +532,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 
                 {/* Submit Error */}
                 {submitError && (
-                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-655 font-semibold">
                         {submitError}
                     </div>
                 )}
@@ -526,7 +541,7 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
                 <div className="mt-8 flex items-center justify-between">
                     {step > 1 ? (
                         <button type="button" onClick={prevStep}
-                            className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-50 hover:text-gray-800"
+                            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-800 shadow-sm"
                         >
                             <ChevronLeft className="size-4" /> Previous
                         </button>
@@ -534,13 +549,13 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 
                     {step < 3 ? (
                         <button type="button" onClick={nextStep}
-                            className="flex items-center gap-2 rounded-2xl bg-[#007200] hover:bg-[#006400] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all"
+                            className="flex items-center gap-2 rounded-2xl bg-[#057A55] hover:bg-[#046c4b] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-200/50 transition-all"
                         >
                             Next Step <ChevronRight className="size-4" />
                         </button>
                     ) : (
                         <button type="button" onClick={submitForm} disabled={isSubmitting}
-                            className="flex items-center gap-2 rounded-2xl bg-[#007200] hover:bg-[#006400] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-2xl bg-[#057A55] hover:bg-[#046c4b] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-200/50 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {isSubmitting ? (
                                 <><Loader2 className="size-4 animate-spin" /> Saving...</>
@@ -553,9 +568,9 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             {/* Security Badge */}
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-400 pb-4">
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-semibold pb-4">
                 <Lock className="size-3.5 text-emerald-500" />
-                <span>🔒 Your data is stored securely</span>
+                <span>Your data is stored securely</span>
             </div>
         </div>
     );
@@ -568,75 +583,19 @@ function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
 export default function ProfilePage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading: authLoading } = useUser();
-    const [profileData, setProfileData] = useState<ProfileData | null>(null);
-    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [fetchError, setFetchError] = useState('');
 
-    const fetchProfile = useCallback(async () => {
-        setIsLoadingProfile(true);
-        setFetchError('');
-        try {
-            if (!isSupabaseConfigured) {
-                setIsLoadingProfile(false);
-                return;
-            }
+    const {
+        data: profileData,
+        isLoading: isLoadingProfile,
+        error: fetchQueryError,
+        refetch: fetchProfile
+    } = useProfileQuery(user?.id);
 
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) {
-                setIsLoadingProfile(false);
-                return;
-            }
-
-            const aiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const res = await fetch(`${aiUrl}/api/onboarding/get-profile`, {
-                headers: { Authorization: `Bearer ${session.access_token}` },
-                signal: controller.signal,
-            });
-            clearTimeout(timeoutId);
-
-            if (res.status === 401) {
-                // Token is invalid/expired or from an old project. Clear stale session.
-                try {
-                    await fetch('/api/auth/logout', { method: 'POST' });
-                } catch (e) {
-                    console.error('Failed to logout API', e);
-                }
-                if (isSupabaseConfigured) {
-                    await supabase.auth.signOut();
-                }
-                window.location.href = '/auth/login';
-                return;
-            } else if (res.status === 404) {
-                // No profile yet — show form
-                setProfileData(null);
-            } else if (res.ok) {
-                const data = await res.json();
-                setProfileData(data.profile);
-            } else {
-                const errData = await res.json().catch(() => ({}));
-                setFetchError(errData.detail || 'Failed to load profile.');
-            }
-        } catch (err) {
-            console.error('Profile fetch error:', err);
-            setFetchError('Could not connect to server. Showing form instead.');
-        } finally {
-            setIsLoadingProfile(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!authLoading && isAuthenticated) {
-            fetchProfile();
-        } else if (!authLoading && !isAuthenticated) {
-            setIsLoadingProfile(false);
-        }
-    }, [authLoading, isAuthenticated, fetchProfile]);
+    const fetchError = fetchQueryError instanceof Error ? fetchQueryError.message : (fetchQueryError ? String(fetchQueryError) : '');
 
     // Auth guard
-    if (authLoading || isLoadingProfile) {
+    if (authLoading || (isLoadingProfile && isAuthenticated)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
                 <div className="text-center">
@@ -669,28 +628,46 @@ export default function ProfilePage() {
     const showForm = !profileData || isEditing;
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA]">
-            {/* Page Header */}
-            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                            {showForm ? 'Complete Your Health Profile' : 'My Health Profile'}
-                        </h1>
-                        <p className="text-gray-500 text-sm">
-                            {showForm
-                                ? 'Fill in your details for personalized Ayurvedic recommendations'
-                                : 'Your health data at a glance'}
-                        </p>
+        <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30 pb-12">
+            {/* Conditional Page Header for Onboarding */}
+            {showForm && (
+                <div className="bg-[#057A55] text-white pt-8 pb-8 px-6 lg:px-10 overflow-hidden relative shadow-lg rounded-b-3xl shrink-0 mb-8">
+                    {/* Background decorative elements */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+
+                    <div className="max-w-4xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="size-12 rounded-2xl bg-emerald-850/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
+                                <User className="size-6 text-emerald-300" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight animate-in slide-in-from-top-4 duration-300">
+                                    Complete Your Health Profile
+                                </h1>
+                                <p className="text-sm text-emerald-100/80 mt-1 font-medium animate-in slide-in-from-top-3 duration-300">
+                                    Fill in your details for personalized Ayurvedic recommendations
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Simple Title for Profile Display */}
+            {!showForm && (
+                <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+                    <div className="max-w-3xl mx-auto">
+                        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">My Health Profile</h1>
+                    </div>
+                </div>
+            )}
 
             {/* Content */}
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="px-4 sm:px-6 lg:px-8 py-4">
                 <div className="max-w-3xl mx-auto">
                     {fetchError && !showForm && (
-                        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+                        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50/50 p-4 text-sm text-red-700 font-semibold shadow-sm animate-in fade-in">
                             {fetchError}
                         </div>
                     )}

@@ -11,11 +11,11 @@ export default function EncyclopediaLayout({
 }) {
     return (
         <SidebarProvider defaultOpen={true}>
-            <div className="bg-[#16826B] text-[var(--chat-text-primary)] overflow-hidden h-screen flex w-full relative selection:bg-[var(--chat-primary)] selection:text-black pt-2 pr-4 pb-4 pl-0">
+            <div className="h-screen flex w-full bg-gray-50 overflow-hidden">
                 <AppSidebar />
-                <div className="flex-1 flex flex-col h-full min-w-0">
+                <div className="flex-1 flex flex-col min-w-0 h-full">
                     <Topbar />
-                    <SidebarInset className="flex-1 relative transition-all duration-300 bg-white rounded-[2rem] overflow-hidden shadow-2xl border-0">
+                    <SidebarInset className="flex-1 relative overflow-hidden border-0">
                         <main className="h-full overflow-auto">
                             {children}
                         </main>

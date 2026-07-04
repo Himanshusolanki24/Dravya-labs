@@ -67,7 +67,7 @@ export default function HerbDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-600 mb-2">{t.encyclopedia.herbNotFound}</h1>
                 <p className="text-gray-500 mb-6">{t.encyclopedia.herbNotFoundDesc}</p>
                 <Link
-                    href="/ensyclopedia"
+                    href="/encyclopedia"
                     className="px-6 py-3 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 transition-colors"
                 >
                     {t.encyclopedia.backButton}
@@ -87,13 +87,13 @@ export default function HerbDetailPage() {
     ];
 
     return (
-        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
             {/* Main Content */}
             <main className="flex-1 py-8 px-4 sm:px-8 lg:px-20">
                 <div className="max-w-6xl mx-auto">
                     {/* Breadcrumbs */}
                     <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                        <Link href="/ensyclopedia" className="hover:text-emerald-600 transition-colors flex items-center gap-1">
+                        <Link href="/encyclopedia" className="hover:text-emerald-600 transition-colors flex items-center gap-1">
                             <ArrowLeft className="size-4" />
                             {t.encyclopedia.backToEncyclopedia}
                         </Link>
@@ -408,7 +408,7 @@ export default function HerbDetailPage() {
                                     {relatedHerbs.map(related => (
                                         <Link
                                             key={related.id}
-                                            href={`/ensyclopedia/${related.id}`}
+                                            href={`/encyclopedia/${related.id}`}
                                             className="flex items-center gap-4 rounded-xl bg-white p-3 shadow-sm border border-gray-100 hover:border-emerald-200 transition-all group"
                                         >
                                             <div className="relative size-16 shrink-0 rounded-lg overflow-hidden">

@@ -191,7 +191,7 @@ function HealthRadar({ metrics }: { metrics: ProfileData['health_metrics'] }) {
                         />
                         <Tooltip
                             contentStyle={{ borderRadius: 12, border: '1px solid #e5e7eb', fontSize: 12 }}
-                            formatter={(value: number | undefined) => [`${value ?? 0}/100`, 'Score']}
+                            formatter={(value: any) => [`${value ?? 0}/100`, 'Score']}
                         />
                     </RadarChart>
                 </ResponsiveContainer>

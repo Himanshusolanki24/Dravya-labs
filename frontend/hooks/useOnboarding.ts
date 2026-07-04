@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useSaveProfileMutation } from '@/hooks/useProfileQuery';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -100,6 +101,7 @@ export function useOnboarding() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [submitError, setSubmitError] = useState('');
+    const saveProfileMutation = useSaveProfileMutation();
 
     // Update a nested field
     const updateField = useCallback(
@@ -189,42 +191,7 @@ export function useOnboarding() {
         setSubmitError('');
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) {
-                setSubmitError('You must be logged in to save your profile.');
-                return;
-            }
-
-            // Build the payload (convert age to number)
-            const payload = {
-                ...formData,
-                basic_profile: {
-                    ...formData.basic_profile,
-                    age: parseInt(formData.basic_profile.age, 10),
-                    height: formData.basic_profile.height ? parseFloat(formData.basic_profile.height) : null,
-                    weight: formData.basic_profile.weight ? parseFloat(formData.basic_profile.weight) : null,
-                },
-                health_metrics: {
-                    ...formData.health_metrics,
-                    stress_level: formData.health_metrics.stress_level,
-                },
-            };
-
-            const aiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-            const res = await fetch(`${aiUrl}/api/onboarding/save-profile`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.detail || 'Failed to save profile');
-            }
-
+            await saveProfileMutation.mutateAsync(formData);
             setSubmitSuccess(true);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'An unexpected error occurred';
@@ -232,7 +199,7 @@ export function useOnboarding() {
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, validateStep]);
+    }, [formData, validateStep, saveProfileMutation]);
 
     return {
         step,

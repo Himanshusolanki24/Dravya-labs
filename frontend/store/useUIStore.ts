@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 
-interface UIState {
+interface IUIState {
     isGlobalLoading: boolean;
     sidebarOpen: boolean;
 
@@ -11,7 +11,7 @@ interface UIState {
     setSidebarOpen: (open: boolean) => void;
 }
 
-export const useUIStore = create<UIState>()((set) => ({
+export const useUIStore = create<IUIState>()((set) => ({
     isGlobalLoading: false,
     sidebarOpen: true,
 

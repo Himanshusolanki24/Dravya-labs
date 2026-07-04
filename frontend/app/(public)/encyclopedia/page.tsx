@@ -59,23 +59,23 @@ export default function EncyclopediaPage() {
     }, [searchQuery, selectedCategory, selectedDoshas]);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-auto bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex-1 flex flex-col h-full overflow-auto bg-gradient-to-br from-amber-50/30 via-green-50/20 to-teal-50/30">
             {/* Header Section */}
-            <div className="relative px-6 py-5 border-b border-emerald-100/50 overflow-hidden bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-green-50/80 shrink-0">
-                {/* Decorative abstract background elements */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-300/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <div className="absolute bottom-0 left-20 w-72 h-72 bg-teal-300/10 rounded-full blur-3xl translate-y-1/3"></div>
+            <div className="bg-[#057A55] text-white py-8 px-6 lg:px-10 overflow-hidden relative shadow-lg rounded-b-3xl shrink-0">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
                 
-                <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200 shrink-0">
-                            <Leaf className="size-6 text-white" />
+                        <div className="size-12 rounded-2xl bg-emerald-800/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
+                            <Leaf className="size-6 text-emerald-300" />
                         </div>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent leading-tight">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
                                 {t.encyclopedia.title}
                             </h1>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <p className="text-sm text-emerald-100/80 mt-0.5">
                                 {t.encyclopedia.subtitle.replace('{count}', String(herbs.length))}
                             </p>
                         </div>
@@ -83,19 +83,19 @@ export default function EncyclopediaPage() {
 
                     {/* Search Bar */}
                     <div className="w-full md:max-w-[320px] shrink-0">
-                        <div className="flex items-center bg-white/80 backdrop-blur-md rounded-xl px-4 py-2.5 border border-emerald-100 shadow-sm focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100/50 transition-all">
-                            <Search className="size-4 text-emerald-600" />
+                        <div className="flex items-center bg-emerald-800/30 backdrop-blur-md rounded-xl px-4 py-2 border border-emerald-700/50 shadow-sm focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-400/20 transition-all">
+                            <Search className="size-4 text-emerald-300" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t.encyclopedia.searchPlaceholder}
-                                className="flex-1 ml-3 text-sm bg-transparent border-none focus:outline-none placeholder:text-gray-400 text-gray-800"
+                                className="flex-1 ml-3 text-sm bg-transparent border-none focus:outline-none placeholder:text-emerald-200/60 text-white focus:ring-0"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="text-gray-400 hover:text-emerald-600 p-0.5 transition-colors"
+                                    className="text-emerald-300 hover:text-white p-0.5 transition-colors"
                                 >
                                     <X className="size-3.5" />
                                 </button>
@@ -106,12 +106,12 @@ export default function EncyclopediaPage() {
             </div>
 
             {/* Filter Section */}
-            <div className="px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10 shrink-0">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-4">
+            <div className="px-6 shrink-0 mt-6 z-10 relative">
+                <div className="max-w-7xl mx-auto bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm p-5 transition-all">
+                    <div className="flex items-center justify-between">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
+                            className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition-colors"
                         >
                             <Filter className="size-4" />
                             <span>{showFilters ? t.encyclopedia.hideFilters : t.encyclopedia.showFilters}</span>
@@ -119,7 +119,7 @@ export default function EncyclopediaPage() {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
+                                className="text-sm font-semibold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
                             >
                                 <X className="size-4" />
                                 {t.encyclopedia.clearAll}
@@ -128,10 +128,10 @@ export default function EncyclopediaPage() {
                     </div>
 
                     {showFilters && (
-                        <div className="flex flex-col sm:flex-row gap-4 mb-2">
+                        <div className="flex flex-col sm:flex-row gap-4 mt-4 transition-all duration-300">
                             {/* Dosha Filters */}
                             <div className="flex-1 max-w-[200px]">
-                                <label className="text-[10px] font-semibold text-emerald-800/60 uppercase tracking-wider mb-2 block pl-1">{t.encyclopedia.byDoshaBalance}</label>
+                                <label className="text-[10px] font-bold text-emerald-800/60 uppercase tracking-wider mb-1.5 block pl-1">{t.encyclopedia.byDoshaBalance}</label>
                                 <div className="relative">
                                     <select 
                                         value={selectedDoshas.length > 0 ? selectedDoshas[0] : 'All'}
@@ -139,7 +139,7 @@ export default function EncyclopediaPage() {
                                             if (e.target.value === 'All') setSelectedDoshas([]);
                                             else setSelectedDoshas([e.target.value]);
                                         }}
-                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2.5 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
+                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
                                     >
                                         <option value="All">All Doshas</option>
                                         {doshaOptions.map(dosha => (
@@ -152,12 +152,12 @@ export default function EncyclopediaPage() {
 
                             {/* Category Filters */}
                             <div className="flex-1 max-w-[250px]">
-                                <label className="text-[10px] font-semibold text-emerald-800/60 uppercase tracking-wider mb-2 block pl-1">{t.encyclopedia.byCategory}</label>
+                                <label className="text-[10px] font-bold text-emerald-800/60 uppercase tracking-wider mb-1.5 block pl-1">{t.encyclopedia.byCategory}</label>
                                 <div className="relative">
                                     <select
                                         value={selectedCategory}
                                         onChange={(e) => setSelectedCategory(e.target.value)}
-                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2.5 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
+                                        className="w-full appearance-none bg-white border border-emerald-100 text-gray-700 text-sm rounded-xl px-4 py-2 pr-10 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm outline-none hover:border-emerald-300 hover:bg-emerald-50/30 transition-all font-medium cursor-pointer"
                                     >
                                         {categories.map(category => {
                                             const translatedCategory = (t.encyclopedia.categories as Record<string, string>)[category] || category;
@@ -173,7 +173,7 @@ export default function EncyclopediaPage() {
                     )}
 
                     {/* Results count */}
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-4 pt-4 border-t border-slate-100">
                         <p className="text-sm text-gray-500">
                             {t.encyclopedia.showing} <span className="font-semibold text-emerald-600">{filteredHerbs.length}</span> {t.encyclopedia.of} {herbs.length} {t.encyclopedia.herbs}
                             {hasActiveFilters && <span className="text-gray-400"> {t.encyclopedia.filtered}</span>}
