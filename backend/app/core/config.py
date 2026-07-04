@@ -30,6 +30,29 @@ class Settings:
     MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY")
     MODEL_NAME: str = os.getenv("MODEL_NAME", "mistral-large-latest")
 
+    # =========================
+    # 🤖 Multi-LLM providers (optional — system degrades to Mistral if absent)
+    # =========================
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+
+    # Model used for each routing tier. Change these to any provider you have keys for.
+    LLM_SIMPLE_MODEL: str = os.getenv("LLM_SIMPLE_MODEL", "mistral-small-latest")
+    LLM_COMPLEX_MODEL: str = os.getenv("LLM_COMPLEX_MODEL", "mistral-large-latest")
+    # Models that vote when a prompt is classified "critical" (comma-separated).
+    # Providers without a configured key are automatically dropped from the vote.
+    LLM_ENSEMBLE_MODELS: str = os.getenv(
+        "LLM_ENSEMBLE_MODELS",
+        "mistral-large-latest,gpt-4o,claude-sonnet-5",
+    )
+    LLM_JUDGE_MODEL: str = os.getenv("LLM_JUDGE_MODEL", "mistral-small-latest")
+
+    # Feature flag: use the new hierarchical orchestrator instead of the linear pipeline.
+    USE_HIERARCHICAL_ORCHESTRATOR: bool = (
+        os.getenv("USE_HIERARCHICAL_ORCHESTRATOR", "false").lower() == "true"
+    )
+    MAX_CRITIC_RETRIES: int = int(os.getenv("MAX_CRITIC_RETRIES", "3"))
+
 
 
     # =========================

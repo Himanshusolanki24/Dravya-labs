@@ -274,8 +274,16 @@ async def run_pipeline(state: SharedState) -> GeneratePlanResponse:
     """
     Execute the full multi-agent pipeline.
 
+    Dispatches to the new hierarchical orchestrator when
+    USE_HIERARCHICAL_ORCHESTRATOR=true, otherwise runs the linear pipeline.
     Returns a structured GeneratePlanResponse.
     """
+    from app.core.config import settings
+    if settings.USE_HIERARCHICAL_ORCHESTRATOR:
+        from agents.hierarchical_orchestrator import run_hierarchical_pipeline
+        logger.info("Using hierarchical orchestrator")
+        return await run_hierarchical_pipeline(state)
+
     graph = _get_graph()
 
     # Run the graph

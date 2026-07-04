@@ -195,6 +195,43 @@ class SafetyResult(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════
+# HIERARCHICAL ORCHESTRATOR SCHEMAS
+# ═══════════════════════════════════════════════════════════════
+
+class MLFacts(BaseModel):
+    """Structured facts returned by the Models Orchestrator ('the Scientist')."""
+    skin: dict[str, Any] = Field(default_factory=dict)
+    hair: dict[str, Any] = Field(default_factory=dict)
+    pcos: dict[str, Any] = Field(default_factory=dict)
+    diabetes: dict[str, Any] = Field(default_factory=dict)
+    autoimmune: dict[str, Any] = Field(default_factory=dict)
+    obesity: dict[str, Any] = Field(default_factory=dict)
+    brahma: dict[str, Any] = Field(default_factory=dict)
+    symptom_treatment: dict[str, Any] = Field(default_factory=dict)
+    herbs: dict[str, Any] = Field(default_factory=dict)
+    dietplain: dict[str, Any] = Field(default_factory=dict)
+    dominant_dosha: str = "unknown"
+    health_flags: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+
+
+class LLMResponse(BaseModel):
+    """A single response produced by the LLM Orchestrator ('the Communicator')."""
+    text: str = ""
+    model_used: str = "unknown"
+    route: str = "complex"          # simple / complex / critical
+    attempts: int = 1
+
+
+class CritiqueResult(BaseModel):
+    """Verdict from the Critic Agent (loop engineering)."""
+    approved: bool = True
+    reasons: list[str] = Field(default_factory=list)
+    fix_instructions: str = ""
+    retry_count: int = 0
+
+
+# ═══════════════════════════════════════════════════════════════
 # SHARED STATE — passed through the entire pipeline
 # ═══════════════════════════════════════════════════════════════
 
@@ -223,6 +260,13 @@ class SharedState(BaseModel):
     # ── Memory context ──────────────────────────────────────
     memory_context: dict[str, Any] = Field(default_factory=dict)
     orchestrator_summary: str = ""
+
+    # ── Hierarchical orchestrator state ─────────────────────
+    ml_facts: MLFacts = Field(default_factory=MLFacts)
+    llm_response: LLMResponse = Field(default_factory=LLMResponse)
+    critique: CritiqueResult = Field(default_factory=CritiqueResult)
+    critique_feedback: str = ""
+    orchestrator_logs: dict[str, Any] = Field(default_factory=dict)  # for the Data Flywheel
 
     # ── A2A message bus ─────────────────────────────────────
     messages: list[A2AMessage] = Field(default_factory=list)

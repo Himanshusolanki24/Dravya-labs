@@ -53,8 +53,13 @@ except ImportError:
 @app.on_event("shutdown")
 async def _close_pools() -> None:
     try:
-        from app.services.supabase_async import close_client
-        await close_client()
+        from app.services.supabase_async import close_client as _close_db
+        await _close_db()
+    except Exception:
+        pass
+    try:
+        from agents.llm_client import close_client as _close_llm
+        await _close_llm()
     except Exception:
         pass
 

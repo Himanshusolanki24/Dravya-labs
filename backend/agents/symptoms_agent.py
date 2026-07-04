@@ -11,7 +11,7 @@ from agents.schemas import SharedState, SymptomsResult, A2AMessage
 from model_clients.skin_client import skin_client
 from model_clients.hair_client import hair_client
 from model_clients.pcos_client import pcos_client
-from model_clients.pcos_client import pcos_client
+from model_clients.diabetes_client import diabetes_client
 from model_clients.autoimmune_client import autoimmune_client
 from model_clients.obesity_client import obesity_client
 from model_clients.brahma_client import brahma_client
