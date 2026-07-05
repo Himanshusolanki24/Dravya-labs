@@ -4,15 +4,292 @@ import Link from 'next/link';
 import Image from 'next/image';
 import LandingNavbar from '@/components/navigation/LandingNavbar';
 import PlantGallery from '@/components/features/PlantGallery';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './landing.css';
 
 export default function LandingPage() {
+    const lastPos = useRef({ x: 0, y: 0 });
+
+    useEffect(() => {
+        // --- 1. PETAL CURSOR FOR DESKTOP ONLY ---
+        const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+        let mainCursor: HTMLDivElement | null = null;
+        let container: HTMLDivElement | null = null;
+
+        if (isFinePointer) {
+            // Container for trailing petals
+            container = document.createElement('div');
+            container.id = 'petal-cursor-container';
+            container.style.position = 'fixed';
+            container.style.inset = '0';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+
+            // Main cursor petal
+            mainCursor = document.createElement('div');
+            mainCursor.style.position = 'fixed';
+            mainCursor.style.width = '14px';
+            mainCursor.style.height = '14px';
+            mainCursor.style.borderRadius = '50% 0 50% 50%';
+            mainCursor.style.backgroundColor = '#22c55e';
+            mainCursor.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.5)';
+            mainCursor.style.pointerEvents = 'none';
+            mainCursor.style.zIndex = '10000';
+            // Start it offscreen
+            mainCursor.style.left = '-100px';
+            mainCursor.style.top = '-100px';
+            mainCursor.style.transform = 'translate(-50%, -50%) rotate(45deg)';
+            mainCursor.style.transition = 'width 0.25s, height 0.25s, background-color 0.25s';
+            document.body.appendChild(mainCursor);
+            
+            // Add custom cursor class to html element
+            document.documentElement.classList.add('custom-cursor-active');
+        }
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            if (mainCursor) {
+                // Instantly update cursor position so it is perfectly in sync with the mouse!
+                mainCursor.style.left = `${x}px`;
+                mainCursor.style.top = `${y}px`;
+
+                // Calculate direction of movement to rotate the petal cursor dynamically
+                const dx = x - lastPos.current.x;
+                const dy = y - lastPos.current.y;
+                
+                if (Math.hypot(dx, dy) > 1.5) {
+                    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                    // Leaf shape starts pointing top-right (45 deg).
+                    // Rotating by `angle + 135` aligns its tip in the direction of motion.
+                    gsap.to(mainCursor, {
+                        rotation: angle + 135,
+                        duration: 0.15,
+                        ease: 'power1.out'
+                    });
+                }
+            }
+
+            if (!container) return;
+
+            // Calculate distance from last petal spawn
+            const dist = Math.hypot(x - lastPos.current.x, y - lastPos.current.y);
+            if (dist < 35) return; // Spawn every 35px of movement to keep it clean and performant
+            
+            lastPos.current = { x, y };
+
+            // Create trailing petal element
+            const petal = document.createElement('div');
+            petal.className = 'petal-particle';
+            
+            // Random leaf size
+            const size = gsap.utils.random(8, 15);
+            petal.style.width = `${size}px`;
+            petal.style.height = `${size}px`;
+            petal.style.position = 'absolute';
+            petal.style.left = `${x - size / 2}px`;
+            petal.style.top = `${y - size / 2}px`;
+            petal.style.pointerEvents = 'none';
+            
+            // Leaf shape (teardrop)
+            petal.style.borderRadius = '50% 0 50% 50%';
+            
+            // Random green shades matching the theme
+            const colors = ['#22c55e', '#10b981', '#4ade80', '#86efac', '#15803d'];
+            const color = gsap.utils.random(colors);
+            petal.style.backgroundColor = color;
+            petal.style.opacity = '0.7';
+            
+            container.appendChild(petal);
+
+            // GSAP animate the drifting petal
+            gsap.fromTo(petal, 
+                {
+                    scale: 0.2,
+                    rotation: gsap.utils.random(0, 360),
+                },
+                {
+                    scale: 1,
+                    rotation: '+=120',
+                    x: gsap.utils.random(-30, 30),
+                    y: gsap.utils.random(40, 90), // falls down
+                    opacity: 0,
+                    duration: gsap.utils.random(1.2, 1.8),
+                    ease: 'power2.out',
+                    onComplete: () => {
+                        petal.remove();
+                    }
+                }
+            );
+        };
+
+        const handleMouseOver = (e: MouseEvent) => {
+            if (!mainCursor) return;
+            const target = e.target as HTMLElement;
+            if (target.closest('a') || target.closest('button') || target.closest('.group') || target.classList.contains('cursor-pointer')) {
+                gsap.to(mainCursor, {
+                    width: 24,
+                    height: 24,
+                    backgroundColor: '#4ade80',
+                    duration: 0.2
+                });
+            } else {
+                gsap.to(mainCursor, {
+                    width: 14,
+                    height: 14,
+                    backgroundColor: '#22c55e',
+                    duration: 0.2
+                });
+            }
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseover', handleMouseOver);
+
+        // --- 2. GSAP REVEALING ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        const ctx = gsap.context(() => {
+            const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+            // Navbar slide down
+            heroTl.fromTo('.landing-nav-anim', 
+                { y: -100, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 1.2, delay: 0.2 }
+            );
+
+            // Badge
+            heroTl.fromTo('.hero-badge',
+                { y: 40, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1 },
+                '-=0.8'
+            );
+
+            // Title Reveal
+            heroTl.fromTo('.hero-title',
+                { y: 50, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1 },
+                '-=0.8'
+            );
+
+            // Subtitle Reveal
+            heroTl.fromTo('.hero-subtitle',
+                { y: 30, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1 },
+                '-=0.8'
+            );
+
+            // Buttons
+            heroTl.fromTo('.hero-buttons',
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1 },
+                '-=0.8'
+            );
+
+            // Side Connectors Fade In & Scale
+            heroTl.fromTo('.hero-connector-left',
+                { scale: 0.8, opacity: 0, x: -30 },
+                { scale: 1, opacity: 1, x: 0, duration: 1.2, ease: 'back.out(1.5)' },
+                '-=0.6'
+            );
+
+            heroTl.fromTo('.hero-connector-right',
+                { scale: 0.8, opacity: 0, x: 30 },
+                { scale: 1, opacity: 1, x: 0, duration: 1.2, ease: 'back.out(1.5)' },
+                '-=1.2'
+            );
+
+            // Bottom Feature Bar
+            heroTl.fromTo('.hero-feature-bar',
+                { y: 60, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1.2 },
+                '-=1'
+            );
+
+            // Staggered features inside the bar
+            heroTl.fromTo('.hero-feature-item',
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.15, duration: 0.8 },
+                '-=0.8'
+            );
+
+            // --- ABOUT SECTION ---
+            const aboutTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#about',
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                }
+            });
+            aboutTl.fromTo('.about-badge', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
+                   .fromTo('.about-heading', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, '-=0.4')
+                   .fromTo('.about-text', { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.2, duration: 0.8 }, '-=0.6')
+                   .fromTo('.about-feature-card', { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.2, duration: 0.8, ease: 'back.out(1.2)' }, '-=0.6')
+                   .fromTo('.about-gallery', { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 1, ease: 'power2.out' }, '-=0.8');
+
+            // --- SOLUTION SECTION ---
+            const solutionTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#solution',
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                }
+            });
+            solutionTl.fromTo('.solution-badge-1', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
+                      .fromTo('.solution-heading-1', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, '-=0.4')
+                      .fromTo('.solution-text-1', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, '-=0.6')
+                      .fromTo('.solution-text-2', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, '-=0.6')
+                      .fromTo('.solution-image', { scale: 0.95, opacity: 0, x: 50 }, { scale: 1, opacity: 1, x: 0, duration: 1, ease: 'power2.out' }, '-=0.8');
+
+            // --- FEATURES BENTO GRID ---
+            const featuresTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#features',
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                }
+            });
+            featuresTl.fromTo('.features-badge', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
+                      .fromTo('.features-heading', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, '-=0.4')
+                      .fromTo('.bento-card-anim', { y: 50, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.2, duration: 0.8, ease: 'back.out(1.1)' }, '-=0.6')
+                      .fromTo('.stat-card-anim', { y: 30, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.15, duration: 0.6 }, '-=0.4');
+
+            // --- FOOTER ---
+            gsap.fromTo('.footer-reveal',
+                { y: 40, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1,
+                    scrollTrigger: {
+                        trigger: '.landing-footer',
+                        start: 'top 90%',
+                        toggleActions: 'play none none none'
+                    }
+                }
+            );
+        });
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseover', handleMouseOver);
+            if (container) container.remove();
+            if (mainCursor) mainCursor.remove();
+            document.documentElement.classList.remove('custom-cursor-active');
+            ctx.revert();
+        };
+    }, []);
+
     return (
         <div className="relative min-h-screen bg-white">
-            {/* White Frame Border removed for edge-to-edge design */}
-
-            {/* Navbar */}
-            <LandingNavbar />
+            {/* Navbar wrapped in animation helper */}
+            <div className="landing-nav-anim opacity-0 relative z-50">
+                <LandingNavbar />
+            </div>
 
             {/* Section 1: Hero */}
             <section className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden bg-[#0A1A10] pt-32 pb-6 md:pb-10">
@@ -38,7 +315,7 @@ export default function LandingPage() {
                 {/* Hero Content */}
                 <div className="relative z-10 w-full max-w-7xl mx-auto px-4 flex flex-1 flex-col items-center justify-center">
                     {/* Top Badge */}
-                    <div className="animate-wellness-slide-up mb-8">
+                    <div className="hero-badge opacity-0 mb-8">
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-sm text-gray-200 shadow-sm">
                             <span className="text-green-400">🌿</span>
                             <span className="font-medium tracking-wide">Ancient Wisdom. Modern Wellness.</span>
@@ -46,18 +323,18 @@ export default function LandingPage() {
                     </div>
 
                     {/* Headline */}
-                    <h1 className="animate-wellness-slide-up animation-delay-100 text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1] max-w-5xl">
+                    <h1 className="hero-title opacity-0 text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1] max-w-5xl">
                         Your AI-powered gateway to <br className="hidden sm:block" />
                         <span className="text-[#4ADE80]">Ayurvedic wellness.</span>
                     </h1>
 
                     {/* Subheadline */}
-                    <p className="animate-wellness-slide-up animation-delay-200 text-center text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
+                    <p className="hero-subtitle opacity-0 text-center text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
                         Discover personalized herbal solutions backed by centuries of traditional knowledge.
                     </p>
 
                     {/* Buttons */}
-                    <div className="animate-wellness-slide-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="hero-buttons opacity-0 flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Link
                             href="/auth/signup"
                             className="bg-[#267F37] hover:bg-[#1E672B] text-white font-medium px-8 py-3.5 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-green-900/50 flex items-center gap-2 text-[17px]"
@@ -81,15 +358,33 @@ export default function LandingPage() {
                 </div>
 
                 {/* Side Connectors (Hidden on mobile & tablet) */}
-                <div className="hidden xl:block absolute left-[3%] 2xl:left-[8%] top-[55%] -translate-y-1/2 z-10 animate-wellness-slide-up animation-delay-500">
+                <div className="hero-connector-left hidden xl:block absolute left-[3%] 2xl:left-[8%] top-[55%] -translate-y-1/2 z-30 opacity-0">
                     <div className="relative group cursor-pointer">
                         <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-md shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:bg-green-500/10 group-hover:border-green-400/50 group-hover:shadow-[0_0_30px_rgba(74,222,128,0.2)]">
+                            {/* Replaced credit card icon with personalized user avatar icon */}
                             <svg className="w-8 h-8 text-white transition-colors duration-500 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <div className="absolute top-1/2 left-[105%] w-32 xl:w-40 border-t border-dashed border-white/40 translate-y-[20px] origin-left -rotate-[15deg] transition-all duration-500 group-hover:border-green-400/50" />
-                        <div className="absolute top-1/2 left-[calc(105%+8rem)] xl:left-[calc(105%+10rem)] w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,1)] -translate-y-[15px] transition-all duration-500 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(74,222,128,1)]" />
+                        {/* Fixed: Mathematically aligned dashed connector and glowing dot using SVG */}
+                        <svg className="absolute left-1/2 top-1/2 w-48 h-20 pointer-events-none overflow-visible">
+                            <line 
+                                x1="40" 
+                                y1="0" 
+                                x2="150" 
+                                y2="-25" 
+                                stroke="currentColor" 
+                                strokeWidth="1.5" 
+                                strokeDasharray="4 4" 
+                                className="text-white/40 transition-colors duration-500 group-hover:text-green-400"
+                            />
+                            <circle 
+                                cx="150" 
+                                cy="-25" 
+                                r="4" 
+                                className="fill-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)] transition-all duration-500 group-hover:scale-150 group-hover:fill-green-300"
+                            />
+                        </svg>
                         <div className="mt-4 text-center transition-transform duration-500 group-hover:translate-y-1">
                             <p className="text-white font-medium text-sm transition-colors duration-300 group-hover:text-green-300">Personalized</p>
                             <p className="text-gray-400 text-xs">Recommendations</p>
@@ -97,15 +392,34 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                <div className="hidden xl:block absolute right-[3%] 2xl:right-[8%] top-[45%] -translate-y-1/2 z-10 animate-wellness-slide-up animation-delay-500">
+                <div className="hero-connector-right hidden xl:block absolute right-[3%] 2xl:right-[8%] top-[45%] -translate-y-1/2 z-30 opacity-0">
                     <div className="relative flex flex-col items-end group cursor-pointer">
                         <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-md shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:bg-green-500/10 group-hover:border-green-400/50 group-hover:shadow-[0_0_30px_rgba(74,222,128,0.2)]">
+                            {/* Replaced beaker flask icon with natural leaf icon */}
                             <svg className="w-8 h-8 text-white transition-colors duration-500 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 3c1 2 2 5.5 1 9.5a7 7 0 0 1-9 7.5z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21.5V12" />
                             </svg>
                         </div>
-                        <div className="absolute top-1/2 right-[105%] w-32 xl:w-40 border-t border-dashed border-white/40 -translate-y-[20px] origin-right rotate-[15deg] transition-all duration-500 group-hover:border-green-400/50" />
-                        <div className="absolute top-1/2 right-[calc(105%+8rem)] xl:right-[calc(105%+10rem)] w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,1)] translate-y-[20px] transition-all duration-500 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(74,222,128,1)]" />
+                        {/* Fixed: Mathematically aligned dashed connector and glowing dot using SVG */}
+                        <svg className="absolute left-1/2 top-1/2 w-48 h-20 pointer-events-none overflow-visible">
+                            <line 
+                                x1="-40" 
+                                y1="0" 
+                                x2="-150" 
+                                y2="25" 
+                                stroke="currentColor" 
+                                strokeWidth="1.5" 
+                                strokeDasharray="4 4" 
+                                className="text-white/40 transition-colors duration-500 group-hover:text-green-400"
+                            />
+                            <circle 
+                                cx="-150" 
+                                cy="25" 
+                                r="4" 
+                                className="fill-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)] transition-all duration-500 group-hover:scale-150 group-hover:fill-green-300"
+                            />
+                        </svg>
                         <div className="mt-4 text-center transition-transform duration-500 group-hover:translate-y-1">
                             <p className="text-white font-medium text-sm transition-colors duration-300 group-hover:text-green-300">100% Natural</p>
                             <p className="text-gray-400 text-xs">Solutions</p>
@@ -135,54 +449,53 @@ export default function LandingPage() {
                     </div>
 
                     {/* Bottom Feature Bar (Glassmorphic) */}
-                    <div className="w-full max-w-6xl">
+                    <div className="hero-feature-bar opacity-0 w-full max-w-6xl">
                         <div className="bg-[#1C231F]/70 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10">
                                 
                                 {/* Feature 1 */}
-                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-6 first:pt-0 first:pl-0 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
+                                <div className="hero-feature-item opacity-0 flex items-center gap-4 py-4 lg:py-2 px-4 lg:px-6 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50 group-hover:shadow-[0_0_30px_rgba(74,222,128,0.2)]">
                                         <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">AI-Powered</h3>
+                                        <h3 className="text-white font-medium mb-1 text-base transition-colors duration-300 group-hover:text-green-300">AI-Powered</h3>
                                         <p className="text-gray-400 text-sm leading-relaxed">Advanced AI analyzes your health needs</p>
                                     </div>
                                 </div>
                                 
                                 {/* Feature 2 */}
-                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                <div className="hero-feature-item opacity-0 flex items-center gap-4 py-4 lg:py-2 px-4 lg:px-6 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
                                         <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Natural & Safe</h3>
-                                        <p className="text-gray-400 text-sm leading-relaxed">100% natural solutions from Ayurvedic wisdom</p>
+                                        <h3 className="text-white font-medium mb-1 text-base transition-colors duration-300 group-hover:text-green-300">Natural & Safe</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">100% natural solutions from Ayurveda</p>
                                     </div>
                                 </div>
 
                                 {/* Feature 3 */}
-                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-4 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                <div className="hero-feature-item opacity-0 flex items-center gap-4 py-4 lg:py-2 px-4 lg:px-6 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
                                         <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Trusted Knowledge</h3>
+                                        <h3 className="text-white font-medium mb-1 text-base transition-colors duration-300 group-hover:text-green-300">Trusted Knowledge</h3>
                                         <p className="text-gray-400 text-sm leading-relaxed">Backed by centuries of traditional Ayurveda</p>
                                     </div>
                                 </div>
 
                                 {/* Feature 4 */}
-                                <div className="flex items-start gap-4 pt-4 md:pt-0 pl-0 md:pl-6 lg:pl-8 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                                <div className="hero-feature-item opacity-0 flex items-center gap-4 py-4 lg:py-2 px-4 lg:px-6 group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center shrink-0 bg-white/5 transition-all duration-300 group-hover:scale-110 group-hover:bg-green-500/20 group-hover:border-green-400/50">
                                         <svg className="w-5 h-5 text-white transition-colors duration-300 group-hover:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-medium mb-1.5 text-base transition-colors duration-300 group-hover:text-green-300">Personalized for You</h3>
-                                        <p className="text-gray-400 text-sm leading-relaxed">Tailored recommendations just for your unique needs</p>
+                                        <h3 className="text-white font-medium mb-1 text-base transition-colors duration-300 group-hover:text-green-300">Personalized for You</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">Tailored recommendations just for your needs</p>
                                     </div>
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
@@ -196,116 +509,223 @@ export default function LandingPage() {
                         {/* Left: Text Content */}
                         <div className="space-y-8">
                             <div>
-                                <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
-                                    About Dravya Labs
+                                <span className="about-badge opacity-0 inline-block text-green-600 text-sm font-bold uppercase tracking-wider mb-2">
+                                    ABOUT DRAVYA LABS
                                 </span>
-                                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                                    Bridging <span className="text-gradient-green">Ancient Ayurveda</span> with Modern Technology
+                                <h2 className="about-heading opacity-0 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                                    Bridging <span className="text-green-600">Ancient Ayurveda</span> with Modern Technology
                                 </h2>
                             </div>
 
-                            <p className="text-lg text-gray-600 leading-relaxed">
+                            <p className="about-text opacity-0 text-base md:text-lg text-gray-600 leading-relaxed">
                                 Dravya Labs is an innovative AI-powered platform that brings the timeless wisdom of Ayurveda to your fingertips. We combine cutting-edge artificial intelligence with authentic Ayurvedic knowledge to provide personalized wellness recommendations.
                             </p>
 
-                            <p className="text-lg text-gray-600 leading-relaxed">
+                            <p className="about-text opacity-0 text-base md:text-lg text-gray-600 leading-relaxed">
                                 Our comprehensive database includes detailed information about medicinal herbs, their properties, uses, and potential interactions, empowering you to make informed decisions about your health journey.
                             </p>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-4">
-                                <div className="feature-card p-6 rounded-2xl">
-                                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-2">
+                                {/* Card 1: AI-Powered Insights */}
+                                <div className="about-feature-card opacity-0 bg-white border border-gray-100 p-5 rounded-2xl flex items-start gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center shrink-0">
                                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">AI-Powered Insights</h3>
-                                    <p className="text-gray-600">Smart recommendations based on your unique health profile</p>
+                                    <div>
+                                        <h3 className="text-base font-bold text-gray-900 mb-1">AI-Powered Insights</h3>
+                                        <p className="text-gray-500 text-xs leading-relaxed">Smart recommendations based on your unique health profile</p>
+                                    </div>
                                 </div>
 
-                                <div className="feature-card p-6 rounded-2xl">
-                                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
-                                        <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                {/* Card 2: Herbal Encyclopedia */}
+                                <div className="about-feature-card opacity-0 bg-white border border-gray-100 p-5 rounded-2xl flex items-start gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+                                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Herbal Encyclopedia</h3>
-                                    <p className="text-gray-600">Comprehensive database of 500+ Ayurvedic herbs</p>
+                                    <div>
+                                        <h3 className="text-base font-bold text-gray-900 mb-1">Herbal Encyclopedia</h3>
+                                        <p className="text-gray-500 text-xs leading-relaxed">Comprehensive database of 500+ Ayurvedic herbs</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Right: Plant Gallery */}
-                        <div className="lg:pl-8">
+                        <div className="about-gallery opacity-0 lg:pl-8">
                             <PlantGallery />
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Section 3: Problem & Solution */}
-            <section id="solution" className="section-solution py-16 sm:py-20 md:py-24 lg:py-32 scroll-mt-20">
+            {/* Section 3: Problem & Solution (Redesigned with Premium UI) */}
+            <section id="solution" className="section-solution py-16 sm:py-20 md:py-24 lg:py-32 bg-white scroll-mt-20 overflow-hidden">
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-                    <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        {/* Left: Problem & Solution Text */}
-                        <div className="space-y-10">
-                            <div>
-                                <span className="inline-block bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
-                                    The Problem
-                                </span>
-                                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                                    Ayurvedic Knowledge is Scattered and Inaccessible
-                                </h2>
-                                <p className="text-lg text-gray-600 leading-relaxed">
-                                    Despite Ayurveda&apos;s 5,000-year history, authentic information remains fragmented across ancient texts, making it difficult for modern users to access reliable, personalized guidance for their wellness needs.
-                                </p>
-                            </div>
+                    {/* Section Header */}
+                    <div className="text-center mb-16">
+                        <span className="solution-badge-1 opacity-0 inline-block bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
+                            Our Innovation
+                        </span>
+                        <h2 className="solution-heading-1 opacity-0 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 max-w-3xl mx-auto leading-tight">
+                            Transforming How You <span className="text-green-600">Experience Wellness</span>
+                        </h2>
+                    </div>
 
-                            <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-                            <div>
-                                <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
-                                    Our Solution
-                                </span>
-                                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                                    AI-Powered <span className="text-gradient-green">Ayurvedic Assistant</span>
-                                </h2>
-                                <p className="text-lg text-gray-600 leading-relaxed mb-6">
-                                    Dravya Labs uses advanced AI to analyze traditional texts and provide instant, personalized recommendations. Our platform offers:
-                                </p>
-
-                                <ul className="space-y-4">
+                    <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+                        {/* Left Column: Challenge & Solution Comparison (7 cols on lg) */}
+                        <div className="lg:col-span-7 flex flex-col justify-between gap-6">
+                            
+                            {/* Card 1: The Challenge (Pain Point) */}
+                            <div className="solution-text-1 opacity-0 bg-slate-50/80 border border-slate-100 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                                        <span className="text-xs font-bold text-red-600 uppercase tracking-widest">The Pain Point</span>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Ayurvedic Knowledge is Scattered & Inaccessible</h3>
+                                    <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                                        Despite Ayurveda&apos;s 5,000-year history, authentic information remains fragmented across ancient Sanskrit texts, making it extremely difficult to access reliable, personalized, and safe wellness advice.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200/60">
                                     {[
-                                        'Plant identification using image recognition',
-                                        'Personalized herbal remedies based on your dosha',
-                                        'Drug interaction checker for safety',
-                                        'AI consultation for wellness queries',
-                                    ].map((item, index) => (
-                                        <li key={index} className="flex items-start gap-3">
-                                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                </svg>
+                                        { label: 'Scattered Texts', desc: 'Sanskrit sutras are hard to find and translate' },
+                                        { label: 'Safety Risks', desc: 'Unknown drug-herb interactions cause health issues' },
+                                        { label: 'General Recipes', desc: 'Generic tips ignore your unique body type' }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex items-center gap-1.5 text-red-600 font-semibold text-sm">
+                                                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                <span>{item.label}</span>
                                             </div>
-                                            <span className="text-gray-700 text-lg">{item}</span>
-                                        </li>
+                                            <p className="text-slate-500 text-xs leading-normal">{item.desc}</p>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
+                            </div>
+
+                            {/* Card 2: The Solution */}
+                            <div className="solution-text-2 opacity-0 bg-gradient-to-br from-green-50/80 to-emerald-50 border border-green-100 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-lg relative overflow-hidden group">
+                                {/* Soft glow decorative circle */}
+                                <div className="absolute -right-16 -bottom-16 w-32 h-32 bg-green-200/40 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                                
+                                <div className="space-y-4 relative z-10">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                                        <span className="text-xs font-bold text-green-700 uppercase tracking-widest">Our Solution</span>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900">AI-Powered Personalized Wisdom</h3>
+                                    <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                                        Dravya Labs uses advanced AI models to synthesize traditional texts and offer direct, safe, and custom-tailored recommendations based on your unique body type.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-green-200/60 relative z-10">
+                                    {[
+                                        { label: 'Instant Plant ID', desc: 'Identify medicinal herbs with your phone camera' },
+                                        { label: 'Safety Checker', desc: 'Cross-check drug interactions instantly' },
+                                        { label: 'Dosha Customization', desc: 'Tailor remedies to your custom body type' }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex items-center gap-1.5 text-green-700 font-semibold text-sm">
+                                                <svg className="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                                <span>{item.label}</span>
+                                            </div>
+                                            <p className="text-slate-500 text-xs leading-normal">{item.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {/* Right Column: Premium AI Mockup Dashboard (5 cols on lg) */}
+                        <div className="solution-image opacity-0 lg:col-span-5 flex items-stretch">
+                            <div className="w-full bg-gradient-to-br from-slate-50 to-[#EDF4EE] border border-slate-200/80 rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[480px]">
+                                {/* Grid background effect */}
+                                <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+                                
+                                {/* Header of mockup */}
+                                <div className="flex justify-between items-center relative z-10 mb-4 pb-4 border-b border-slate-200/60">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-red-400" />
+                                        <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                                        <div className="w-3 h-3 rounded-full bg-green-400" />
+                                    </div>
+                                    <span className="text-[11px] text-slate-400 uppercase tracking-widest font-mono">Dravya AI Panel v1.2</span>
+                                </div>
+
+                                {/* Floating mockup cards inside container */}
+                                <div className="flex-1 flex flex-col gap-4 justify-center relative z-10">
+                                    
+                                    {/* Mock Card 1: Chat interface */}
+                                    <div className="bg-white border border-green-100 rounded-2xl p-4 shadow-md hover:-translate-y-1 transition-transform duration-300 cursor-default group/card">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                                            <span className="text-[11px] font-bold text-green-700 uppercase tracking-wide">Dravya Wellness AI</span>
+                                        </div>
+                                        <p className="text-slate-600 text-xs leading-relaxed italic">
+                                            &quot;Ashwagandha is highly recommended for Vata-Pitta stress relief. Take 1 tsp at bedtime.&quot;
+                                        </p>
+                                    </div>
+
+                                    {/* Mock Card 2: Interaction Checker */}
+                                    <div className="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-4 shadow-md hover:-translate-y-1 transition-transform duration-300 cursor-default">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                                <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Interaction Scanner</span>
+                                            </div>
+                                            <span className="text-[9px] bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-medium">Safe</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-slate-600">Ashwagandha + Ibuprofen</span>
+                                            <span className="text-emerald-600 font-bold">0 Interactions</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Mock Card 3: Dosha Profile */}
+                                    <div className="bg-white border border-slate-100 text-slate-800 rounded-2xl p-4 shadow-md hover:-translate-y-1 transition-transform duration-300 cursor-default">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide font-sans">Dosha Profile (Prakriti)</span>
+                                            <span className="text-[10px] text-green-600 font-semibold">Active</span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {[
+                                                { name: 'Vata (Wind)', pct: '45%', color: 'bg-green-600' },
+                                                { name: 'Pitta (Fire)', pct: '35%', color: 'bg-emerald-600' },
+                                                { name: 'Kapha (Earth)', pct: '20%', color: 'bg-slate-400' }
+                                            ].map((dosha, idx) => (
+                                                <div key={idx} className="space-y-0.5">
+                                                    <div className="flex justify-between text-[10px] font-medium">
+                                                        <span className="text-slate-500">{dosha.name}</span>
+                                                        <span className="text-slate-800 font-bold">{dosha.pct}</span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                        <div className={`h-full rounded-full ${dosha.color}`} style={{ width: dosha.pct }} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {/* Bottom decorative link */}
+                                <div className="mt-4 pt-4 border-t border-slate-200/60 flex justify-between items-center text-xs text-slate-450 relative z-10">
+                                    <span className="text-slate-400 font-medium">AI Diagnosis System</span>
+                                    <span className="text-green-600 hover:text-green-700 cursor-pointer flex items-center gap-1 transition-colors font-bold">
+                                        Open WebApp
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Right: Solution Image */}
-                        <div className="lg:pl-8">
-                            <div className="relative max-w-lg mx-auto">
-                                <Image
-                                    src="/solution-hero.png"
-                                    alt="AI-Powered Ayurvedic Health Assistant"
-                                    width={500}
-                                    height={500}
-                                    className="w-full h-auto rounded-3xl"
-                                />
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -315,10 +735,10 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     {/* Section Header */}
                     <div className="text-center mb-16">
-                        <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
+                        <span className="features-badge opacity-0 inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
                             Why Choose Us
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+                        <h2 className="features-heading opacity-0 text-4xl md:text-5xl font-bold text-gray-900">
                             Everything You Need for <span className="text-gradient-green">Holistic Wellness</span>
                         </h2>
                     </div>
@@ -326,7 +746,7 @@ export default function LandingPage() {
                     {/* Bento Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {/* Card 1: Ayurvedic Expertise - Large */}
-                        <div className="bento-card lg:col-span-2 bg-gradient-to-br from-green-50 to-emerald-100 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                        <div className="bento-card-anim opacity-0 bento-card lg:col-span-2 bg-gradient-to-br from-green-50 to-emerald-100 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                             <div className="relative z-10">
                                 <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +758,6 @@ export default function LandingPage() {
                                     Our platform is built on authentic Ayurvedic texts and principles, curated by experts with deep knowledge of traditional Indian medicine systems spanning over 5,000 years.
                                 </p>
                             </div>
-                            {/* Decorative Element */}
                             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-green-200/50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                             <div className="absolute right-8 top-8 opacity-10">
                                 <svg className="w-32 h-32 text-green-600" fill="currentColor" viewBox="0 0 24 24">
@@ -348,7 +767,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* Card 2: Secure & Private */}
-                        <div className="bento-card bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                        <div className="bento-card-anim opacity-0 bento-card bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                             <div className="relative z-10">
                                 <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,7 +783,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* Card 3: Integrations */}
-                        <div className="bento-card bg-white rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                        <div className="bento-card-anim opacity-0 bento-card bg-white rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500 border border-gray-100">
                             <div className="relative z-10">
                                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Comprehensive Platform</h3>
                                 <p className="text-gray-600 leading-relaxed mb-6">
@@ -384,7 +803,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* Card 4: Visual Card with Plant Image */}
-                        <div className="bento-card lg:col-span-2 rounded-3xl overflow-hidden relative group hover:shadow-2xl transition-all duration-500 h-64 lg:h-auto">
+                        <div className="bento-card-anim opacity-0 bento-card lg:col-span-2 rounded-3xl overflow-hidden relative group hover:shadow-2xl transition-all duration-500 h-64 lg:h-auto">
                             <Image
                                 src="/ayurvedic_plants/Ashwagandha.jpg"
                                 alt="Ayurvedic Herbs"
@@ -407,7 +826,7 @@ export default function LandingPage() {
                             { value: '99%', label: 'Accuracy Rate' },
                             { value: '24/7', label: 'AI Availability' },
                         ].map((stat, index) => (
-                            <div key={index} className="text-center p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-shadow">
+                            <div key={index} className="stat-card-anim opacity-0 text-center p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-shadow">
                                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient-green mb-1 sm:mb-2">{stat.value}</div>
                                 <div className="text-gray-600 font-medium text-xs sm:text-sm">{stat.label}</div>
                             </div>
@@ -417,7 +836,7 @@ export default function LandingPage() {
             </section>
 
             {/* Section 5: Footer */}
-            <footer className="landing-footer py-10 sm:py-12 md:py-16 text-white">
+            <footer className="footer-reveal opacity-0 landing-footer py-10 sm:py-12 md:py-16 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-12">
                         {/* Logo & Description */}
@@ -474,25 +893,6 @@ export default function LandingPage() {
                                     India
                                 </li>
                             </ul>
-
-                            {/* Social Links */}
-                            <div className="flex gap-4 mt-6">
-                                {[
-                                    { icon: 'M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z', name: 'Twitter' },
-                                    { icon: 'M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z', name: 'GitHub' },
-                                ].map((social) => (
-                                    <a
-                                        key={social.name}
-                                        href="#"
-                                        className="w-10 h-10 bg-gray-800 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
-                                        aria-label={social.name}
-                                    >
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d={social.icon} />
-                                        </svg>
-                                    </a>
-                                ))}
-                            </div>
                         </div>
                     </div>
 

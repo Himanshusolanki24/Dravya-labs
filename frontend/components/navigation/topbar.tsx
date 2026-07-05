@@ -2,9 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Search, Stethoscope, Plus } from 'lucide-react';
+import { Search, Stethoscope, Plus, Sun, Bell } from 'lucide-react';
 
 interface TopbarProps {
     showSearch?: boolean;
@@ -16,38 +15,49 @@ export default function Topbar({
     showNewChat = true
 }: TopbarProps) {
     return (
-        <header className="h-14 shrink-0 bg-gradient-to-r from-[#f0fdf4] to-[#f0f9ff] flex items-center justify-between z-40 relative px-4 border-b border-slate-200/80 shadow-sm text-slate-800">
+        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between z-40 relative px-4 lg:px-8 text-slate-800">
             <div className="flex items-center gap-4">
-                <SidebarTrigger className="size-9 text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all rounded-lg" />
+                <SidebarTrigger className="size-10 bg-[#F4F9F4] text-[#267F37] hover:text-[#1e662c] hover:bg-[#E8F0E5] transition-all rounded-full border-none shadow-none flex items-center justify-center [&>svg]:size-5" />
 
                 {/* Search Bar - Left Aligned */}
                 {showSearch && (
-                    <div className="hidden md:flex items-center bg-white/80 border border-slate-200 hover:border-emerald-500/30 focus-within:border-emerald-500/40 focus-within:bg-white rounded-full px-4 py-1.5 transition-all duration-300 shadow-sm group">
-                        <Search className="size-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+                    <div className="hidden md:flex items-center bg-white border border-slate-200 hover:border-[#267F37]/30 focus-within:border-[#267F37]/50 rounded-full px-5 py-2.5 transition-all duration-300 w-[350px] lg:w-[450px]">
+                        <Search className="size-4.5 text-[#267F37] shrink-0" />
                         <input
                             type="text"
-                            className="bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium text-slate-800 w-[200px] lg:w-[280px] placeholder:text-slate-400 p-0 ml-3 h-auto leading-none"
-                            placeholder='Try searching "insights"'
+                            className="bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium text-slate-700 w-full placeholder:text-slate-500 p-0 ml-3 h-auto leading-none"
+                            placeholder="Search insights, herbs, remedies..."
                         />
                     </div>
                 )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+
+
+                {/* Bell Icon */}
+                <button
+                    className="flex items-center justify-center size-10 rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:scale-95 relative"
+                    title="Notifications"
+                >
+                    <Bell className="size-4.5" />
+                    <span className="absolute top-2.5 right-2.5 size-2 bg-[#267F37] rounded-full border border-white"></span>
+                </button>
+
                 {/* Find Doctor Icon */}
                 <Link
                     href="/doctor"
-                    className="flex items-center justify-center size-9 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-emerald-600 shadow-sm transition-all active:scale-95"
+                    className="flex items-center justify-center size-10 rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
                     title="Find Doctor"
                 >
-                    <Stethoscope className="size-4" />
+                    <Stethoscope className="size-4.5" />
                 </Link>
 
                 {/* New Chat Circular Button */}
                 {showNewChat && (
                     <Link
                         href="/chat"
-                        className="flex items-center justify-center size-9 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
+                        className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-[#267F37] to-teal-600 text-white hover:opacity-90 transition-all active:scale-95 shadow-sm"
                         title="New Chat"
                     >
                         <Plus className="size-5" />

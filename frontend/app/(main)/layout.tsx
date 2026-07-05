@@ -13,10 +13,10 @@ export default function MainLayout({
         <SidebarProvider defaultOpen={true}>
             <div className="h-screen flex w-full bg-gray-50 overflow-hidden">
                 <AppSidebar />
-                <div className="flex-1 flex flex-col min-w-0 h-full">
+                <div className="flex-1 flex flex-col min-w-0 h-full transition-all duration-300 ease-in-out">
                     <Topbar />
                     <SidebarInset className="flex-1 relative overflow-hidden border-0">
-                        <main className="h-full overflow-auto hide-scrollbar bg-white">
+                        <main className="h-full overflow-auto hide-scrollbar bg-[#F8FAFC]">
                             {children}
                         </main>
                     </SidebarInset>

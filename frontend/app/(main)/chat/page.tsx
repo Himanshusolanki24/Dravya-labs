@@ -282,13 +282,13 @@ function ChatPageContent() {
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="flex flex-1 flex-col h-full relative overflow-hidden">
+        <div className="flex flex-1 flex-col h-full relative overflow-hidden bg-transparent">
             {/* Modern Animated Background */}
             <ModernBackground />
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col items-center px-3 sm:px-4 md:px-6 overflow-y-auto chat-scrollbar relative z-10 pt-12 sm:pt-14 pb-2">
-                <div className="w-full max-w-4xl mx-auto py-3 sm:py-4 lg:py-6 flex-1 flex flex-col">
+            <main className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4 md:px-6 overflow-y-auto chat-scrollbar relative z-10 pt-4 pb-2">
+                <div className="w-full max-w-4xl mx-auto py-2 flex-1 flex flex-col justify-center">
                     {!hasMessages ? (
                         <>
                             {/* Initial State - Wellness Icon */}
@@ -345,8 +345,8 @@ function ChatPageContent() {
                 </div>
             )}
 
-            {/* Sticky Chat Input - Mobile optimized */}
-            <div className="sticky bottom-0 w-full pt-4 sm:pt-6 relative z-20 mobile-chat-input safe-area-bottom">
+            {/* Chat Input */}
+            <div className="w-full relative z-20 pb-2 bg-transparent">
                 <ChatInput
                     onSend={handleSendMessage}
                     placeholder={t.chat.placeholder}

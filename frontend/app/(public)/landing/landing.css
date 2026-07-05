@@ -2,29 +2,16 @@
  * LANDING PAGE STYLES
  * ==================================== */
 
-/* Custom Gradient Scrollbar */
+/* Hide scrollbar completely while maintaining scroll functionality */
 ::-webkit-scrollbar {
-  width: 12px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%);
-  border-radius: 10px;
-  border: 2px solid #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #16a34a 0%, #059669 50%, #047857 100%);
-}
-
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #22c55e #f1f5f9;
+html, body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important;  /* IE and Edge */
 }
 
 /* White Frame Border - Picture Frame Effect */
@@ -479,14 +466,12 @@
   }
 }
 
-/* Mobile Scrollbar - thinner on mobile */
+/* Mobile Scrollbar - hidden on mobile */
 @media screen and (max-width: 768px) {
   ::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-width: 1px;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 }
 
@@ -524,4 +509,26 @@
       padding-bottom: max(3rem, env(safe-area-inset-bottom));
     }
   }
+}
+
+/* Custom Petal/Leaf Cursor Trail Styles */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+@media (pointer: coarse) {
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: auto !important;
+  }
+}
+
+.petal-particle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: normal;
+  will-change: transform, opacity;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

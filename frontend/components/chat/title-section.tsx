@@ -2,22 +2,14 @@
 
 import React from 'react';
 
-interface TitleSectionProps {
-    headline?: string;
-    subtitle?: string;
-}
-
-export default function TitleSection({
-    headline = "What's on your mind today?",
-    subtitle = "Describe your symptoms or wellness concerns, and receive personalized Ayurvedic suggestions tailored to your unique constitution."
-}: TitleSectionProps) {
+export default function TitleSection() {
     return (
-        <div className="text-center max-w-xl mx-auto mb-6 animate-wellness-fade-in">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight mb-3 animate-wellness-slide-up">
-                {headline}
+        <div className="text-center max-w-2xl mx-auto mb-6 animate-wellness-fade-in px-4 relative z-10">
+            <h1 className="text-[28px] sm:text-[36px] font-bold text-[#0F172A] leading-[1.2] tracking-tight mb-2 animate-wellness-slide-up">
+                How can we support <br className="hidden sm:block" /> your <span className="text-[#16826B]">wellness</span> today?
             </h1>
-            <p className="text-sm sm:text-base text-gray-500 leading-relaxed font-medium animate-wellness-slide-up animation-delay-100">
-                {subtitle}
+            <p className="text-[14px] sm:text-[15px] text-slate-500 leading-relaxed font-medium animate-wellness-slide-up animation-delay-100 max-w-[500px] mx-auto">
+                Share your symptoms or wellness concerns and get personalized Ayurvedic guidance tailored to you.
             </p>
         </div>
     );

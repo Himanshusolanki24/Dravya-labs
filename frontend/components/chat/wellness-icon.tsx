@@ -6,21 +6,12 @@ import { Leaf } from 'lucide-react';
 export default function WellnessIcon() {
     return (
         <div
-            className="wellness-icon-container mb-8"
+            className="flex items-center justify-center mb-4 mt-4 animate-wellness-float"
             role="img"
-            aria-label="Wellness icon representing Ayurvedic healing"
+            aria-label="Wellness icon"
         >
-            <div className="relative">
-                {/* Outer glow ring */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#16826B]/20 to-[#007200]/20 blur-xl animate-wellness-pulse" />
-
-                {/* Middle ring */}
-                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[#16826B]/30 to-[#007200]/30 blur-md animate-wellness-pulse-delayed" />
-
-                {/* Icon container */}
-                <div className="relative size-24 rounded-full bg-gradient-to-br from-white to-[#f0f9f6] border border-[#16826B]/20 flex items-center justify-center shadow-xl shadow-[#16826B]/10 animate-wellness-float">
-                    <Leaf className="size-10 text-[#16826B] animate-wellness-breathe" strokeWidth={1.5} />
-                </div>
+            <div className="relative size-16 sm:size-20 rounded-full bg-white border border-[#16826B]/10 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+                <Leaf className="size-6 sm:size-8 text-[#16826B]" strokeWidth={2} />
             </div>
         </div>
     );

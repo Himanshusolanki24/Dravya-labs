@@ -119,28 +119,25 @@ function ChatHistorySection() {
     };
 
     return (
-        <div className="mt-0.5 group-data-[collapsible=icon]:hidden">
+        <div className="group-data-[collapsible=icon]:hidden">
             {/* Toggle button */}
             <div
                 onClick={() => setIsOpen(!isOpen)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsOpen(!isOpen); }}
-                className="w-full flex items-center justify-between px-3 py-2 text-[10px] uppercase tracking-wider font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-colors cursor-pointer rounded-lg"
+                className="w-full flex items-center justify-between px-3 h-10 text-[14px] font-medium text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 transition-colors cursor-pointer rounded-xl"
             >
-                <div className="flex items-center gap-1.5">
-                    <ChevronDown
-                        className={`size-3 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}
-                        strokeWidth={2.5}
-                    />
-                    <span className="font-semibold tracking-wider">Chat History</span>
+                <div className="flex items-center">
+                    <Clock className="size-[18px] mr-3 text-slate-500" strokeWidth={2} />
+                    <span>Chat History</span>
                 </div>
                 <button
                     onClick={handleNewChat}
-                    className="p-1 rounded-md hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                    className="p-1.5 rounded-full hover:bg-slate-200 transition-colors"
                     title="New Chat"
                 >
-                    <Plus className="size-3.5" strokeWidth={2.5} />
+                    <Plus className="size-4 text-slate-500" strokeWidth={2} />
                 </button>
             </div>
 
@@ -246,23 +243,19 @@ function UserProfileWidget() {
     const initial = name.charAt(0).toUpperCase();
 
     return (
-        <div className="flex items-center justify-between px-3 py-2 mx-3 mb-3 mt-2 rounded-xl bg-slate-50/50 border border-slate-200/60 group group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:mx-1 transition-all duration-300 hover:border-slate-200 hover:bg-slate-50 shadow-sm">
+        <div className="flex items-center justify-between px-3 py-2 mx-3 mb-3 mt-1 rounded-[20px] bg-white border border-slate-200 group group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:mx-1 transition-all duration-300 hover:shadow-sm cursor-pointer" onClick={handleSignOut} title="Click to Sign Out">
             <div className="flex items-center gap-3 min-w-0 group-data-[collapsible=icon]:gap-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md shadow-emerald-500/10">
+                <div className="size-9 rounded-full bg-[#051F14] flex items-center justify-center text-white font-medium text-[15px] shrink-0">
                     {initial}
                 </div>
                 <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
-                    <span className="text-sm font-semibold text-slate-700 truncate">{name}</span>
-                    <span className="text-[10px] text-slate-400 truncate">{user.email}</span>
+                    <span className="text-sm font-medium text-slate-800 truncate">{name}</span>
+                    <span className="text-[11px] text-slate-500 truncate">{user.email}</span>
                 </div>
             </div>
-            <button 
-                onClick={handleSignOut}
-                className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 transition-all text-slate-400 shrink-0 group-data-[collapsible=icon]:hidden"
-                title="Sign Out"
-            >
-                <LogOut className="size-4" strokeWidth={2} />
-            </button>
+            <div className="shrink-0 group-data-[collapsible=icon]:hidden pr-1 text-slate-600 group-hover:text-red-500 transition-colors">
+                <ChevronDown className="size-4" strokeWidth={2.5} />
+            </div>
         </div>
     );
 }
@@ -277,18 +270,18 @@ export default function AppSidebar() {
     return (
         <Sidebar 
             collapsible="icon" 
-            className="border-r border-slate-200/80 [&_[data-sidebar=sidebar]]:!bg-[linear-gradient(to_bottom,#f0fdf4,#f0f9ff,#ffffff)] [&_[data-sidebar=sidebar]]:border-r [&_[data-sidebar=sidebar]]:border-slate-200/80 text-slate-900" 
+            className="border-r border-slate-200/80 [&_[data-sidebar=sidebar]]:!bg-[#FAFAFA] [&_[data-sidebar=sidebar]]:border-r [&_[data-sidebar=sidebar]]:border-slate-200/80 text-slate-900" 
         >
             {/* Logo Header */}
-            <SidebarHeader className="h-16 flex items-center justify-center border-b border-slate-200/80 py-0 px-4">
+            <SidebarHeader className="h-20 flex items-center justify-start pt-6 pb-2 px-6">
                 <button onClick={toggleSidebar} className="relative group flex items-center gap-3 w-full cursor-pointer focus:outline-none group-data-[collapsible=icon]:justify-center">
                     {/* Collapsed Logo (Icon only) */}
-                    <div className="size-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden hidden group-data-[collapsible=icon]:flex mx-auto relative">
+                    <div className="size-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden hidden group-data-[collapsible=icon]:flex mx-auto relative">
                         <Image
                             src="/logo.png"
                             alt="Dravya Labs"
-                            width={36}
-                            height={36}
+                            width={40}
+                            height={40}
                             className="object-contain transition-opacity duration-300 group-hover:opacity-0"
                         />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -300,9 +293,9 @@ export default function AppSidebar() {
                         <Image
                             src="/Full logo.png"
                             alt="Dravya Labs"
-                            width={140}
-                            height={40}
-                            className="object-contain h-8 w-auto transition-opacity duration-300 group-hover:opacity-20"
+                            width={160}
+                            height={48}
+                            className="object-contain h-10 w-auto transition-opacity duration-300 group-hover:opacity-20"
                         />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <PanelLeft className="size-6 text-slate-600" strokeWidth={1.5} />
@@ -312,9 +305,9 @@ export default function AppSidebar() {
             </SidebarHeader>
 
             {/* Main Navigation */}
-            <SidebarContent className="px-3 pt-4 [&::-webkit-scrollbar]:hidden scrollbar-none">
+            <SidebarContent className="px-3 pt-2 [&::-webkit-scrollbar]:hidden scrollbar-none flex flex-col gap-0.5">
                 <SidebarGroup className="pt-0">
-                    <SidebarGroupLabel className="text-[10px] text-slate-400/80 font-semibold uppercase tracking-wider mb-1 group-data-[collapsible=icon]:hidden">
+                    <SidebarGroupLabel className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1 px-3 group-data-[collapsible=icon]:hidden">
                         Navigation
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -327,11 +320,11 @@ export default function AppSidebar() {
                                         <SidebarMenuButton
                                             asChild
                                             tooltip={item.label}
-                                            className={`transition-all duration-200 h-10 rounded-xl px-3 flex items-center ${active ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-semibold shadow-sm' : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 hover:translate-x-0.5'}`}
+                                            className={`transition-all duration-200 h-10 rounded-xl px-3 flex items-center ${active ? 'bg-[#E8F0E5] text-[#267F37] font-semibold' : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 font-medium'}`}
                                         >
                                             <Link href={item.href} className="flex items-center w-full">
-                                                <item.icon className={`size-[18px] mr-3 transition-colors ${active ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'}`} strokeWidth={active ? 2.2 : 1.8} />
-                                                <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                                                <item.icon className={`size-[18px] mr-3 transition-colors ${active ? 'text-[#267F37]' : 'text-slate-500 group-hover:text-slate-600'}`} strokeWidth={2} />
+                                                <span className="group-data-[collapsible=icon]:hidden text-[14px]">{item.label}</span>
                                             </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
@@ -345,8 +338,8 @@ export default function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup className="pt-0">
-                    <SidebarGroupLabel className="text-[10px] text-slate-400/80 font-semibold uppercase tracking-wider mb-1 mt-4 group-data-[collapsible=icon]:hidden">
+                <SidebarGroup className="pt-2">
+                    <SidebarGroupLabel className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1 px-3 group-data-[collapsible=icon]:hidden">
                         Settings
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -358,11 +351,11 @@ export default function AppSidebar() {
                                     <SidebarMenuButton
                                         asChild
                                         tooltip={item.label}
-                                        className={`transition-all duration-200 h-10 rounded-xl px-3 flex items-center ${active ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-semibold shadow-sm' : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 hover:translate-x-0.5'}`}
+                                        className={`transition-all duration-200 h-10 rounded-xl px-3 flex items-center ${active ? 'bg-[#E8F0E5] text-[#267F37] font-semibold' : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 font-medium'}`}
                                     >
                                         <Link href={item.href} className="flex items-center w-full">
-                                            <item.icon className={`size-[18px] mr-3 transition-colors ${active ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'}`} strokeWidth={active ? 2.2 : 1.8} />
-                                            <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                                            <item.icon className={`size-[18px] mr-3 transition-colors ${active ? 'text-[#267F37]' : 'text-slate-500 group-hover:text-slate-600'}`} strokeWidth={2} />
+                                            <span className="group-data-[collapsible=icon]:hidden text-[14px]">{item.label}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -373,7 +366,7 @@ export default function AppSidebar() {
             </SidebarContent>
 
             {/* Footer with Profile */}
-            <SidebarFooter className="border-t border-slate-200/80 pb-2 px-0 group-data-[collapsible=icon]:px-0">
+            <SidebarFooter className="border-none pb-2 px-0 group-data-[collapsible=icon]:px-0">
                 <UserProfileWidget />
             </SidebarFooter>
 
