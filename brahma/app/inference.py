@@ -1,21 +1,18 @@
 import os
 import json
 import logging
-import torch
 import numpy as np
-import pandas as pd
+import lightgbm as lgb
 from typing import Dict, List
-from .model import BrahmaModel
 
 logger = logging.getLogger(__name__)
 
 class BrahmaPredictor:
-    """Singleton predictor that loads the Brahma model and metadata once."""
+    """Singleton predictor that loads the Brahma LightGBM model and metadata once."""
 
     def __init__(self):
         self.model = None
         self.metadata = None
-        self.device = torch.device('cpu')
         self._loaded = False
 
     @property
@@ -23,7 +20,7 @@ class BrahmaPredictor:
         return self._loaded
 
     def load(self, model_dir: str) -> None:
-        """Load metadata, PyTorch weights, and label encoders from model_dir."""
+        """Load metadata and LightGBM model from model_dir."""
         logger.info(f"📂 Loading Brahma model from: {model_dir}")
 
         meta_path = os.path.join(model_dir, "model_metadata.json")
@@ -39,18 +36,13 @@ class BrahmaPredictor:
         self.feature_classes = self.meta['feature_classes']
         self.id_to_name = {int(k): v for k, v in self.meta['id_to_name'].items()}
 
-        model_path = os.path.join(model_dir, "brahma_model.pth")
+        model_path = os.path.join(model_dir, "brahma_model.txt")
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Missing {model_path}")
 
-        self.model = BrahmaModel(self.input_dim, self.num_classes)
-        state_dict = torch.load(model_path, map_location=self.device, weights_only=True)
-        self.model.load_state_dict(state_dict)
-        self.model.to(self.device)
-        self.model.eval()
-
+        self.model = lgb.Booster(model_file=model_path)
         self._loaded = True
-        logger.info("🕉️ Brahma predictor ready!")
+        logger.info("🕉️ Brahma LightGBM predictor ready!")
 
     def predict(self, input_features: Dict[str, str]) -> List[Dict]:
         """Runs the 29 features through the knowledge model to retrieve Dosha classification."""
@@ -58,7 +50,7 @@ class BrahmaPredictor:
             raise RuntimeError("Brahma model is not loaded.")
 
         # Encode categorical features matching the training protocol exactly
-        features = np.zeros(self.input_dim, dtype=np.float32)
+        features = np.zeros((1, self.input_dim), dtype=np.float32)
 
         for i, feature_name in enumerate(self.features):
             provided_val = str(input_features.get(feature_name, "")).strip().lower()
@@ -67,27 +59,24 @@ class BrahmaPredictor:
             if provided_val in allowed_classes:
                 encoded_idx = allowed_classes.index(provided_val)
             else:
-                # Fallback to index 0 if not cleanly recognized
                 encoded_idx = 0
 
-            features[i] = encoded_idx
+            features[0, i] = encoded_idx
 
-        tensor = torch.FloatTensor(features).unsqueeze(0).to(self.device)
-
-        with torch.no_grad():
-            logits = self.model(tensor)
-            probs = torch.softmax(logits, dim=1)
-            
-            # Retrieve all doshas ranked by probability
-            top_probs, top_idx = torch.topk(probs, self.num_classes, dim=1)
+        # Predict returns probabilities for each class since it's multiclass
+        probs = self.model.predict(features)[0]
+        
+        # Sort indices by descending probability
+        top_idx = np.argsort(probs)[::-1][:self.num_classes]
 
         results = []
-        for rank, (prob, idx) in enumerate(zip(top_probs[0].tolist(), top_idx[0].tolist()), start=1):
+        for rank, idx in enumerate(top_idx, start=1):
+            prob = probs[idx]
             dosha = self.id_to_name.get(idx, "Unknown")
             results.append({
                 "rank": rank,
                 "dosha": dosha.title(),
-                "confidence": round(prob, 6)
+                "confidence": round(float(prob), 6)
             })
 
         return results

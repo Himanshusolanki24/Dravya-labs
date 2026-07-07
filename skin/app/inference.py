@@ -1,11 +1,16 @@
-import torch
+"""
+Skin Disease Inference — TensorFlow/Keras
+Replaces PyTorch-based inference pipeline.
+"""
+
 import json
+import numpy as np
+import tensorflow as tf
 from PIL import Image
-from typing import List, Dict, Optional
+from typing import List, Dict
 from utils.logger import logger
 from utils.helpers import get_model_path, get_config_path
 from app.model_loader import load_trained_model
-from training.transform import get_val_transforms
 
 
 class SkinPredictor:
@@ -15,10 +20,8 @@ class SkinPredictor:
     """
 
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = None
         self.config: Dict = {}
-        self.transform = get_val_transforms()
         self.is_ready = False
         self._load_resources()
 
@@ -27,7 +30,7 @@ class SkinPredictor:
         """Returns current model status for health checks."""
         return {
             "model_loaded": self.is_ready,
-            "device": str(self.device),
+            "backend": "tensorflow",
             "num_classes": len(self.config.get("classes", [])),
             "classes": self.config.get("classes", []),
         }
@@ -35,7 +38,6 @@ class SkinPredictor:
     def _load_resources(self):
         """Loads model and config from disk. Fails gracefully."""
         try:
-            # Load config
             config_path = get_config_path()
             if not config_path.exists():
                 logger.warning(f"Config not found at {config_path}. Model not trained yet.")
@@ -49,16 +51,15 @@ class SkinPredictor:
                 logger.warning("Config has no classes. Run training first.")
                 return
 
-            # Load model
             model_path = get_model_path()
             if not model_path.exists():
                 logger.warning(f"Model weights not found at {model_path}. Run training first.")
                 return
 
             num_classes = len(classes)
-            self.model = load_trained_model(num_classes=num_classes, device=self.device)
+            self.model = load_trained_model(num_classes=num_classes)
             self.is_ready = True
-            logger.info(f"Model loaded successfully ({num_classes} classes, device={self.device})")
+            logger.info(f"TF Model loaded successfully ({num_classes} classes)")
 
         except Exception as e:
             logger.error(f"Error loading resources: {e}")
@@ -73,29 +74,28 @@ class SkinPredictor:
         if not self.is_ready or self.model is None:
             raise RuntimeError(
                 "Model not loaded. Please train the model first and place "
-                "skin_model.pth in the model/ directory."
+                "skin_model.h5 in the model/ directory."
             )
 
-        # Preprocess
-        img_tensor = self.transform(image).unsqueeze(0).to(self.device)
+        # Preprocess — resize, normalize to [0,1], add batch dim
+        img = image.convert("RGB").resize((224, 224))
+        img_array = np.array(img, dtype=np.float32) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
         # Inference
-        with torch.no_grad():
-            outputs = self.model(img_tensor)
-            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+        predictions = self.model.predict(img_array, verbose=0)
+        probabilities = predictions[0]
 
         # Get top-k
         classes = self.config.get("classes", [])
         actual_k = min(top_k, len(classes))
-        top_probs, top_indices = torch.topk(probabilities, actual_k)
+        top_indices = np.argsort(probabilities)[::-1][:actual_k]
 
         descriptions = self.config.get("descriptions", {})
 
         results = []
-        for i in range(actual_k):
-            idx = top_indices[0][i].item()
-            prob = top_probs[0][i].item()
-
+        for idx in top_indices:
+            prob = float(probabilities[idx])
             label = classes[idx] if idx < len(classes) else "Unknown"
             desc = descriptions.get(label, "No description available.")
 

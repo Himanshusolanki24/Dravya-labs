@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-torch
+lightgbm
 pandas
 scikit-learn
 pydantic

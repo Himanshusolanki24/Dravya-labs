@@ -27,7 +27,7 @@ app = FastAPI(title="Dravya Labs Orchestrator Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://192.168.0.109:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -130,14 +130,17 @@ class ChatResponse(BaseModel):
 # Profile Fetching Helper
 # -----------------------------------------------------
 
-def _fetch_user_profile(user_id: str) -> Optional[dict]:
+async def _fetch_user_profile(user_id: str) -> Optional[dict]:
     """Fetch the user's saved health profile from Supabase."""
     try:
-        record = fetch_row_by_id("user_health_profiles", "user_id", user_id)
-        if record and record.get("encrypted_health_json"):
-            import json as _json
-            decrypted = decrypt_json(record["encrypted_health_json"])
-            return _json.loads(decrypted)
+        from app.services.supabase_async import select_rows
+        records = await select_rows("user_health_profiles", filters={"user_id": f"eq.{user_id}"}, limit=1)
+        if records:
+            record = records[0]
+            if record.get("encrypted_health_json"):
+                import json as _json
+                decrypted = decrypt_json(record["encrypted_health_json"])
+                return _json.loads(decrypted)
     except Exception as e:
         logger.warning("Failed to fetch user profile (non-fatal): %s", e)
     return None
@@ -188,7 +191,7 @@ async def analyze_symptoms(symptom_input: SymptomInput):
         conditions.append(symptom_input.existing_conditions)
 
     # Fetch saved profile from Supabase to enrich the analysis
-    saved_profile = _fetch_user_profile(user_id)
+    saved_profile = await _fetch_user_profile(user_id)
 
     # Build enriched UserProfile from saved data
     bp = saved_profile.get("basic_profile", {}) if saved_profile else {}
@@ -325,7 +328,7 @@ async def chat(message_input: ChatMessageInput):
     # Fetch user's saved health profile for personalized responses
     profile_context = "No saved profile."
     if message_input.user_id:
-        saved_profile = _fetch_user_profile(message_input.user_id)
+        saved_profile = await _fetch_user_profile(message_input.user_id)
         if saved_profile:
             profile_context = _profile_to_context_str(saved_profile)
 
@@ -493,7 +496,7 @@ async def generate_treatment(input_data: GenerateTreatmentInput):
     # Optionally enrich with user profile
     profile_context = "No saved profile."
     if input_data.user_id:
-        saved = _fetch_user_profile(input_data.user_id)
+        saved = await _fetch_user_profile(input_data.user_id)
         if saved:
             profile_context = _profile_to_context_str(saved)
 
@@ -552,7 +555,7 @@ async def review_treatment(input_data: ReviewTreatmentInput):
 
     profile_context = "No saved profile."
     if input_data.user_id:
-        saved = _fetch_user_profile(input_data.user_id)
+        saved = await _fetch_user_profile(input_data.user_id)
         if saved:
             profile_context = _profile_to_context_str(saved)
 

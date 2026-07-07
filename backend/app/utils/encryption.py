@@ -1,24 +1,36 @@
-import json
 import logging
+from nacl import secret
+from app.core.config import settings
 
 logger = logging.getLogger("dravya.encryption")
 
+_box = secret.SecretBox(bytes.fromhex(settings.ENCRYPTION_KEY))
 
 # =========================
-# 🔐 Serialize Data (passthrough)
+# 🔐 Serialize Data
 # =========================
 def encrypt_json(data: str) -> str:
     """
-    Returns data as-is (no encryption applied).
+    Encrypts the JSON string using PyNaCl SecretBox.
     """
-    return data
+    try:
+        encrypted = _box.encrypt(data.encode())
+        return encrypted.hex()
+    except Exception as e:
+        logger.error(f"Encryption failed: {e}")
+        raise
 
 
 # =========================
-# 🔓 Deserialize Data (passthrough)
+# 🔓 Deserialize Data
 # =========================
 def decrypt_json(token: str) -> str:
     """
-    Returns token as-is (no decryption applied).
+    Decrypts the token string back to JSON.
     """
-    return token
+    try:
+        decrypted = _box.decrypt(bytes.fromhex(token))
+        return decrypted.decode()
+    except Exception as e:
+        logger.error(f"Decryption failed: {e}")
+        raise

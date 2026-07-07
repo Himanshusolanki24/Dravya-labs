@@ -1,40 +1,64 @@
-import torch
-import torch.nn as nn
+"""
+Diabetes prediction model — LightGBM
+Binary classifier for diabetes risk: 8 numeric features → probability
+"""
 
-class DiabetesModel(nn.Module):
-    """
-    Architecture must match train_model.py exactly:
-    fc1(8→128) → bn1 → relu → dropout(0.3)
-    fc2(128→64) → bn2 → relu → dropout(0.3)
-    fc3(64→16) → bn3 → relu
-    fc4(16→1)
-    """
-    def __init__(self, input_dim=8):
-        super(DiabetesModel, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 128)
-        self.bn1 = nn.BatchNorm1d(128)
-        self.fc2 = nn.Linear(128, 64)
-        self.bn2 = nn.BatchNorm1d(64)
-        self.fc3 = nn.Linear(64, 16)
-        self.bn3 = nn.BatchNorm1d(16)
-        self.fc4 = nn.Linear(16, 1)
-        self.dropout = nn.Dropout(p=0.3)
-        self.relu = nn.ReLU()
-        
-    def forward(self, x):
-        x = self.relu(self.bn1(self.fc1(x)))
-        x = self.dropout(x)
-        x = self.relu(self.bn2(self.fc2(x)))
-        x = self.dropout(x)
-        x = self.relu(self.bn3(self.fc3(x)))
-        x = self.fc4(x)
-        return x
+import json
+import os
+import logging
+import numpy as np
+import lightgbm as lgb
 
-def load_model(model_path: str, input_dim=8):
-    model = DiabetesModel(input_dim)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    state_dict = torch.load(model_path, map_location=device)
-    model.load_state_dict(state_dict)
-    model.to(device)
-    model.eval()
-    return model, device
+logger = logging.getLogger(__name__)
+
+
+_model = None
+_scaler_params = None
+
+
+def load_model(model_path: str = None, scaler_path: str = None):
+    """Load LightGBM model and scaler params."""
+    global _model, _scaler_params
+
+    if model_path is None:
+        base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        model_path = os.path.join(base, "diabetes_model.txt")
+        scaler_path = os.path.join(base, "scaler_params.json")
+
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found: {model_path}")
+
+    _model = lgb.Booster(model_file=model_path)
+
+    if scaler_path and os.path.exists(scaler_path):
+        with open(scaler_path, "r") as f:
+            _scaler_params = json.load(f)
+
+    logger.info("✅ Diabetes LightGBM model loaded.")
+    return _model, _scaler_params
+
+
+def predict(features: list[float]) -> dict:
+    """Run prediction on scaled features. Returns probability and label."""
+    global _model, _scaler_params
+
+    if _model is None:
+        raise RuntimeError("Model not loaded.")
+
+    # Scale features
+    if _scaler_params:
+        mean = _scaler_params["mean"]
+        scale = _scaler_params["scale"]
+        features = [(features[i] - mean[i]) / scale[i] for i in range(len(features))]
+
+    arr = np.array([features], dtype=np.float64)
+    probability = float(_model.predict(arr)[0])
+
+    is_diabetic = probability >= 0.5
+    prediction = "Diabetic" if is_diabetic else "Non-Diabetic"
+
+    return {
+        "prediction": prediction,
+        "probability": round(probability, 4),
+        "is_diabetic": is_diabetic,
+    }

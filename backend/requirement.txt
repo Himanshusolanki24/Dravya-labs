@@ -4,9 +4,10 @@ python-dotenv
 httpx
 aiohttp
 
-pinecone
+# Helix DB accessed via httpx — no SDK needed
 sentence-transformers
 python-jose[cryptography]
 pydantic
 tenacity
 langgraph
+pynacl

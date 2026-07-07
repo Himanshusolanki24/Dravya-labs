@@ -10,6 +10,7 @@ class Settings:
     # 🔐 Security
     # =========================
     SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET")
+    ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "b40c741639d6e7f1fbc7c3e38716b9b39d1b64a33118cf23b49c4033b0f5b9d3")
 
     # =========================
     # 🗄 Supabase (PostgREST)
@@ -18,11 +19,11 @@ class Settings:
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
     # =========================
-    # 📚 Pinecone
+    # 📚 Helix DB
     # =========================
-    PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
-    PINECONE_INDEX: str = os.getenv("PINECONE_INDEX", "dravya-health-profiles")
-    PINECONE_MEMORY_INDEX: str = os.getenv("PINECONE_MEMORY_INDEX", "dravya-health-profiles")
+    HELIX_DB_API_KEY: str = os.getenv("HELIX_DB_API_KEY", "")
+    HELIX_DB_API_URL: str = os.getenv("HELIX_DB_API_URL", "http://localhost:8080")
+    HELIX_DB_COLLECTION: str = os.getenv("HELIX_DB_COLLECTION", "dravya-health-profiles")
 
     # =========================
     # 🤖 Mistral LLM (Direct API)
@@ -49,7 +50,7 @@ class Settings:
 
     # Feature flag: use the new hierarchical orchestrator instead of the linear pipeline.
     USE_HIERARCHICAL_ORCHESTRATOR: bool = (
-        os.getenv("USE_HIERARCHICAL_ORCHESTRATOR", "false").lower() == "true"
+        os.getenv("USE_HIERARCHICAL_ORCHESTRATOR", "true").lower() == "true"
     )
     MAX_CRITIC_RETRIES: int = int(os.getenv("MAX_CRITIC_RETRIES", "3"))
 

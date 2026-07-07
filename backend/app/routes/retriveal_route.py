@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.core.security import verify_user
 from app.utils.encryption import decrypt_json
-from app.services.supabase_api import fetch_row_by_id
+from app.services.supabase import fetch_row_by_id
 import logging
 
 router = APIRouter()

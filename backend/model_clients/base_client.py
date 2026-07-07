@@ -21,6 +21,17 @@ from app.core.config import settings
 logger = logging.getLogger("dravya.model_clients")
 
 
+_shared_client: Optional[httpx.AsyncClient] = None
+
+def get_shared_client(timeout: int) -> httpx.AsyncClient:
+    global _shared_client
+    if _shared_client is None:
+        _shared_client = httpx.AsyncClient(
+            timeout=timeout,
+            limits=httpx.Limits(max_keepalive_connections=50, max_connections=200)
+        )
+    return _shared_client
+
 class BaseModelClient:
     """
     Abstract base for calling a pre-hosted ML model API.
@@ -76,11 +87,11 @@ class BaseModelClient:
 
         payload = self._build_payload(data)
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(self.api_url, json=payload, headers=headers)
-            if resp.status_code == 422:
-                logger.error(f"Validation Error (422) from {self.model_name}: {resp.text}")
-            resp.raise_for_status()
+        client = get_shared_client(self.timeout)
+        resp = await client.post(self.api_url, json=payload, headers=headers)
+        if resp.status_code == 422:
+            logger.error(f"Validation Error (422) from {self.model_name}: {resp.text}")
+        resp.raise_for_status()
 
         result = resp.json()
         result["status"] = "success"

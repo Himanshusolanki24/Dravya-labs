@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.models.health import HealthProfileInput
 from app.core.security import verify_user
 from app.utils.encryption import encrypt_json
-from app.services.supabase_api import insert_row
+from app.services.supabase import insert_row
 from app.services.embeddings import embed_text
-from app.services.pinecone_service import index
+from app.services.helix_db import index
 import uuid
 import logging
 
