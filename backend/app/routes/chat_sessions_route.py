@@ -8,10 +8,11 @@ import logging
 from datetime import datetime, timezone
 
 import requests as req
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from pydantic import BaseModel
 
 from app.core.config import settings
+from app.core.security import verify_user
 from app.services.supabase import insert_row, fetch_row_by_id
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ def _headers(prefer: str = "return=representation"):
 # ─── Routes ──────────────────────────────────────────────────
 
 @router.get("/sessions", response_model=ChatSessionsList)
-async def list_sessions(user_id: str = Query(..., description="Supabase user UUID")):
+async def list_sessions(user_id: str = Depends(verify_user)):
     """List all chat sessions for a user, newest first."""
     try:
         url = (

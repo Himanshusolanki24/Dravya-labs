@@ -6,6 +6,8 @@ Provides: retry, timeout, logging, graceful degradation.
 """
 
 import logging
+import hashlib
+import json
 from typing import Any, Optional
 
 import httpx
@@ -17,9 +19,11 @@ from tenacity import (
 )
 
 from app.core.config import settings
+from app.services.redis_cache import cache_get_json, cache_set_json
 
 logger = logging.getLogger("dravya.model_clients")
 
+CACHE_TTL_SECONDS = 3600
 
 _shared_client: Optional[httpx.AsyncClient] = None
 
@@ -60,8 +64,16 @@ class BaseModelClient:
                 "reason": f"{self.model_name} API URL not configured",
             }
 
+        cache_key = "ml:" + hashlib.md5(f"{self.model_name}:{json.dumps(data, sort_keys=True)}".encode()).hexdigest()
+        cached_val = await cache_get_json(cache_key)
+        if cached_val is not None:
+            logger.info("Serving %s prediction from Redis cache", self.model_name)
+            return cached_val
+
         try:
-            return await self._call_api(data)
+            res = await self._call_api(data)
+            await cache_set_json(cache_key, res, CACHE_TTL_SECONDS)
+            return res
         except Exception as e:
             logger.warning(
                 "%s prediction failed (non-fatal): %s", self.model_name, e

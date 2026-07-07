@@ -19,10 +19,11 @@ class Settings:
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
     # =========================
-    # 📚 Helix DB
+    # 📚 Helix DB & Redis
     # =========================
     HELIX_DB_API_KEY: str = os.getenv("HELIX_DB_API_KEY", "")
     HELIX_DB_API_URL: str = os.getenv("HELIX_DB_API_URL", "http://localhost:8080")
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     HELIX_DB_COLLECTION: str = os.getenv("HELIX_DB_COLLECTION", "dravya-health-profiles")
 
     # =========================

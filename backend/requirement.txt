@@ -11,3 +11,4 @@ pydantic
 tenacity
 langgraph
 pynacl
+redis

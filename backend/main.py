@@ -3,11 +3,12 @@ import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from app.core.security import verify_user
 from agents.orchestrator_agent import run_pipeline
 from agents.schemas import (
     SharedState, UserProfile, SymptomsInput, MedicalHistory,
@@ -18,6 +19,7 @@ from memory.vector_store import retrieve_relevant_memory, store_health_memory
 from app.services.supabase import fetch_row_by_id
 from app.utils.encryption import decrypt_json
 from app.routes.chat_sessions_route import upsert_chat_session
+from app.utils.event_bus import event_bus
 
 load_dotenv()
 logger = logging.getLogger("dravya.main")
@@ -62,6 +64,11 @@ async def _close_pools() -> None:
         await _close_llm()
     except Exception:
         pass
+    try:
+        from app.services.redis_cache import close_redis
+        await close_redis()
+    except Exception:
+        pass
 
 # -----------------------------------------------------
 # Frontend Expected Interfaces
@@ -72,7 +79,6 @@ class SymptomInput(BaseModel):
     age: Optional[int] = None
     gender: Optional[str] = None
     existing_conditions: Optional[str] = None
-    user_id: Optional[str] = None
     session_id: Optional[str] = None
 
 class HomeRemedy(BaseModel):
@@ -118,7 +124,6 @@ class AnalysisResult(BaseModel):
 class ChatMessageInput(BaseModel):
     message: str
     session_id: str
-    user_id: Optional[str] = None
     context: Optional[Dict] = None
 
 class ChatResponse(BaseModel):
@@ -181,8 +186,7 @@ def _profile_to_context_str(profile: dict) -> str:
 # -----------------------------------------------------
 
 @app.post("/api/analyze", response_model=AnalysisResult)
-async def analyze_symptoms(symptom_input: SymptomInput):
-    user_id = symptom_input.user_id or str(uuid.uuid4())
+async def analyze_symptoms(symptom_input: SymptomInput, user_id: str = Depends(verify_user)):
     session_id = symptom_input.session_id or str(uuid.uuid4())
     analysis_id = str(uuid.uuid4())
 
@@ -246,76 +250,187 @@ async def analyze_symptoms(symptom_input: SymptomInput):
     try:
         # Run the full orchestrated LangGraph pipeline!
         result = await run_pipeline(initial_state)
-
-        # 1. Check Safety
-        emergency_warning = None
-        if result.safety.verdict == SafetyVerdict.HIGH_RISK:
-            flags_str = " ".join([f.reason for f in result.safety.flags])
-            emergency_warning = f"⚠️ HIGH RISK: {flags_str} Consult your doctor immediately."
-
-        # 2. Extract mapped herbs
-        mapped_herbs = []
-        for h in result.herbs.herbs:
-            mapped_herbs.append(HerbModel(
-                name=h.name,
-                sanskrit_name=h.sanskrit_name,
-                properties=[],
-                how_to_consume="",
-                dosage=h.dosage_guidance or "As directed",
-                benefits=h.reasoning,
-                contraindications=", ".join(h.contraindications) if h.contraindications else None
-            ))
-
-        # 3. Dietary 
-        diet_advice = result.diet.foods_to_eat + [f"Avoid: {f}" for f in result.diet.foods_to_avoid]
-
-        # Extract severity from Safety flag or string
-        severity_score = result.vikriti.severity_score
-        if severity_score > 7:
-            sev = "urgent"
-        elif severity_score > 4:
-            sev = "moderate"
-        else:
-            sev = "mild"
-            
-        if result.safety.verdict == SafetyVerdict.HIGH_RISK:
-            sev = "emergency"
-
-        dosha = (result.prakriti.dominant_dosha or "vata").lower()
-        if dosha == "unknown" or not dosha:
-            dosha = "vata"
-            
-        summary = result.orchestrator_summary
-        if not summary:
-            summary = "We successfully ran your analysis based on our ML Models. Refer to Diet and Herbs!"
-
-        # Save chat session metadata to Supabase
-        session_title = symptom_input.symptoms[:80] if symptom_input.symptoms else "Symptom Analysis"
-        upsert_chat_session(user_id, session_id, session_title)
-
-        # Return strictly what Next.js expects:
-        return AnalysisResult(
-            analysis_id=analysis_id,
-            session_id=session_id,
-            user_id=user_id,
-            severity=sev,
-            dosha_imbalance=dosha,
-            primary_symptoms=[symptom_input.symptoms],
-            ayurvedic_interpretation=summary,
-            emergency_warning=emergency_warning,
-            home_remedies=[],  
-            herbs=mapped_herbs,
-            medicines=[],
-            lifestyle_recommendations=result.herbs.lifestyle_tips,
-            dietary_advice=diet_advice
-        )
-
+        return _build_analysis_result(analysis_id, session_id, user_id, result, symptom_input)
     except Exception as e:
         logger.error(f"Error in Orchestrator Pipeline: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+class AsyncAnalysisResponse(BaseModel):
+    task_id: str
+    status: str
+
+@app.post("/api/analyze/async", response_model=AsyncAnalysisResponse)
+async def analyze_symptoms_async(symptom_input: SymptomInput, background_tasks: BackgroundTasks, user_id: str = Depends(verify_user)):
+    session_id = symptom_input.session_id or str(uuid.uuid4())
+    analysis_id = str(uuid.uuid4())
+    task_id = str(uuid.uuid4())
+
+    # Re-use the setup logic (in a real app we'd extract this, doing inline for speed)
+    conditions = []
+    if symptom_input.existing_conditions:
+        conditions.append(symptom_input.existing_conditions)
+    saved_profile = await _fetch_user_profile(user_id)
+    bp = saved_profile.get("basic_profile", {}) if saved_profile else {}
+    hm_data = saved_profile.get("health_metrics", {}) if saved_profile else {}
+    di_data = saved_profile.get("diet_info", {}) if saved_profile else {}
+    mh_data = saved_profile.get("medical_history", {}) if saved_profile else {}
+    saved_conditions = mh_data.get("conditions", [])
+    all_conditions = list(set(saved_conditions + conditions))
+
+    initial_state = SharedState(
+        user_profile=UserProfile(
+            user_id=user_id,
+            full_name=bp.get("full_name"),
+            age=symptom_input.age or bp.get("age"),
+            gender=symptom_input.gender or bp.get("gender"),
+            height=bp.get("height"),
+            weight=bp.get("weight"),
+            location=bp.get("location"),
+            occupation=bp.get("occupation"),
+            activity_level=bp.get("activity_level", "moderate"),
+        ),
+        health_metrics=HealthMetrics(
+            blood_pressure=hm_data.get("blood_pressure"),
+            blood_sugar_fasting=hm_data.get("blood_sugar_fasting"),
+            blood_sugar_post_meal=hm_data.get("blood_sugar_post_meal"),
+            cholesterol=hm_data.get("cholesterol"),
+            thyroid_levels=hm_data.get("thyroid_levels"),
+            heart_rate=hm_data.get("heart_rate"),
+            sleep_duration=hm_data.get("sleep_duration"),
+            stress_level=hm_data.get("stress_level", 5),
+        ),
+        diet_info=DietInfo(
+            diet_type=di_data.get("diet_type"),
+            food_allergies=di_data.get("food_allergies"),
+            daily_water_intake=di_data.get("daily_water_intake"),
+            current_diet_pattern=di_data.get("current_diet_pattern"),
+            supplements=di_data.get("supplements"),
+        ),
+        symptoms_input=SymptomsInput(
+            chief_complaint=symptom_input.symptoms
+        ),
+        medical_history=MedicalHistory(
+            conditions=all_conditions,
+            injury_history=mh_data.get("injury_history"),
+            surgery_history=mh_data.get("surgery_history"),
+        )
+    )
+
+    background_tasks.add_task(_run_pipeline_task, task_id, initial_state, symptom_input, analysis_id, session_id, user_id)
+    return AsyncAnalysisResponse(task_id=task_id, status="processing")
+
+@app.websocket("/ws/analyze/{task_id}")
+async def websocket_analyze(websocket: WebSocket, task_id: str):
+    await websocket.accept()
+    queue = event_bus.get_queue(task_id)
+    try:
+        while True:
+            event = await queue.get()
+            await websocket.send_json(event)
+            if event.get("status") in ["complete", "error"]:
+                break
+    except WebSocketDisconnect:
+        pass
+    finally:
+        event_bus.remove_queue(task_id)
+
+async def _run_pipeline_task(task_id: str, initial_state: SharedState, symptom_input: SymptomInput, analysis_id: str, session_id: str, user_id: str):
+    from app.core.config import settings
+    from agents.schemas import GeneratePlanResponse
+    try:
+        if settings.USE_HIERARCHICAL_ORCHESTRATOR:
+            from agents.hierarchical_orchestrator import _get_graph
+            graph = _get_graph()
+        else:
+            from agents.orchestrator_agent import _get_graph
+            graph = _get_graph()
+
+        final_state_dict = None
+        async for event in graph.astream(initial_state.model_dump()):
+            node_name = list(event.keys())[0]
+            await event_bus.publish(task_id, {"status": "progress", "node": node_name})
+            final_state_dict = event[node_name]
+
+        final = SharedState(**final_state_dict)
+        result = GeneratePlanResponse(
+            status="success",
+            prakriti=final.prakriti,
+            vikriti=final.vikriti,
+            disease_risk=final.disease_risk,
+            herbs=final.herbs,
+            diet=final.diet,
+            safety=final.safety,
+            orchestrator_summary=final.orchestrator_summary,
+            pipeline_errors=final.pipeline_errors,
+        )
+
+        analysis_result = _build_analysis_result(analysis_id, session_id, user_id, result, symptom_input)
+        await event_bus.publish(task_id, {"status": "complete", "result": analysis_result.dict()})
+    except Exception as e:
+        logger.error(f"Error in background task: {e}")
+        await event_bus.publish(task_id, {"status": "error", "message": str(e)})
+
+def _build_analysis_result(analysis_id: str, session_id: str, user_id: str, result: Any, symptom_input: SymptomInput) -> AnalysisResult:
+    from agents.schemas import SafetyVerdict
+    emergency_warning = None
+    if result.safety.verdict == SafetyVerdict.HIGH_RISK:
+        flags_str = " ".join([f.reason for f in result.safety.flags])
+        emergency_warning = f"⚠️ HIGH RISK: {flags_str} Consult your doctor immediately."
+
+    mapped_herbs = []
+    for h in result.herbs.herbs:
+        mapped_herbs.append(HerbModel(
+            name=h.name,
+            sanskrit_name=h.sanskrit_name,
+            properties=[],
+            how_to_consume="",
+            dosage=h.dosage_guidance or "As directed",
+            benefits=h.reasoning,
+            contraindications=", ".join(h.contraindications) if h.contraindications else None
+        ))
+
+    diet_advice = result.diet.foods_to_eat + [f"Avoid: {f}" for f in result.diet.foods_to_avoid]
+
+    severity_score = result.vikriti.severity_score
+    if severity_score > 7:
+        sev = "urgent"
+    elif severity_score > 4:
+        sev = "moderate"
+    else:
+        sev = "mild"
+        
+    if result.safety.verdict == SafetyVerdict.HIGH_RISK:
+        sev = "emergency"
+
+    dosha = (result.prakriti.dominant_dosha or "vata").lower()
+    if dosha == "unknown" or not dosha:
+        dosha = "vata"
+        
+    summary = result.orchestrator_summary
+    if not summary:
+        summary = "We successfully ran your analysis based on our ML Models. Refer to Diet and Herbs!"
+
+    session_title = symptom_input.symptoms[:80] if symptom_input.symptoms else "Symptom Analysis"
+    upsert_chat_session(user_id, session_id, session_title)
+
+    return AnalysisResult(
+        analysis_id=analysis_id,
+        session_id=session_id,
+        user_id=user_id,
+        severity=sev,
+        dosha_imbalance=dosha,
+        primary_symptoms=[symptom_input.symptoms],
+        ayurvedic_interpretation=summary,
+        emergency_warning=emergency_warning,
+        home_remedies=[],  
+        herbs=mapped_herbs,
+        medicines=[],
+        lifestyle_recommendations=result.herbs.lifestyle_tips,
+        dietary_advice=diet_advice
+    )
+
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat(message_input: ChatMessageInput):
+async def chat(message_input: ChatMessageInput, user_id: str = Depends(verify_user)):
     # Retrieve Pinecone Chat memory for this session
     previous_memory = ""
     try:
@@ -327,8 +442,8 @@ async def chat(message_input: ChatMessageInput):
 
     # Fetch user's saved health profile for personalized responses
     profile_context = "No saved profile."
-    if message_input.user_id:
-        saved_profile = await _fetch_user_profile(message_input.user_id)
+    if user_id:
+        saved_profile = await _fetch_user_profile(user_id)
         if saved_profile:
             profile_context = _profile_to_context_str(saved_profile)
 
@@ -359,9 +474,9 @@ async def chat(message_input: ChatMessageInput):
             logger.warning(f"Pinecone memory save failed: {e}")
 
         # Track session in Supabase
-        if message_input.user_id:
+        if user_id:
             chat_title = message_input.message[:80]
-            upsert_chat_session(message_input.user_id, message_input.session_id, chat_title)
+            upsert_chat_session(user_id, message_input.session_id, chat_title)
             
         return ChatResponse(
             message_id=str(uuid.uuid4()),
@@ -400,13 +515,11 @@ class TreatmentPlanModel(BaseModel):
 
 class GenerateTreatmentInput(BaseModel):
     session_id: str
-    user_id: Optional[str] = None
     condition: str
     severity: Optional[str] = "moderate"
 
 class ReviewTreatmentInput(BaseModel):
     treatment_id: str
-    user_id: Optional[str] = None
     condition: str
     completed_tasks: List[str]  # list of completed task IDs
     total_tasks: int
@@ -491,12 +604,12 @@ def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentP
 
 
 @app.post("/api/treatment/generate", response_model=TreatmentPlanModel)
-async def generate_treatment(input_data: GenerateTreatmentInput):
+async def generate_treatment(input_data: GenerateTreatmentInput, user_id: str = Depends(verify_user)):
     """Generate a structured daily Ayurvedic treatment plan using AI."""
     # Optionally enrich with user profile
     profile_context = "No saved profile."
-    if input_data.user_id:
-        saved = await _fetch_user_profile(input_data.user_id)
+    if user_id:
+        saved = await _fetch_user_profile(user_id)
         if saved:
             profile_context = _profile_to_context_str(saved)
 
@@ -549,13 +662,13 @@ Make tasks specific, actionable, and progressively build on each other across th
 
 
 @app.post("/api/treatment/review", response_model=TreatmentReviewResult)
-async def review_treatment(input_data: ReviewTreatmentInput):
+async def review_treatment(input_data: ReviewTreatmentInput, user_id: str = Depends(verify_user)):
     """Review treatment progress and decide whether to adjust or refer to doctor."""
     completion_pct = (len(input_data.completed_tasks) / max(input_data.total_tasks, 1)) * 100
 
     profile_context = "No saved profile."
-    if input_data.user_id:
-        saved = await _fetch_user_profile(input_data.user_id)
+    if user_id:
+        saved = await _fetch_user_profile(user_id)
         if saved:
             profile_context = _profile_to_context_str(saved)
 

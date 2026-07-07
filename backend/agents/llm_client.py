@@ -19,16 +19,20 @@ from __future__ import annotations
 import json
 import logging
 import re
+import hashlib
 from typing import Optional
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from app.core.config import settings
+from app.services.redis_cache import cache_get, cache_set
 
 logger = logging.getLogger("dravya.llm")
 
 _RETRYABLE = (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout)
+
+CACHE_TTL_SECONDS = 3600
 
 # ── Shared, pooled client ────────────────────────────────────
 _client: Optional[httpx.AsyncClient] = None
@@ -109,6 +113,14 @@ async def call_llm_text(
 ) -> str:
     """Call the resolved provider and return the raw text content."""
     provider, model = _resolve(model)
+    
+    # Check Redis Cache
+    cache_key = "llm:" + hashlib.md5(f"{provider}:{model}:{temperature}:{system_prompt}:{user_message}".encode()).hexdigest()
+    cached_val = await cache_get(cache_key)
+    if cached_val is not None:
+        logger.info("Serving LLM response from Redis cache (key=%s)", cache_key)
+        return cached_val
+
     client = _get_client()
 
     if provider == "anthropic":
@@ -128,7 +140,9 @@ async def call_llm_text(
         resp = await client.post(url, json=body, headers=headers)
         resp.raise_for_status()
         data = resp.json()
-        return "".join(block.get("text", "") for block in data.get("content", []))
+        result_text = "".join(block.get("text", "") for block in data.get("content", []))
+        await cache_set(cache_key, result_text, CACHE_TTL_SECONDS)
+        return result_text
 
     # OpenAI + Mistral share the chat-completions shape
     if provider == "openai":
@@ -150,8 +164,11 @@ async def call_llm_text(
     }
     resp = await client.post(url, json=body, headers=headers)
     resp.raise_for_status()
+
     data = resp.json()
-    return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    result_text = data["choices"][0]["message"]["content"]
+    await cache_set(cache_key, result_text, CACHE_TTL_SECONDS)
+    return result_text
 
 
 async def call_llm(
