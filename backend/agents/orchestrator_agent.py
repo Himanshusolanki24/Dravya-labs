@@ -274,11 +274,15 @@ async def run_pipeline(state: SharedState) -> GeneratePlanResponse:
     """
     Execute the full multi-agent pipeline.
 
-    Dispatches to the new hierarchical orchestrator when
-    USE_HIERARCHICAL_ORCHESTRATOR=true, otherwise runs the linear pipeline.
-    Returns a structured GeneratePlanResponse.
+    Dispatches to AgentScope when USE_AGENTSCOPE=true (default), else the
+    hierarchical LangGraph orchestrator when USE_HIERARCHICAL_ORCHESTRATOR=true,
+    otherwise the linear LangGraph pipeline.
     """
     from app.core.config import settings
+    if settings.USE_AGENTSCOPE:
+        from agents.agentscope_orchestrator import run_agentscope_pipeline
+        logger.info("Using AgentScope knowledge orchestrator")
+        return await run_agentscope_pipeline(state)
     if settings.USE_HIERARCHICAL_ORCHESTRATOR:
         from agents.hierarchical_orchestrator import run_hierarchical_pipeline
         logger.info("Using hierarchical orchestrator")

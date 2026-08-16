@@ -1,6 +1,6 @@
 """
 Ayurvedic Herb Model — Inference Engine
-Loads the trained .pth model + metadata, rebuilds TF-IDF vectorizer,
+Loads the trained Keras model + metadata, rebuilds TF-IDF vectorizer,
 and provides prediction and lookup functions for the FastAPI service.
 """
 
@@ -9,11 +9,10 @@ import os
 import logging
 import numpy as np
 import pandas as pd
-import torch
+import tensorflow as tf
 from typing import List, Dict, Optional
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from app.model import HerbKnowledgeModel
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ class HerbPredictor:
     """
 
     def __init__(self):
-        self.model: Optional[HerbKnowledgeModel] = None
+        self.model: Optional[tf.keras.Model] = None
         self.vectorizer: Optional[TfidfVectorizer] = None
         self.id_to_name: Dict[int, str] = {}
         self.name_to_id: Dict[str, int] = {}
@@ -46,7 +45,7 @@ class HerbPredictor:
     def load(self, model_dir: str) -> None:
         """
         Load all artifacts:
-          - herb_model.pth        (PyTorch state dict)
+          - herb_model.keras      (TensorFlow/Keras model)
           - model_metadata.json   (label mappings, TF-IDF vocab, config)
           - herb_lookup.csv       (full Ayurvedic info for responses)
         """
@@ -75,15 +74,12 @@ class HerbPredictor:
         self.vectorizer.fit(["dummy"])
         self.vectorizer.vocabulary_ = {k: int(v) for k, v in vocab.items()}
 
-        # 3. Load PyTorch model
-        model_path = os.path.join(model_dir, "herb_model.pth")
+        # 3. Load TensorFlow/Keras model
+        model_path = os.path.join(model_dir, "herb_model.keras")
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model weights not found: {model_path}")
 
-        self.model = HerbKnowledgeModel(self.input_dim, self.num_classes)
-        state_dict = torch.load(model_path, map_location="cpu", weights_only=True)
-        self.model.load_state_dict(state_dict)
-        self.model.eval()
+        self.model = tf.keras.models.load_model(model_path, compile=False)
         logger.info(f"✅ Model loaded: {self.input_dim} → {self.num_classes} classes")
 
         # 4. Herb lookup table
@@ -113,18 +109,13 @@ class HerbPredictor:
         else:
             features = tfidf
 
-        tensor = torch.FloatTensor(features)
-
-        # Inference
-        with torch.no_grad():
-            logits = self.model(tensor)
-            probs = torch.softmax(logits, dim=1)
-            highest_probs, top_idx = torch.topk(probs, min(top_k, self.num_classes), dim=1)
+        probs = self.model.predict(features.astype(np.float32), verbose=0)[0]
+        top_idx = np.argsort(probs)[::-1][:min(top_k, self.num_classes)]
 
         # Build results with herb details
         results = []
         for rank, (prob, idx) in enumerate(
-            zip(highest_probs[0].tolist(), top_idx[0].tolist()), start=1
+            ((probs[idx], idx) for idx in top_idx), start=1
         ):
             name = self.id_to_name.get(idx, "Unknown")
             info = self._lookup(name)

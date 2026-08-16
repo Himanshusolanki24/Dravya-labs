@@ -42,7 +42,7 @@ load_dotenv()
 
 API_KEY = os.getenv("HERB_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "..", "model"))
-PORT = int(os.getenv("PORT", 8002))
+PORT = int(os.getenv("PORT", 7860))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -75,7 +75,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"🚀 Starting Ayurvedic Herb Microservice...")
     logger.info(f"   Model dir: {model_dir}")
 
-    if os.path.exists(os.path.join(model_dir, "herb_model.pth")):
+    if os.path.exists(os.path.join(model_dir, "herb_model.keras")):
         try:
             predictor.load(model_dir)
             logger.info("🌿 Ayurvedic Model loaded successfully!")
@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
             logger.error(f"❌ Failed to load model: {e}")
             logger.info("⚠️ Service running without model — /health will report model_loaded=false")
     else:
-        logger.warning(f"⚠️ No herb_model.pth found in {model_dir}")
+        logger.warning(f"⚠️ No herb_model.keras found in {model_dir}")
         logger.info("   Train the model first using python training/train_local.py")
 
     yield
@@ -95,7 +95,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Dravya Labs — Ayurvedic Herb Knowledge Microservice",
     description=(
-        "Standalone microservice for Ayurvedic herb prediction using a PyTorch model "
+        "Standalone microservice for Ayurvedic herb prediction using a TensorFlow/Keras model "
         "trained on authentic Dravyaguna data (Amidha Database). "
         "Secured with API key authentication."
     ),
@@ -250,4 +250,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT)

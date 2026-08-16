@@ -1,7 +1,10 @@
 // AI Service for Dravya Labs - Connects to Azure AI Foundry backend
 import API_CONFIG from '@/config/api';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 // Types matching the FastAPI backend
+export type ChatLeague = 'high' | 'medium' | 'low';
+
 export interface SymptomInput {
     symptoms: string;
     age?: number;
@@ -9,6 +12,10 @@ export interface SymptomInput {
     existing_conditions?: string;
     user_id?: string;
     session_id?: string;
+    league?: ChatLeague;
+    caveman?: boolean;
+    skill_ids?: string[];
+    skills?: string[];
 }
 
 export interface HomeRemedy {
@@ -56,6 +63,7 @@ export interface AnalysisResult {
     medicines: Medicine[];
     lifestyle_recommendations: string[];
     dietary_advice: string[];
+    openui?: string;
 }
 
 export interface ChatMessageInput {
@@ -63,12 +71,29 @@ export interface ChatMessageInput {
     session_id: string;
     user_id?: string;
     context?: Record<string, unknown>;
+    league?: ChatLeague;
+    caveman?: boolean;
+    skill_ids?: string[];
+    skills?: string[];
+}
+
+export interface ChatUsage {
+    league: string;
+    requests_left: number;
+    tokens_left: number;
+    reset_at: string;
 }
 
 export interface ChatResponse {
     message_id: string;
     response: string;
     timestamp: string;
+    league_requested?: string;
+    league_used?: string;
+    model_used?: string;
+    downgraded?: boolean;
+    usage?: ChatUsage;
+    openui?: string;
 }
 
 export interface ChatSession {
@@ -101,6 +126,7 @@ export interface TreatmentPlan {
     duration_days: number;
     created_at: string;
     overview: string;
+    openui?: string;
 }
 
 export interface GenerateTreatmentInput {
@@ -132,7 +158,29 @@ export interface Message {
     content: string;
     timestamp: Date;
     analysis?: AnalysisResult;
+    openui?: string;
 }
+
+export interface ChatSkill {
+    id: string;
+    name: string;
+    body: string;
+    enabled: boolean;
+}
+
+export interface ChatToolsState {
+    caveman: boolean;
+    skills: ChatSkill[];
+    mcp: {
+        knowledge: boolean;
+        notion: { enabled: boolean; token?: string; configured?: boolean };
+        obsidian: { enabled: boolean; base_url: string; api_key?: string; configured?: boolean };
+    };
+}
+
+export type ChatToolsPatch = Partial<ChatToolsState> & {
+    mcp?: ChatToolsState['mcp'];
+};
 
 class AIService {
     private baseUrl: string;
@@ -141,6 +189,20 @@ class AIService {
     constructor() {
         this.baseUrl = API_CONFIG.AI_URL;
         this.timeout = API_CONFIG.AI_TIMEOUT;
+    }
+
+    private async authHeaders(): Promise<Record<string, string>> {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (!isSupabaseConfigured) return headers;
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                headers.Authorization = `Bearer ${session.access_token}`;
+            }
+        } catch {
+            /* ignore */
+        }
+        return headers;
     }
 
     private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
@@ -179,9 +241,7 @@ class AIService {
             `${this.baseUrl}${API_CONFIG.AI_ENDPOINTS.ANALYZE}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: await this.authHeaders(),
                 body: JSON.stringify(input),
             }
         );
@@ -200,9 +260,7 @@ class AIService {
             `${this.baseUrl}${API_CONFIG.AI_ENDPOINTS.CHAT}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: await this.authHeaders(),
                 body: JSON.stringify(input),
             }
         );
@@ -274,6 +332,36 @@ class AIService {
         }
 
         return response.json();
+    }
+
+    async getChatTools(): Promise<ChatToolsState | null> {
+        try {
+            const response = await this.fetchWithTimeout(
+                `${this.baseUrl}${API_CONFIG.AI_ENDPOINTS.CHAT_TOOLS}`,
+                { method: 'GET', headers: await this.authHeaders() }
+            );
+            if (!response.ok) return null;
+            return response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    async saveChatTools(payload: ChatToolsPatch): Promise<ChatToolsState | null> {
+        try {
+            const response = await this.fetchWithTimeout(
+                `${this.baseUrl}${API_CONFIG.AI_ENDPOINTS.CHAT_TOOLS}`,
+                {
+                    method: 'PUT',
+                    headers: await this.authHeaders(),
+                    body: JSON.stringify(payload),
+                }
+            );
+            if (!response.ok) return null;
+            return response.json();
+        } catch {
+            return null;
+        }
     }
 }
 

@@ -26,7 +26,7 @@ def get_model_path() -> Path:
     """
     Returns the path to the model weights file.
     """
-    path = PROJECT_ROOT / "model" / "skin_model.pth"
+    path = PROJECT_ROOT / "model" / "skin_model.keras"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
 

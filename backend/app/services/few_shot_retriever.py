@@ -61,7 +61,24 @@ async def get_few_shot_examples(
     ]
 
     logger.info("Injected %d few-shot examples for dosha=%s", len(blocks), dosha)
-    return (
+    formatted = (
         "\n\n--- HIGHLY-RATED PAST ANSWERS (match this quality & style) ---\n"
         + "\n\n".join(blocks)
     )
+    try:
+        from app.agentscope_runtime.knowledge import get_knowledge_registry
+
+        texts = [f"{r.get('user_prompt', '')}\n{r.get('ai_response', '')}" for r in rows]
+        await get_knowledge_registry().feedback_fewshot.add_documents(
+            texts,
+            metadata={"dosha": dosha, "type": "fewshot"},
+        )
+        kb_hits = await get_knowledge_registry().feedback_fewshot.retrieve(
+            user_prompt or dosha, top_k=top_k, extra_filter={"dosha": dosha}
+        )
+        extra = [hit.text for hit in kb_hits if hit.text]
+        if extra:
+            formatted += "\n\n--- KNOWLEDGE BASE FEW-SHOT ---\n" + "\n\n".join(extra[:top_k])
+    except Exception as e:
+        logger.warning("Few-shot KB index/search failed (non-fatal): %s", e)
+    return formatted

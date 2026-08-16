@@ -64,6 +64,9 @@ async def generate_plan(
         response = await run_pipeline(state)
         return response
     except Exception as e:
+        from agents.llm_leagues import QuotaExceeded
+        if isinstance(e, QuotaExceeded):
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(e))
         logger.error("Pipeline failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

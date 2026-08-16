@@ -10,5 +10,6 @@ python-jose[cryptography]
 pydantic
 tenacity
 langgraph
+agentscope>=1.0.0
 pynacl
 redis

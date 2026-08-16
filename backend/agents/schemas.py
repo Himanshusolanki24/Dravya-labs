@@ -219,6 +219,7 @@ class LLMResponse(BaseModel):
     """A single response produced by the LLM Orchestrator ('the Communicator')."""
     text: str = ""
     model_used: str = "unknown"
+    league_used: str = "medium"
     route: str = "complex"          # simple / complex / critical
     attempts: int = 1
 
@@ -267,6 +268,9 @@ class SharedState(BaseModel):
     critique: CritiqueResult = Field(default_factory=CritiqueResult)
     critique_feedback: str = ""
     orchestrator_logs: dict[str, Any] = Field(default_factory=dict)  # for the Data Flywheel
+    llm_league: str = "medium"
+    chat_caveman: bool = False
+    chat_skill_bodies: list[str] = Field(default_factory=list)
 
     # ── A2A message bus ─────────────────────────────────────
     messages: list[A2AMessage] = Field(default_factory=list)

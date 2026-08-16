@@ -4,6 +4,7 @@ import { resolve } from "path";
 const projectDir = import.meta.dirname ?? resolve(".");
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['@openuidev/react-ui', '@openuidev/react-lang', '@openuidev/lang-core'],
 
   turbopack: {
     root: projectDir,

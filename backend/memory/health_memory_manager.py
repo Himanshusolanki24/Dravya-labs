@@ -1,8 +1,8 @@
 """
-Health Memory Manager — orchestrates Supabase + Pinecone memory.
+Health Memory Manager — orchestrates Supabase + AgentScope knowledge memory.
 
 Before agents:  retrieve profile + past consultations
-After pipeline:  save report to Supabase + embed summary to Pinecone
+After pipeline:  save report to Supabase + index the summary in the user KB
 """
 
 import json
@@ -34,7 +34,7 @@ async def retrieve_health_context(user_id: str) -> dict[str, Any]:
     Returns dict with keys:
       "profile"     — Supabase user_health_profiles row (if any)
       "history"     — recent analysis_history rows
-      "memories"    — Pinecone vector matches
+      "memories"    — vector matches from the user_consultations knowledge base
     """
     context: dict[str, Any] = {
         "profile": None,
@@ -69,13 +69,29 @@ async def retrieve_health_context(user_id: str) -> dict[str, Any]:
     except Exception as e:
         logger.warning("Failed to fetch analysis history: %s", e)
 
-    # 3. Retrieve Pinecone memories
+    # 3. Retrieve AgentScope / Helix consultation memories
     try:
-        context["memories"] = retrieve_relevant_memory(
+        from app.agentscope_runtime.rag import retrieve_knowledge_blocks
+
+        hits = await retrieve_knowledge_blocks(
+            "health consultation history",
             user_id=user_id,
-            query_text="health consultation history",
             top_k=5,
         )
+        context["memories"] = [
+            {
+                "text": getattr(hit, "text", ""),
+                "score": getattr(hit, "score", 0.0),
+                **(getattr(hit, "metadata", None) or {}),
+            }
+            for hit in hits
+        ]
+        if not context["memories"]:
+            context["memories"] = retrieve_relevant_memory(
+                user_id=user_id,
+                query_text="health consultation history",
+                top_k=5,
+            )
     except Exception as e:
         logger.warning("Failed to retrieve vector memories: %s", e)
 
@@ -90,7 +106,7 @@ async def save_consultation(
     Persist consultation results after pipeline completion.
 
     1. Insert row into Supabase `analysis_history`
-    2. Embed summary text into Pinecone
+    2. Embed summary text into the AgentScope user_consultations knowledge base
     """
     base = settings.SUPABASE_URL
     saved = False
@@ -113,9 +129,20 @@ async def save_consultation(
     except Exception as e:
         logger.warning("Failed to save to Supabase: %s", e)
 
-    # 2. Store embedding in Pinecone
+    # 2. Store embedding in the user consultations knowledge base
     try:
-        summary = _build_summary_text(report)
+        summary = report.get("summary") or _build_summary_text(report)
+        from app.agentscope_runtime.knowledge import get_knowledge_registry
+
+        await get_knowledge_registry().user_consultations.add_documents(
+            [summary],
+            metadata={
+                "user_id": user_id,
+                "type": "consultation",
+                "prakriti": report.get("prakriti", {}).get("dominant_dosha", ""),
+                "verdict": report.get("safety", {}).get("verdict", ""),
+            },
+        )
         store_health_memory(
             user_id=user_id,
             summary_text=summary,

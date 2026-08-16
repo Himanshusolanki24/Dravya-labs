@@ -13,7 +13,7 @@ load_dotenv()
 
 API_KEY = os.getenv("BRAHMA_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", "model")
-PORT = int(os.getenv("PORT", 8005))
+PORT = int(os.getenv("PORT", 7860))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,21 +26,21 @@ async def lifespan(app: FastAPI):
     model_dir = os.path.abspath(MODEL_DIR)
     logger.info(f"🚀 Starting Brahma Prakriti Microservice...")
     
-    if os.path.exists(os.path.join(model_dir, "brahma_model.pth")):
+    if os.path.exists(os.path.join(model_dir, "brahma_model.keras")):
         try:
             predictor.load(model_dir)
             logger.info("🕉️ Brahma Model loaded successfully!")
         except Exception as e:
             logger.error(f"❌ Failed to load Brahma model: {e}")
     else:
-        logger.warning(f"⚠️ No brahma_model.pth found in {model_dir}. Please train first.")
+        logger.warning(f"⚠️ No brahma_model.keras found in {model_dir}. Please train first.")
     
     yield
     logger.info("👋 Brahma Microservice shutting down")
 
 app = FastAPI(
     title="Brahma Prakriti Knowledge API",
-    description="Knowledge-based PyTorch classification model for Ayurvedic Dosha",
+    description="TensorFlow/Keras classification model for Ayurvedic Dosha",
     version="1.0.0",
     lifespan=lifespan,
 )

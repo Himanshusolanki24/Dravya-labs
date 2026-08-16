@@ -1,6 +1,7 @@
-fastapi
-uvicorn
-lightgbm
-pandas
-scikit-learn
-pydantic
+fastapi==0.115.8
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+tensorflow-cpu==2.16.1
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.6.1

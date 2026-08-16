@@ -36,31 +36,15 @@ def get_skin_model(num_classes: int, pretrained: bool = True) -> Model:
 
 def load_trained_model(num_classes: int) -> Model:
     """
-    Loads a trained model from disk (model/skin_model.h5 or SavedModel).
+    Loads a trained Keras model from disk.
 
     Args:
         num_classes: Number of classes (must match the saved model).
     """
     model_path = get_model_path()
 
-    # Support both .h5 and SavedModel directory formats
-    h5_path = str(model_path).replace(".pth", ".h5")
-    saved_model_path = str(model_path).replace(".pth", "")
-
-    import os
-    if os.path.exists(h5_path):
-        logger.info(f"Loading TF model from {h5_path}...")
-        model = tf.keras.models.load_model(h5_path)
-    elif os.path.isdir(saved_model_path):
-        logger.info(f"Loading SavedModel from {saved_model_path}...")
-        model = tf.keras.models.load_model(saved_model_path)
-    elif os.path.exists(str(model_path)):
-        # Fallback: try to build from scratch and load weights
-        logger.info(f"Loading weights from {model_path}...")
-        model = get_skin_model(num_classes=num_classes, pretrained=False)
-        model.load_weights(str(model_path))
-    else:
+    if not model_path.exists():
         logger.error(f"Model file not found at {model_path}")
         raise FileNotFoundError(f"Model file not found at {model_path}")
-
-    return model
+    logger.info(f"Loading Keras model from {model_path}...")
+    return tf.keras.models.load_model(model_path, compile=False)

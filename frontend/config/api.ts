@@ -7,6 +7,8 @@ const API_CONFIG = {
         ANALYZE: '/api/analyze',
         CHAT: '/api/chat',
         HEALTH: '/api/health',
+        LLM_LEAGUES: '/api/llm/leagues',
+        CHAT_TOOLS: '/api/chat/tools',
         TREATMENT_GENERATE: '/api/treatment/generate',
         TREATMENT_REVIEW: '/api/treatment/review',
     },

@@ -74,12 +74,12 @@ class SkinPredictor:
         if not self.is_ready or self.model is None:
             raise RuntimeError(
                 "Model not loaded. Please train the model first and place "
-                "skin_model.h5 in the model/ directory."
+                "skin_model.keras in the model/ directory."
             )
 
-        # Preprocess — resize, normalize to [0,1], add batch dim
+        # EfficientNet Keras preprocessing is included in the application model.
         img = image.convert("RGB").resize((224, 224))
-        img_array = np.array(img, dtype=np.float32) / 255.0
+        img_array = np.array(img, dtype=np.float32)
         img_array = np.expand_dims(img_array, axis=0)
 
         # Inference

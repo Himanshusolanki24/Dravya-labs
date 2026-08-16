@@ -12,7 +12,7 @@ _ready = False
 async def lifespan(app: FastAPI):
     global _ready
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    model_path = os.path.join(base_path, "diabetes_model.txt")
+    model_path = os.path.join(base_path, "diabetes_model.keras")
     scaler_path = os.path.join(base_path, "scaler_params.json")
 
     print(f"Loading model from: {model_path}")
@@ -24,18 +24,23 @@ async def lifespan(app: FastAPI):
         try:
             load_model(model_path, scaler_path)
             _ready = True
-            print("✅ LightGBM Model and Scaler loaded successfully.")
+            print("✅ TensorFlow/Keras model and scaler loaded successfully.")
         except Exception as e:
             print(f"❌ Error loading model: {e}")
 
     yield
     print("Shutting down...")
 
-app = FastAPI(title="Diabetes Prediction API (LightGBM)", lifespan=lifespan)
+app = FastAPI(title="Diabetes Prediction API (TensorFlow/Keras)", lifespan=lifespan)
 
 @app.get("/")
 def read_root():
-    return {"message": "Diabetes Prediction API is running (LightGBM)."}
+    return {"message": "Diabetes Prediction API is running (TensorFlow/Keras)."}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "model_loaded": _ready, "backend": "tensorflow"}
 
 @app.post("/predict", response_model=DiabetesOutput)
 def predict_endpoint(input_data: DiabetesInput):

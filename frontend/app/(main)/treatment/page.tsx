@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { aiService, TreatmentPlan, TreatmentReviewResult } from '@/lib/ai-service';
 import { useUser } from '@/context/UserContext';
+import OpenUIView from '@/lib/openui/openui-view';
 
 // Category icons & colors
 const categoryConfig: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
@@ -437,6 +438,14 @@ function TreatmentPageContent() {
                     </div>
                 </div>
             </div>
+
+            {plan.openui ? (
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-6">
+                    <div className="bg-white/90 border border-white/60 rounded-2xl shadow-sm p-4">
+                        <OpenUIView source={plan.openui} />
+                    </div>
+                </div>
+            ) : null}
 
             {/* Stats Bar */}
             <div className="sticky top-0 z-40 pb-2 mt-6">

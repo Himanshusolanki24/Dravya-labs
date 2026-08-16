@@ -80,6 +80,7 @@ async def node_llm_orchestrator(state: dict[str, Any]) -> dict[str, Any]:
     s.orchestrator_logs = {
         "route": s.llm_response.route,
         "model_used": s.llm_response.model_used,
+        "league_used": getattr(s.llm_response, "league_used", s.llm_league),
         "attempts": s.llm_response.attempts,
         "critic_approved": s.critique.approved,
         "critic_reasons": s.critique.reasons,

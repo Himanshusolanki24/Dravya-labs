@@ -15,7 +15,7 @@ load_dotenv()
 # Configuration
 API_KEY = os.getenv("DIETPLAIN_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", "model")
-PORT = int(os.getenv("PORT", 8004))
+PORT = int(os.getenv("PORT", 7860))
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -29,19 +29,19 @@ predictor = DietPredictor()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifecycle manager: loads the PyTorch model into memory on startup."""
+    """Lifecycle manager: loads the TensorFlow/Keras model on startup."""
     model_dir = os.path.abspath(MODEL_DIR)
     logger.info(f"🚀 Starting Dietplain Microservice...")
     logger.info(f"   Model dir: {model_dir}")
 
-    if os.path.exists(os.path.join(model_dir, "dietplain_model.pth")):
+    if os.path.exists(os.path.join(model_dir, "dietplain_model.keras")):
         try:
             predictor.load(model_dir)
             logger.info("🥗 Dietplain Model loaded successfully!")
         except Exception as e:
             logger.error(f"❌ Failed to load Dietplain model: {e}")
     else:
-        logger.warning(f"⚠️ No dietplain_model.pth found in {model_dir}. Please train first.")
+        logger.warning(f"⚠️ No dietplain_model.keras found in {model_dir}. Please train first.")
     
     yield
     logger.info("👋 Dietplain Microservice shutting down")
@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI App
 app = FastAPI(
     title="Dietplain Knowledge System API",
-    description="Knowledge-based PyTorch model for nutritional food recommendation",
+    description="TensorFlow/Keras model for nutritional food recommendation",
     version="1.0.0",
     lifespan=lifespan,
 )

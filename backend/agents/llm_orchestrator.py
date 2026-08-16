@@ -21,7 +21,8 @@ from agents.schemas import SharedState, MLFacts, LLMResponse, CritiqueResult
 from agents.llm_router import LLMRouter
 from agents.llm_ensemble import LLMEnsemble
 from agents.critic_agent import CriticAgent
-from agents.llm_client import call_llm_text
+from agents.llm_client import invoke_llm
+from agents.llm_leagues import ROUTE_TO_LEAGUE
 from app.core.config import settings
 
 logger = logging.getLogger("dravya.llm_orchestrator")
@@ -69,17 +70,28 @@ class LLMOrchestrator:
 
         critique = CritiqueResult()
         model_used = "unknown"
+        league_used = "medium"
         draft = ""
         feedback = ""
 
         for attempt in range(1, settings.MAX_CRITIC_RETRIES + 1):
             system = _SYNTHESIS_PROMPT.format(few_shot=few_shot, critique_feedback=feedback)
 
+            picker = (state.llm_league or "").lower()
+            mapped = ROUTE_TO_LEAGUE.get(route, "medium")
+            league = picker if picker in ("high", "medium", "low") else mapped
+
             if route == "critical":
-                draft, model_used = await self.ensemble.vote(system, context)
+                draft, model_used = await self.ensemble.vote(
+                    system, context, user_id=state.user_profile.user_id,
+                )
+                league_used = "high"
             else:
-                model_used = settings.LLM_COMPLEX_MODEL if route == "complex" else settings.LLM_SIMPLE_MODEL
-                draft = await call_llm_text(system, context, model=model_used)
+                result = await invoke_llm(
+                    system, context, league=league, user_id=state.user_profile.user_id,
+                )
+                draft, model_used = result.text, result.model_id
+                league_used = result.league or league
 
             critique = await self.critic.evaluate(
                 draft,
@@ -102,6 +114,12 @@ class LLMOrchestrator:
             )
 
         return (
-            LLMResponse(text=draft, model_used=model_used, route=route, attempts=critique.retry_count + 1),
+            LLMResponse(
+                text=draft,
+                model_used=model_used,
+                league_used=league_used,
+                route=route,
+                attempts=critique.retry_count + 1,
+            ),
             critique,
         )

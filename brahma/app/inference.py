@@ -2,13 +2,13 @@ import os
 import json
 import logging
 import numpy as np
-import lightgbm as lgb
+import tensorflow as tf
 from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
 class BrahmaPredictor:
-    """Singleton predictor that loads the Brahma LightGBM model and metadata once."""
+    """Singleton predictor that loads the Brahma Keras model and metadata once."""
 
     def __init__(self):
         self.model = None
@@ -20,7 +20,7 @@ class BrahmaPredictor:
         return self._loaded
 
     def load(self, model_dir: str) -> None:
-        """Load metadata and LightGBM model from model_dir."""
+        """Load metadata and Keras model from model_dir."""
         logger.info(f"📂 Loading Brahma model from: {model_dir}")
 
         meta_path = os.path.join(model_dir, "model_metadata.json")
@@ -36,13 +36,13 @@ class BrahmaPredictor:
         self.feature_classes = self.meta['feature_classes']
         self.id_to_name = {int(k): v for k, v in self.meta['id_to_name'].items()}
 
-        model_path = os.path.join(model_dir, "brahma_model.txt")
+        model_path = os.path.join(model_dir, "brahma_model.keras")
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Missing {model_path}")
 
-        self.model = lgb.Booster(model_file=model_path)
+        self.model = tf.keras.models.load_model(model_path, compile=False)
         self._loaded = True
-        logger.info("🕉️ Brahma LightGBM predictor ready!")
+        logger.info("🕉️ Brahma TensorFlow predictor ready!")
 
     def predict(self, input_features: Dict[str, str]) -> List[Dict]:
         """Runs the 29 features through the knowledge model to retrieve Dosha classification."""
@@ -63,8 +63,7 @@ class BrahmaPredictor:
 
             features[0, i] = encoded_idx
 
-        # Predict returns probabilities for each class since it's multiclass
-        probs = self.model.predict(features)[0]
+        probs = self.model.predict(features, verbose=0)[0]
         
         # Sort indices by descending probability
         top_idx = np.argsort(probs)[::-1][:self.num_classes]

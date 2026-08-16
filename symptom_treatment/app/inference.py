@@ -1,6 +1,6 @@
 """
 Symptom→Treatment Model — Inference Engine
-Loads the trained .pth model + metadata, rebuilds feature processing,
+Loads the trained Keras model + metadata, rebuilds feature processing,
 and provides prediction functions for the FastAPI service.
 """
 
@@ -9,10 +9,9 @@ import os
 import logging
 import numpy as np
 import pandas as pd
-import torch
+import tensorflow as tf
 from typing import List, Dict, Optional
 
-from app.model import SymptomTreatmentModel
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class SymptomTreatmentPredictor:
     """
 
     def __init__(self):
-        self.model: Optional[SymptomTreatmentModel] = None
+        self.model: Optional[tf.keras.Model] = None
         self.id_to_name: Dict[int, str] = {}
         self.name_to_id: Dict[str, int] = {}
         self.treatment_lookup: Optional[pd.DataFrame] = None
@@ -55,7 +54,7 @@ class SymptomTreatmentPredictor:
     def load(self, model_dir: str) -> None:
         """
         Load all artifacts:
-          - symptom_treatment_model.pth   (PyTorch state dict)
+          - symptom_treatment_model.keras (TensorFlow/Keras model)
           - model_metadata.json           (label mappings, scaler params, feature config)
           - treatment_lookup.csv          (disease → treatment info for responses)
         """
@@ -86,15 +85,12 @@ class SymptomTreatmentPredictor:
             self.scaler_min = np.array(scaler["min"], dtype=np.float32)
             self.scaler_max = np.array(scaler["max"], dtype=np.float32)
 
-        # 2. Load PyTorch model
-        model_path = os.path.join(model_dir, "symptom_treatment_model.pth")
+        # 2. Load TensorFlow/Keras model
+        model_path = os.path.join(model_dir, "symptom_treatment_model.keras")
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model weights not found: {model_path}")
 
-        self.model = SymptomTreatmentModel(self.input_dim, self.num_classes)
-        state_dict = torch.load(model_path, map_location="cpu", weights_only=True)
-        self.model.load_state_dict(state_dict)
-        self.model.eval()
+        self.model = tf.keras.models.load_model(model_path, compile=False)
         logger.info(f"✅ Model loaded: {self.input_dim} features → {self.num_classes} disease classes")
 
         # 3. Treatment lookup table
@@ -208,18 +204,13 @@ class SymptomTreatmentPredictor:
                         else:
                             features[col_idx] = 0.0
 
-        tensor = torch.FloatTensor(features).unsqueeze(0)
-
-        # Inference
-        with torch.no_grad():
-            logits = self.model(tensor)
-            probs = torch.softmax(logits, dim=1)
-            top_probs, top_idx = torch.topk(probs, min(top_k, self.num_classes), dim=1)
+        probs = self.model.predict(features.reshape(1, -1), verbose=0)[0]
+        top_idx = np.argsort(probs)[::-1][:min(top_k, self.num_classes)]
 
         # Build results
         results = []
         for rank, (prob, idx) in enumerate(
-            zip(top_probs[0].tolist(), top_idx[0].tolist()), start=1
+            ((probs[idx], idx) for idx in top_idx), start=1
         ):
             disease = self.id_to_name.get(idx, "Unknown")
             treatment_info = self._lookup_treatment(disease)

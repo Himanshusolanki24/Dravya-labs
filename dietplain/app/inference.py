@@ -1,11 +1,10 @@
 import os
 import json
 import logging
-import torch
+import tensorflow as tf
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional
-from .model import DietplainModel
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,6 @@ class DietPredictor:
     def __init__(self):
         self.model = None
         self.metadata = None
-        self.device = torch.device('cpu')  # Run API on CPU
         self._loaded = False
 
     @property
@@ -23,7 +21,7 @@ class DietPredictor:
         return self._loaded
 
     def load(self, model_dir: str) -> None:
-        """Load metadata, PyTorch weights, and CSV lookups from model_dir."""
+        """Load metadata, Keras model, and CSV lookups from model_dir."""
         logger.info(f"📂 Loading Dietplain model from: {model_dir}")
 
         # 1. Load Metadata First
@@ -51,16 +49,12 @@ class DietPredictor:
         self.scale = self.max_vals - self.min_vals
         self.scale[self.scale == 0] = 1.0  # Prevent division by zero
 
-        # 2. Load PyTorch model
-        model_path = os.path.join(model_dir, "dietplain_model.pth")
+        # 2. Load TensorFlow/Keras model
+        model_path = os.path.join(model_dir, "dietplain_model.keras")
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Missing {model_path}")
 
-        self.model = DietplainModel(self.input_dim, self.num_classes)
-        state_dict = torch.load(model_path, map_location=self.device, weights_only=True)
-        self.model.load_state_dict(state_dict)
-        self.model.to(self.device)
-        self.model.eval()
+        self.model = tf.keras.models.load_model(model_path, compile=False)
 
         # 3. Load Food Lookup CSV
         lookup_path = os.path.join(model_dir, "food_lookup.csv")
@@ -124,17 +118,13 @@ class DietPredictor:
         features[0] = meal_idx
         features[1: 1 + len(norm_continuous)] = norm_continuous
         
-        tensor = torch.FloatTensor(features).unsqueeze(0).to(self.device)
-
-        # Run inference Model Check
-        with torch.no_grad():
-            logits = self.model(tensor)
-            probs = torch.softmax(logits, dim=1)
-            top_probs, top_idx = torch.topk(probs, min(top_k, self.num_classes), dim=1)
+        probs = self.model.predict(features.reshape(1, -1), verbose=0)[0]
+        top_idx = np.argsort(probs)[::-1][:min(top_k, self.num_classes)]
 
         # Organize result output
         results = []
-        for rank, (prob, idx) in enumerate(zip(top_probs[0].tolist(), top_idx[0].tolist()), start=1):
+        for rank, idx in enumerate(top_idx, start=1):
+            prob = probs[idx]
             food_item = self.id_to_name.get(idx, "Unknown Food")
             
             info = self._lookup(food_item)

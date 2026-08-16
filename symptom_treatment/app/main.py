@@ -37,7 +37,7 @@ load_dotenv()
 
 API_KEY = os.getenv("SYMPTOM_TREATMENT_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "..", "model"))
-PORT = int(os.getenv("PORT", 8006))
+PORT = int(os.getenv("PORT", 7860))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting Symptom→Treatment Microservice...")
     logger.info(f"   Model dir: {model_dir}")
 
-    if os.path.exists(os.path.join(model_dir, "symptom_treatment_model.pth")):
+    if os.path.exists(os.path.join(model_dir, "symptom_treatment_model.keras")):
         try:
             predictor.load(model_dir)
             logger.info("🌿 Model and treatments loaded successfully!")
@@ -78,7 +78,7 @@ async def lifespan(app: FastAPI):
             logger.error(f"❌ Failed to load model: {e}")
             logger.info("⚠️ Service running without model — /health will report model_loaded=false")
     else:
-        logger.warning(f"⚠️ No symptom_treatment_model.pth found in {model_dir}")
+        logger.warning(f"⚠️ No symptom_treatment_model.keras found in {model_dir}")
         logger.info("   Train the model first, then place files in model/")
 
     yield
@@ -92,7 +92,7 @@ app = FastAPI(
     description=(
         "Standalone microservice for predicting Ayurvedic diseases and "
         "recommending treatments based on user symptoms. "
-        "Powered by a PyTorch model trained on the AyurGenixAI dataset. "
+        "Powered by a TensorFlow/Keras model trained on the AyurGenixAI dataset. "
         "Secured with API key authentication."
     ),
     version="1.0.0",
@@ -176,4 +176,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT)

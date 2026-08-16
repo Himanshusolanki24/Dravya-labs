@@ -6,35 +6,57 @@ import WellnessIcon from '@/components/chat/wellness-icon';
 import TitleSection from '@/components/chat/title-section';
 import SuggestionChips from '@/components/chat/suggestion-chips';
 import ChatInput from '@/components/chat/chat-input';
+import ChatToolsSheet from '@/components/chat/chat-tools-sheet';
 import ModernBackground from '@/components/chat/modern-background';
 import { translations } from '@/lib/translations';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUser } from '@/context/UserContext';
-import { aiService, AnalysisResult, Message } from '@/lib/ai-service';
+import { useChatTools } from '@/hooks/useChatTools';
+import { aiService, AnalysisResult, ChatLeague, Message } from '@/lib/ai-service';
+import OpenUIView from '@/lib/openui/openui-view';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 // Message bubble component
-function MessageBubble({ message, sessionId }: { message: Message; sessionId?: string | null }) {
+function MessageBubble({
+    message,
+    sessionId,
+    onFollowUp,
+}: {
+    message: Message;
+    sessionId?: string | null;
+    onFollowUp?: (text: string) => void;
+}) {
     const isUser = message.role === 'user';
+    const uiSource = message.openui || message.analysis?.openui;
 
     return (
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3 sm:mb-4 px-1`}>
             <div
-                className={`max-w-[85%] sm:max-w-[80%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 ${isUser
+                className={`max-w-[95%] sm:max-w-[90%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 ${isUser
                     ? 'bg-emerald-500 text-white'
                     : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}
             >
-                <div className={`prose prose-sm max-w-none ${isUser ? 'prose-invert text-white' : 'text-gray-800'}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.content}
-                    </ReactMarkdown>
-                </div>
-                {message.analysis && (
-                    <AnalysisCard analysis={message.analysis} sessionId={sessionId} />
+                {isUser ? (
+                    <div className="prose prose-sm max-w-none prose-invert text-white">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                        </ReactMarkdown>
+                    </div>
+                ) : uiSource ? (
+                    <OpenUIView source={uiSource} fallbackMarkdown={message.content} onFollowUp={onFollowUp} />
+                ) : (
+                    <div className="prose prose-sm max-w-none text-gray-800">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                        </ReactMarkdown>
+                    </div>
                 )}
+                {!uiSource && message.analysis ? (
+                    <AnalysisCard analysis={message.analysis} sessionId={sessionId} />
+                ) : null}
             </div>
         </div>
     );
@@ -169,11 +191,27 @@ function ChatPageContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [league, setLeague] = useState<ChatLeague>('medium');
+    const [usageLabel, setUsageLabel] = useState<string | undefined>();
+    const [downgradeNotice, setDowngradeNotice] = useState<string | null>(null);
+    const [toolsOpen, setToolsOpen] = useState(false);
+    const { tools, persist, setCaveman } = useChatTools();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { language } = useLanguage();
     const { user } = useUser();
     const searchParams = useSearchParams();
     const t = translations[language];
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('dravya-chat-league');
+            if (stored === 'high' || stored === 'medium' || stored === 'low') {
+                setLeague(stored);
+            }
+        } catch {
+            /* ignore */
+        }
+    }, []);
 
     // Handle query params: ?new=true resets chat, ?session=xxx loads that session
     useEffect(() => {
@@ -190,6 +228,15 @@ function ChatPageContent() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    const handleLeagueChange = useCallback((next: ChatLeague) => {
+        setLeague(next);
+        try {
+            localStorage.setItem('dravya-chat-league', next);
+        } catch {
+            /* ignore */
+        }
+    }, []);
 
     const handleChipSelect = useCallback((chipId: string) => {
         setSelectedChip(prev => prev === chipId ? null : chipId);
@@ -210,6 +257,8 @@ function ChatPageContent() {
         setMessages(prev => [...prev, userMessage]);
         setIsLoading(true);
 
+        const extraSkills = tools.skills.filter((s) => s.enabled).map((s) => s.body);
+
         try {
             // If no session yet, do initial analysis
             if (!sessionId) {
@@ -222,6 +271,9 @@ function ChatPageContent() {
                     symptoms: symptomContext,
                     user_id: user?.id || undefined,
                     session_id: undefined,
+                    league,
+                    caveman: tools.caveman,
+                    skills: extraSkills,
                 });
 
                 // Save session info
@@ -233,9 +285,10 @@ function ChatPageContent() {
                 const assistantMessage: Message = {
                     id: result.analysis_id,
                     role: 'assistant',
-                    content: `I've analyzed your symptoms. Here's what I found based on Ayurvedic principles:`,
+                    content: `I've analyzed your symptoms. Here's an interactive snapshot:`,
                     timestamp: new Date(),
                     analysis: result,
+                    openui: result.openui,
                 };
                 setMessages(prev => [...prev, assistantMessage]);
             } else {
@@ -244,13 +297,30 @@ function ChatPageContent() {
                     message: messageText,
                     session_id: sessionId,
                     user_id: user?.id || undefined,
+                    league,
+                    caveman: tools.caveman,
+                    skills: extraSkills,
                 });
+
+                if (result.downgraded && result.league_requested && result.league_used) {
+                    setDowngradeNotice(
+                        `Switched to ${result.league_used} — ${result.league_requested} daily limit reached.`
+                    );
+                } else {
+                    setDowngradeNotice(null);
+                }
+                if (result.usage) {
+                    setUsageLabel(
+                        `${result.usage.league}: ${result.usage.requests_left} requests left today`
+                    );
+                }
 
                 const assistantMessage: Message = {
                     id: result.message_id,
                     role: 'assistant',
                     content: result.response,
                     timestamp: new Date(result.timestamp),
+                    openui: result.openui,
                 };
                 setMessages(prev => [...prev, assistantMessage]);
             }
@@ -269,7 +339,7 @@ function ChatPageContent() {
         } finally {
             setIsLoading(false);
         }
-    }, [isLoading, sessionId, user?.id, selectedChip]);
+    }, [isLoading, sessionId, user?.id, selectedChip, league, tools.caveman, tools.skills]);
 
     // Start new conversation
     const handleNewConversation = useCallback(() => {
@@ -320,7 +390,12 @@ function ChatPageContent() {
                             {/* Messages */}
                             <div className="flex-1 space-y-2">
                                 {messages.map((message) => (
-                                    <MessageBubble key={message.id} message={message} sessionId={sessionId} />
+                                    <MessageBubble
+                                        key={message.id}
+                                        message={message}
+                                        sessionId={sessionId}
+                                        onFollowUp={handleSendMessage}
+                                    />
                                 ))}
                                 {isLoading && <LoadingIndicator />}
                                 <div ref={messagesEndRef} />
@@ -350,6 +425,19 @@ function ChatPageContent() {
                 <ChatInput
                     onSend={handleSendMessage}
                     placeholder={t.chat.placeholder}
+                    league={league}
+                    onLeagueChange={handleLeagueChange}
+                    usageLabel={usageLabel}
+                    downgradeNotice={downgradeNotice}
+                    caveman={tools.caveman}
+                    onCavemanChange={setCaveman}
+                    onOpenTools={() => setToolsOpen(true)}
+                />
+                <ChatToolsSheet
+                    open={toolsOpen}
+                    onOpenChange={setToolsOpen}
+                    tools={tools}
+                    onChange={persist}
                 />
             </div>
         </div>

@@ -47,6 +47,8 @@ try:
     app.include_router(agent_router)
     app.include_router(chat_sessions_router)
     app.include_router(feedback_router)  # Data Flywheel: capture 👍/👎 feedback
+    from app.routes.chat_tools_route import router as chat_tools_router
+    app.include_router(chat_tools_router)
 except ImportError:
     pass
 
@@ -80,6 +82,10 @@ class SymptomInput(BaseModel):
     gender: Optional[str] = None
     existing_conditions: Optional[str] = None
     session_id: Optional[str] = None
+    league: Optional[str] = "medium"
+    caveman: Optional[bool] = None
+    skill_ids: Optional[List[str]] = None
+    skills: Optional[List[str]] = None
 
 class HomeRemedy(BaseModel):
     name: str
@@ -120,16 +126,35 @@ class AnalysisResult(BaseModel):
     medicines: List[Medicine]
     lifestyle_recommendations: List[str]
     dietary_advice: List[str]
+    openui: Optional[str] = None
+
+class ChatUsage(BaseModel):
+    league: str
+    requests_left: int
+    tokens_left: int
+    reset_at: str
+
 
 class ChatMessageInput(BaseModel):
     message: str
     session_id: str
     context: Optional[Dict] = None
+    league: str = "medium"
+    caveman: Optional[bool] = None
+    skill_ids: Optional[List[str]] = None
+    skills: Optional[List[str]] = None
+
 
 class ChatResponse(BaseModel):
     message_id: str
     response: str
     timestamp: datetime
+    league_requested: Optional[str] = None
+    league_used: Optional[str] = None
+    model_used: Optional[str] = None
+    downgraded: bool = False
+    usage: Optional[ChatUsage] = None
+    openui: Optional[str] = None
 
 # -----------------------------------------------------
 # Profile Fetching Helper
@@ -179,6 +204,17 @@ def _profile_to_context_str(profile: dict) -> str:
     if mh.get("surgery_history"): parts.append(f"Surgery history: {mh['surgery_history']}")
 
     return ". ".join(parts) if parts else "No saved profile data."
+
+
+async def _tool_fields(user_id: str, symptom_input: SymptomInput) -> dict:
+    from app.services import chat_settings
+
+    stored = await chat_settings.load_settings(user_id)
+    caveman = stored.get("caveman", False) if symptom_input.caveman is None else bool(symptom_input.caveman)
+    bodies = chat_settings.enabled_skill_bodies(
+        stored, symptom_input.skill_ids, symptom_input.skills,
+    )
+    return {"chat_caveman": caveman, "chat_skill_bodies": bodies}
 
 
 # -----------------------------------------------------
@@ -244,14 +280,19 @@ async def analyze_symptoms(symptom_input: SymptomInput, user_id: str = Depends(v
             conditions=all_conditions,
             injury_history=mh_data.get("injury_history"),
             surgery_history=mh_data.get("surgery_history"),
-        )
+        ),
+        llm_league=(symptom_input.league or "medium").lower(),
+        **(await _tool_fields(user_id, symptom_input)),
     )
 
     try:
-        # Run the full orchestrated LangGraph pipeline!
+        # Run the orchestrated pipeline (AgentScope by default).
         result = await run_pipeline(initial_state)
         return _build_analysis_result(analysis_id, session_id, user_id, result, symptom_input)
     except Exception as e:
+        from agents.llm_leagues import QuotaExceeded
+        if isinstance(e, QuotaExceeded):
+            raise HTTPException(status_code=429, detail=str(e))
         logger.error(f"Error in Orchestrator Pipeline: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -313,7 +354,9 @@ async def analyze_symptoms_async(symptom_input: SymptomInput, background_tasks: 
             conditions=all_conditions,
             injury_history=mh_data.get("injury_history"),
             surgery_history=mh_data.get("surgery_history"),
-        )
+        ),
+        llm_league=(symptom_input.league or "medium").lower(),
+        **(await _tool_fields(user_id, symptom_input)),
     )
 
     background_tasks.add_task(_run_pipeline_task, task_id, initial_state, symptom_input, analysis_id, session_id, user_id)
@@ -338,31 +381,39 @@ async def _run_pipeline_task(task_id: str, initial_state: SharedState, symptom_i
     from app.core.config import settings
     from agents.schemas import GeneratePlanResponse
     try:
-        if settings.USE_HIERARCHICAL_ORCHESTRATOR:
-            from agents.hierarchical_orchestrator import _get_graph
-            graph = _get_graph()
+        if settings.USE_AGENTSCOPE:
+            from agents.agentscope_orchestrator import run_agentscope_pipeline
+
+            async def on_progress(node_name: str) -> None:
+                await event_bus.publish(task_id, {"status": "progress", "node": node_name})
+
+            result = await run_agentscope_pipeline(initial_state, on_progress=on_progress)
         else:
-            from agents.orchestrator_agent import _get_graph
-            graph = _get_graph()
+            if settings.USE_HIERARCHICAL_ORCHESTRATOR:
+                from agents.hierarchical_orchestrator import _get_graph
+                graph = _get_graph()
+            else:
+                from agents.orchestrator_agent import _get_graph
+                graph = _get_graph()
 
-        final_state_dict = None
-        async for event in graph.astream(initial_state.model_dump()):
-            node_name = list(event.keys())[0]
-            await event_bus.publish(task_id, {"status": "progress", "node": node_name})
-            final_state_dict = event[node_name]
+            final_state_dict = None
+            async for event in graph.astream(initial_state.model_dump()):
+                node_name = list(event.keys())[0]
+                await event_bus.publish(task_id, {"status": "progress", "node": node_name})
+                final_state_dict = event[node_name]
 
-        final = SharedState(**final_state_dict)
-        result = GeneratePlanResponse(
-            status="success",
-            prakriti=final.prakriti,
-            vikriti=final.vikriti,
-            disease_risk=final.disease_risk,
-            herbs=final.herbs,
-            diet=final.diet,
-            safety=final.safety,
-            orchestrator_summary=final.orchestrator_summary,
-            pipeline_errors=final.pipeline_errors,
-        )
+            final = SharedState(**final_state_dict)
+            result = GeneratePlanResponse(
+                status="success",
+                prakriti=final.prakriti,
+                vikriti=final.vikriti,
+                disease_risk=final.disease_risk,
+                herbs=final.herbs,
+                diet=final.diet,
+                safety=final.safety,
+                orchestrator_summary=final.orchestrator_summary,
+                pipeline_errors=final.pipeline_errors,
+            )
 
         analysis_result = _build_analysis_result(analysis_id, session_id, user_id, result, symptom_input)
         await event_bus.publish(task_id, {"status": "complete", "result": analysis_result.dict()})
@@ -413,7 +464,7 @@ def _build_analysis_result(analysis_id: str, session_id: str, user_id: str, resu
     session_title = symptom_input.symptoms[:80] if symptom_input.symptoms else "Symptom Analysis"
     upsert_chat_session(user_id, session_id, session_title)
 
-    return AnalysisResult(
+    payload = AnalysisResult(
         analysis_id=analysis_id,
         session_id=session_id,
         user_id=user_id,
@@ -422,68 +473,134 @@ def _build_analysis_result(analysis_id: str, session_id: str, user_id: str, resu
         primary_symptoms=[symptom_input.symptoms],
         ayurvedic_interpretation=summary,
         emergency_warning=emergency_warning,
-        home_remedies=[],  
+        home_remedies=[],
         herbs=mapped_herbs,
         medicines=[],
         lifestyle_recommendations=result.herbs.lifestyle_tips,
-        dietary_advice=diet_advice
+        dietary_advice=diet_advice,
     )
+    from app.openui.compile import analysis_to_openui
+    payload.openui = analysis_to_openui(payload.model_dump())
+    return payload
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(message_input: ChatMessageInput, user_id: str = Depends(verify_user)):
-    # Retrieve Pinecone Chat memory for this session
+    from app.core.config import settings
+
     previous_memory = ""
     try:
         context = retrieve_relevant_memory(message_input.session_id, message_input.message)
         if context:
             previous_memory = "\n".join([r.get('text', '') for r in context])
     except Exception as e:
-        logger.warning(f"Pinecone memory search failed: {e}")
+        logger.warning(f"Vector memory search failed: {e}")
 
-    # Fetch user's saved health profile for personalized responses
     profile_context = "No saved profile."
     if user_id:
         saved_profile = await _fetch_user_profile(user_id)
         if saved_profile:
             profile_context = _profile_to_context_str(saved_profile)
+    if previous_memory:
+        profile_context = f"{profile_context}\n\n--- PREVIOUS CONTEXT ---\n{previous_memory}"
 
-    system_prompt = (
-        "You are a helpful Ayurvedic wellness assistant for Dravya Health. "
-        "You provide brief, safety-first, personalized answers based on the user's health profile. "
-        "Always recommend consulting a healthcare professional for serious concerns.\n\n"
-        f"--- USER HEALTH PROFILE ---\n{profile_context}\n\n"
-        f"--- PREVIOUS CONTEXT ---\n{previous_memory}"
-    )
-    
     try:
-        res = await call_llm(system_prompt, message_input.message)
-        # Using the LLM client we built which parses JSON. The prompt might not return JSON, so we get 'raw_response'
-        resp_text = res.get("raw_response", res.get("response", str(res)))
-        if "{" in resp_text and "}" in resp_text and isinstance(res, dict) and "response" not in res and "raw_response" not in res:
-             # Just cast to str if it accidentally parsed JSON
-             resp_text = str(res)
-        
-        # We should save this interaction to vector store
-        try:
-            store_health_memory(
-                message_input.session_id,
-                f"User: {message_input.message}\nAssistant: {resp_text}",
-                {"type": "chat"}
-            )
-        except Exception as e:
-            logger.warning(f"Pinecone memory save failed: {e}")
+        league = (message_input.league or "medium").lower()
+        if league not in ("high", "medium", "low"):
+            league = "medium"
+        league_used = league
+        model_used = None
+        downgraded = False
+        usage = None
 
-        # Track session in Supabase
+        if settings.USE_AGENTSCOPE:
+            from agents.agentscope_orchestrator import run_rag_chat
+            from agents.llm_leagues import QuotaExceeded
+            from app.services import llm_quota
+
+            agent_chat = await run_rag_chat(
+                message_input.message,
+                user_id=user_id,
+                session_id=message_input.session_id,
+                profile_context=profile_context,
+                league=league,
+                caveman=message_input.caveman,
+                skill_ids=message_input.skill_ids,
+                extra_skills=message_input.skills,
+            )
+            resp_text = agent_chat.text
+            league_used = agent_chat.league_used or league
+            model_used = agent_chat.model_used
+            downgraded = agent_chat.downgraded
+            snap = await llm_quota.remaining(user_id, league_used)
+            usage = ChatUsage(
+                league=league_used,
+                requests_left=snap["requests_left"],
+                tokens_left=snap["tokens_left"],
+                reset_at=snap["reset_at"],
+            )
+        else:
+            from agents.llm_client import invoke_llm
+            from agents.llm_leagues import QuotaExceeded
+            from app.mcp.chat_context import resolve_prompt
+            from app.services import llm_quota
+
+            system_prompt, _, max_tokens = await resolve_prompt(
+                user_id,
+                message_input.message,
+                profile_context=profile_context,
+                rag="",
+                caveman=message_input.caveman,
+                skill_ids=message_input.skill_ids,
+                extra_skills=message_input.skills,
+            )
+            result = await invoke_llm(
+                system_prompt,
+                message_input.message,
+                league=league,
+                user_id=user_id,
+                max_tokens=max_tokens,
+            )
+            resp_text = result.text
+            league_used = result.league or league
+            model_used = result.model_id
+            downgraded = result.downgraded
+            snap = await llm_quota.remaining(user_id, league_used)
+            usage = ChatUsage(
+                league=league_used,
+                requests_left=snap["requests_left"],
+                tokens_left=snap["tokens_left"],
+                reset_at=snap["reset_at"],
+            )
+            try:
+                store_health_memory(
+                    message_input.session_id,
+                    f"User: {message_input.message}\nAssistant: {resp_text}",
+                    {"type": "chat"}
+                )
+            except Exception as e:
+                logger.warning(f"Vector memory save failed: {e}")
+
         if user_id:
             chat_title = message_input.message[:80]
             upsert_chat_session(user_id, message_input.session_id, chat_title)
-            
+
+        from app.openui.compile import wrap_openui
+
         return ChatResponse(
             message_id=str(uuid.uuid4()),
             response=resp_text,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            league_requested=league,
+            league_used=league_used,
+            model_used=model_used,
+            downgraded=downgraded,
+            usage=usage,
+            openui=wrap_openui(resp_text),
         )
     except Exception as e:
+        from agents.llm_leagues import QuotaExceeded
+        if isinstance(e, QuotaExceeded):
+            raise HTTPException(status_code=429, detail=str(e))
         logger.error(f"Error in LLM Call: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -512,6 +629,7 @@ class TreatmentPlanModel(BaseModel):
     duration_days: int
     created_at: str
     overview: str
+    openui: Optional[str] = None
 
 class GenerateTreatmentInput(BaseModel):
     session_id: str
@@ -530,6 +648,12 @@ class TreatmentReviewResult(BaseModel):
     recommendation: str
     refer_to_doctor: bool
     adjusted_plan: Optional[TreatmentPlanModel] = None
+
+
+def _attach_treatment_ui(plan: TreatmentPlanModel) -> TreatmentPlanModel:
+    from app.openui.compile import treatment_to_openui
+    plan.openui = treatment_to_openui(plan.model_dump())
+    return plan
 
 
 def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentPlanModel:
@@ -566,7 +690,7 @@ def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentP
                 tasks=tasks,
                 focus=d.get("focus", "General wellness"),
             ))
-        return TreatmentPlanModel(
+        return _attach_treatment_ui(TreatmentPlanModel(
             treatment_id=treatment_id,
             condition=condition,
             severity=severity,
@@ -575,7 +699,7 @@ def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentP
             duration_days=plan_data.get("duration_days", 7),
             created_at=datetime.utcnow().isoformat(),
             overview=plan_data.get("overview", f"Ayurvedic treatment plan for {condition}"),
-        )
+        ))
 
     # Fallback plan if LLM didn't return valid JSON
     fallback_days = []
@@ -591,7 +715,7 @@ def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentP
             ],
             focus=f"Day {day_num}: Detox and healing",
         ))
-    return TreatmentPlanModel(
+    return _attach_treatment_ui(TreatmentPlanModel(
         treatment_id=treatment_id,
         condition=condition,
         severity=severity,
@@ -600,7 +724,7 @@ def _parse_treatment_plan(raw: str, condition: str, severity: str) -> TreatmentP
         duration_days=7,
         created_at=datetime.utcnow().isoformat(),
         overview=f"7-day Ayurvedic treatment plan for {condition}",
-    )
+    ))
 
 
 @app.post("/api/treatment/generate", response_model=TreatmentPlanModel)
@@ -649,11 +773,22 @@ time_of_day must be one of: "morning", "afternoon", "evening", "night"
 Make tasks specific, actionable, and progressively build on each other across the 7 days. Focus on Ayurvedic principles relevant to {input_data.condition}."""
 
     try:
-        result = await call_llm(
-            "You are a structured JSON generator for Ayurvedic treatment plans. Return ONLY valid JSON.",
-            prompt,
-        )
-        raw = result.get("raw_response", result.get("response", str(result)))
+        from app.core.config import settings
+        if settings.USE_AGENTSCOPE:
+            from agents.agentscope_orchestrator import run_rag_treatment
+
+            raw = await run_rag_treatment(
+                input_data.condition,
+                input_data.severity or "moderate",
+                profile_context,
+                user_id=user_id,
+            )
+        else:
+            result = await call_llm(
+                "You are a structured JSON generator for Ayurvedic treatment plans. Return ONLY valid JSON.",
+                prompt,
+            )
+            raw = result.get("raw_response", result.get("response", str(result)))
         plan = _parse_treatment_plan(raw, input_data.condition, input_data.severity or "moderate")
         return plan
     except Exception as e:
@@ -745,7 +880,19 @@ Guidelines:
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": "Dravya Orchestrator Backend"}
+    from app.core.config import settings
+    return {
+        "status": "healthy",
+        "service": "Dravya Orchestrator Backend",
+        "orchestrator": "agentscope" if settings.USE_AGENTSCOPE else "langgraph",
+    }
+
+
+@app.get("/api/llm/leagues")
+async def llm_leagues(user_id: str = Depends(verify_user)):
+    from agents.llm_leagues import catalog, usage_snapshot
+
+    return {"leagues": catalog(), "usage": await usage_snapshot(user_id)}
 
 if __name__ == "__main__":
     import uvicorn

@@ -37,7 +37,7 @@ load_dotenv()
 
 API_KEY = os.getenv("AUTOIMMUNE_API_KEY", "")
 MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "..", "model"))
-PORT = int(os.getenv("PORT", 8003))
+PORT = int(os.getenv("PORT", 7860))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting Autoimmune Microservice...")
     logger.info(f"   Model dir: {model_dir}")
 
-    if os.path.exists(os.path.join(model_dir, "autoimmune_model.pth")):
+    if os.path.exists(os.path.join(model_dir, "autoimmune_model.keras")):
         try:
             predictor.load(model_dir)
             logger.info("🧬 Model loaded successfully!")
@@ -90,7 +90,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Dravya Labs — Autoimmune Knowledge Microservice",
     description=(
-        "Standalone microservice for autoimmune disorder prediction using a PyTorch model "
+        "Standalone microservice for autoimmune disorder prediction using a TensorFlow/Keras model "
         "trained on patient lab data, symptoms, and antibody markers. "
         "Secured with API key authentication. "
         "Connect from the AI backend using the X-API-Key header."
@@ -206,4 +206,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT)
