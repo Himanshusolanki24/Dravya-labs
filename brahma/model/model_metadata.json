@@ -195,5 +195,5 @@
     "vata+kapha": 4,
     "vata+pitta": 5
   },
-  "accuracy": 87.67
+  "framework": "tensorflow"
 }

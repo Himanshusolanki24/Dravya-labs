@@ -33,12 +33,24 @@ def main() -> None:
     text_values = vectorizer.fit_transform(combined).toarray().astype("float32")
     x = np.hstack((text_values, df[NUMERIC_COLUMNS].to_numpy(dtype="float32")))
     labels = LabelEncoder(); y = labels.fit_transform(df["name"].astype(str))
+    order = np.random.RandomState(42).permutation(len(x))
+    x, y = x[order], y[order]
     output_dir = ROOT / "model"; output_dir.mkdir(exist_ok=True)
     model = build_herb_model(x.shape[1], len(labels.classes_))
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-    model.fit(x, y, validation_split=0.2, epochs=200, batch_size=64, verbose=2,
+    history = model.fit(x, y, validation_split=0.2, epochs=200, batch_size=64, verbose=2,
               callbacks=[tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", mode="max", patience=25, restore_best_weights=True),
                          tf.keras.callbacks.ModelCheckpoint(output_dir / "herb_model.keras", monitor="val_accuracy", mode="max", save_best_only=True)])
+    print(json.dumps({
+        "model": "herbs",
+        "samples": int(len(x)),
+        "num_classes": int(len(labels.classes_)),
+        "input_dim": int(x.shape[1]),
+        "epochs_ran": len(history.history["accuracy"]),
+        "best_train_accuracy": round(float(max(history.history["accuracy"])), 4),
+        "best_val_accuracy": round(float(max(history.history["val_accuracy"])), 4),
+        "final_val_loss": round(float(history.history["val_loss"][int(np.argmax(history.history["val_accuracy"]))]), 4),
+    }))
     metadata = {"num_classes": len(labels.classes_), "input_dim": x.shape[1], "tfidf_max_features": 3000,
                 "tfidf_vocabulary": {key: int(value) for key, value in vectorizer.vocabulary_.items()}, "numeric_columns": NUMERIC_COLUMNS,
                 "id_to_name": {str(i): name for i, name in enumerate(labels.classes_)}, "name_to_id": {name: int(i) for i, name in enumerate(labels.classes_)}, "framework": "tensorflow"}

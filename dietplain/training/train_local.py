@@ -29,12 +29,24 @@ def main() -> None:
     label_encoder = LabelEncoder()
     y = label_encoder.fit_transform(df["Food_Item"].astype(str).str.strip())
     x = np.column_stack((meal, continuous_values)).astype("float32")
+    order = np.random.RandomState(42).permutation(len(x))
+    x, y = x[order], y[order]
     model = build_dietplain_model(x.shape[1], len(label_encoder.classes_))
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
     output_dir = ROOT / "model"; output_dir.mkdir(exist_ok=True)
-    model.fit(x, y, validation_split=0.2, epochs=150, batch_size=128, verbose=2,
+    history = model.fit(x, y, validation_split=0.2, epochs=150, batch_size=128, verbose=2,
               callbacks=[tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", mode="max", patience=20, restore_best_weights=True),
                          tf.keras.callbacks.ModelCheckpoint(output_dir / "dietplain_model.keras", monitor="val_accuracy", mode="max", save_best_only=True)])
+    print(json.dumps({
+        "model": "dietplain",
+        "samples": int(len(x)),
+        "num_classes": int(len(label_encoder.classes_)),
+        "input_dim": int(x.shape[1]),
+        "epochs_ran": len(history.history["accuracy"]),
+        "best_train_accuracy": round(float(max(history.history["accuracy"])), 4),
+        "best_val_accuracy": round(float(max(history.history["val_accuracy"])), 4),
+        "final_val_loss": round(float(history.history["val_loss"][int(np.argmax(history.history["val_accuracy"]))]), 4),
+    }))
     metadata = {
         "num_classes": len(label_encoder.classes_), "input_dim": x.shape[1],
         "feature_columns": ["Meal_Type_Encoded"] + CONTINUOUS, "continuous_columns": CONTINUOUS,

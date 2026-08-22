@@ -29,7 +29,33 @@
     "Patient Recommendations"
   ],
   "continuous_columns": [],
-  "binary_columns": [],
+  "binary_columns": [
+    "Hindi Name",
+    "Marathi Name",
+    "Symptoms",
+    "Diagnosis & Tests",
+    "Symptom Severity",
+    "Medical History",
+    "Current Medications",
+    "Risk Factors",
+    "Environmental Factors",
+    "Sleep Patterns",
+    "Stress Levels",
+    "Physical Activity Levels",
+    "Family History",
+    "Allergies (Food/Env)",
+    "Seasonal Variation",
+    "Age Group",
+    "Gender",
+    "Cultural Preferences",
+    "Formulation",
+    "Constitution/Prakriti",
+    "Medical Intervention",
+    "Prevention",
+    "Prognosis",
+    "Complications",
+    "Patient Recommendations"
+  ],
   "categorical_columns": [
     "Hindi Name",
     "Marathi Name",
@@ -57,10 +83,18 @@
     "Complications",
     "Patient Recommendations"
   ],
-  "symptom_columns": [],
+  "gender_map": {
+    "Male": 0,
+    "Female": 1
+  },
+  "symptom_columns": [
+    "Symptoms",
+    "Symptom Severity"
+  ],
   "scaler_params": {
     "min": [],
-    "max": []
+    "max": [],
+    "columns": []
   },
   "id_to_name": {
     "0": "Acanthosis Nigricans",
@@ -799,5 +833,6 @@
     "Zika Virus": 364,
     "Zoonotic Infections": 365,
     "Zoonotic Malaria": 366
-  }
+  },
+  "framework": "tensorflow"
 }

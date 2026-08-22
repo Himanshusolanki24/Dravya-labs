@@ -54,12 +54,25 @@ def main() -> None:
         tf.keras.callbacks.ReduceLROnPlateau(monitor="val_loss", patience=12, factor=0.5),
     ]
     class_weight = {0: 1.0, 1: float((labels == 0).sum() / max((labels == 1).sum(), 1))}
-    model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=400, batch_size=32,
+    history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=400, batch_size=32,
               callbacks=callbacks, class_weight=class_weight, verbose=2)
     with open(ROOT / "scaler_params.json", "w", encoding="utf-8") as file:
         json.dump({"mean": scaler.mean_.tolist(), "scale": scaler.scale_.tolist()}, file, indent=2)
     metrics = model.evaluate(x_test, y_test, verbose=0, return_dict=True)
-    print({key: round(float(value), 4) for key, value in metrics.items()})
+    print(json.dumps({
+        "model": "diabetes",
+        "samples": int(len(features)),
+        "train_samples": int(len(x_train)),
+        "test_samples": int(len(x_test)),
+        "input_dim": int(x_train.shape[1]),
+        "epochs_ran": len(history.history["accuracy"]),
+        "best_train_accuracy": round(float(max(history.history["accuracy"])), 4),
+        "best_val_accuracy": round(float(max(history.history["val_accuracy"])), 4),
+        "best_val_auc": round(float(max(history.history["val_auc"])), 4),
+        "test_loss": round(float(metrics["loss"]), 4),
+        "test_accuracy": round(float(metrics["accuracy"]), 4),
+        "test_auc": round(float(metrics["auc"]), 4),
+    }))
 
 
 if __name__ == "__main__":

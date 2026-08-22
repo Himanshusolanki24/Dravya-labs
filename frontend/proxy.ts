@@ -1,16 +1,28 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id'];
-const authPaths = ['/auth/login', '/signup'];
+const protectedPaths = [
+    '/dashboard',
+    '/chat',
+    '/settings',
+    '/analytics',
+    '/history',
+    '/consult',
+    '/dravya-id',
+    '/profile',
+    '/treatment',
+    '/feedback',
+];
+
+const authPaths = ['/auth/login', '/auth/signup', '/signup'];
 
 export async function proxy(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const path = request.nextUrl.pathname;
 
     if (!supabaseUrl || !supabaseKey) {
-        console.warn('Supabase middleware skipped because the environment variables are missing.');
         return supabaseResponse;
     }
 
@@ -31,32 +43,26 @@ export async function proxy(request: NextRequest) {
         },
     });
 
-    // Refresh the auth session (keeps cookies valid)
-    await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    // ── AUTH GUARDS DISABLED FOR UI DEVELOPMENT ──
-    // Uncomment the blocks below when ready for production.
-    // // Protected routes — redirect to login if not authenticated
-    // const protectedPaths = ['/dashboard', '/chat', '/settings', '/analytics', '/history', '/consult', '/dravya-id', '/profile', '/treatment', '/feedback'];
-    // const isProtectedRoute = protectedPaths.some(path =>
-    //     request.nextUrl.pathname.startsWith(path)
-    // );
-    // if (isProtectedRoute && !user) {
-    //     const url = request.nextUrl.clone();
-    //     url.pathname = '/auth/login';
-    //     return NextResponse.redirect(url);
-    // }
+    const isProtectedRoute = protectedPaths.some((prefix) => path.startsWith(prefix));
+    const isAuthRoute = authPaths.some((prefix) => path.startsWith(prefix));
 
-    // // Redirect authenticated users away from auth pages
-    // const authPaths = ['/auth/login', '/auth/signup', '/signup'];
-    // const isAuthRoute = authPaths.some(path =>
-    //     request.nextUrl.pathname.startsWith(path)
-    // );
-    // if (isAuthRoute && user) {
-    //     const url = request.nextUrl.clone();
-    //     url.pathname = '/dashboard';
-    //     return NextResponse.redirect(url);
-    // }
+    if (isProtectedRoute && !user) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/auth/login';
+        url.searchParams.set('next', path);
+        return NextResponse.redirect(url);
+    }
+
+    if (isAuthRoute && user) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        url.search = '';
+        return NextResponse.redirect(url);
+    }
 
     return supabaseResponse;
 }

@@ -24,9 +24,6 @@
     "Cholesterol (mg)",
     "Water_Intake (ml)"
   ],
-  "categorical_columns": [
-    "Meal_Type_Encoded"
-  ],
   "meal_classes": [
     "Breakfast",
     "Dinner",
@@ -34,41 +31,6 @@
     "Side",
     "Snack"
   ],
-  "scaler_params": {
-    "min": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "max": [
-      680.0,
-      45.0,
-      70.0,
-      40.0,
-      14.0,
-      60.0,
-      1580.0,
-      450.0,
-      500.0
-    ],
-    "columns": [
-      "Calories (kcal)",
-      "Protein (g)",
-      "Carbohydrates (g)",
-      "Fat (g)",
-      "Fiber (g)",
-      "Sugars (g)",
-      "Sodium (mg)",
-      "Cholesterol (mg)",
-      "Water_Intake (ml)"
-    ]
-  },
   "id_to_name": {
     "0": "Acai Bowl (1 serving)",
     "1": "Aioli (Garlic 1 tbsp)",
@@ -115,7 +77,7 @@
     "42": "Beer (12 oz light)",
     "43": "Beets (1/2 cup roasted)",
     "44": "Bell Pepper (1 medium red)",
-    "45": "Bell Peppers & Onions (sautéed)",
+    "45": "Bell Peppers & Onions (saut\u00e9ed)",
     "46": "Berry Coulis (1 tbsp)",
     "47": "Biryani (Chicken 1.5 cups)",
     "48": "Biscotti (1 cookie)",
@@ -432,7 +394,7 @@
     "359": "Onion (1/2 cup raw chopped)",
     "360": "Onion (1/8 minced in sauce)",
     "361": "Onion Rings (6 rings)",
-    "362": "Onions (sautéed 1/4 cup)",
+    "362": "Onions (saut\u00e9ed 1/4 cup)",
     "363": "Orange",
     "364": "Orange Juice (1 cup)",
     "365": "Orange Peel (garnish)",
@@ -512,7 +474,7 @@
     "439": "Quesadilla (Cheese 1 medium)",
     "440": "Quinoa (1 cup cooked)",
     "441": "Quinoa Salad (1 cup)",
-    "442": "Ragù (filling 1 tbsp)",
+    "442": "Rag\u00f9 (filling 1 tbsp)",
     "443": "Raisins (1 tbsp)",
     "444": "Raisins (1/4 cup)",
     "445": "Raita (2 tbsp)",
@@ -591,7 +553,7 @@
     "518": "Stuffed Grape Leaves (3 pcs)",
     "519": "Sugar (1 tsp for cereal)",
     "520": "Sumac (1/2 tsp dressing)",
-    "521": "Supplì (1 piece fried rice ball)",
+    "521": "Suppl\u00ec (1 piece fried rice ball)",
     "522": "Sweet & Sour Chicken (1 cup)",
     "523": "Sweet Chili Sauce (2 tbsp)",
     "524": "Sweet Potato (1 medium baked)",
@@ -600,7 +562,7 @@
     "527": "Swiss Cheese (1 slice)",
     "528": "T-Bone Steak (6oz)",
     "529": "Tabouli (1/2 cup)",
-    "530": "Tagliatelle al Ragù (Bolognese)",
+    "530": "Tagliatelle al Rag\u00f9 (Bolognese)",
     "531": "Tahini (1 tbsp)",
     "532": "Tahini Sauce (1 tbsp)",
     "533": "Tamarind Chutney (1 tbsp)",
@@ -704,7 +666,7 @@
     "Beer (12 oz light)": 42,
     "Beets (1/2 cup roasted)": 43,
     "Bell Pepper (1 medium red)": 44,
-    "Bell Peppers & Onions (sautéed)": 45,
+    "Bell Peppers & Onions (saut\u00e9ed)": 45,
     "Berry Coulis (1 tbsp)": 46,
     "Biryani (Chicken 1.5 cups)": 47,
     "Biscotti (1 cookie)": 48,
@@ -1021,7 +983,7 @@
     "Onion (1/2 cup raw chopped)": 359,
     "Onion (1/8 minced in sauce)": 360,
     "Onion Rings (6 rings)": 361,
-    "Onions (sautéed 1/4 cup)": 362,
+    "Onions (saut\u00e9ed 1/4 cup)": 362,
     "Orange": 363,
     "Orange Juice (1 cup)": 364,
     "Orange Peel (garnish)": 365,
@@ -1101,7 +1063,7 @@
     "Quesadilla (Cheese 1 medium)": 439,
     "Quinoa (1 cup cooked)": 440,
     "Quinoa Salad (1 cup)": 441,
-    "Ragù (filling 1 tbsp)": 442,
+    "Rag\u00f9 (filling 1 tbsp)": 442,
     "Raisins (1 tbsp)": 443,
     "Raisins (1/4 cup)": 444,
     "Raita (2 tbsp)": 445,
@@ -1180,7 +1142,7 @@
     "Stuffed Grape Leaves (3 pcs)": 518,
     "Sugar (1 tsp for cereal)": 519,
     "Sumac (1/2 tsp dressing)": 520,
-    "Supplì (1 piece fried rice ball)": 521,
+    "Suppl\u00ec (1 piece fried rice ball)": 521,
     "Sweet & Sour Chicken (1 cup)": 522,
     "Sweet Chili Sauce (2 tbsp)": 523,
     "Sweet Potato (1 medium baked)": 524,
@@ -1189,7 +1151,7 @@
     "Swiss Cheese (1 slice)": 527,
     "T-Bone Steak (6oz)": 528,
     "Tabouli (1/2 cup)": 529,
-    "Tagliatelle al Ragù (Bolognese)": 530,
+    "Tagliatelle al Rag\u00f9 (Bolognese)": 530,
     "Tahini (1 tbsp)": 531,
     "Tahini Sauce (1 tbsp)": 532,
     "Tamarind Chutney (1 tbsp)": 533,
@@ -1247,9 +1209,40 @@
     "Yellow Rice (1 cup)": 585,
     "Za'atar (1 tbsp)": 586
   },
-  "accuracy": {
-    "top1": 61.4,
-    "top3": 83.26,
-    "top5": 89.46
-  }
+  "scaler_params": {
+    "min": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max": [
+      680.0,
+      45.0,
+      70.0,
+      40.0,
+      14.0,
+      60.0,
+      1580.0,
+      450.0,
+      500.0
+    ],
+    "columns": [
+      "Calories (kcal)",
+      "Protein (g)",
+      "Carbohydrates (g)",
+      "Fat (g)",
+      "Fiber (g)",
+      "Sugars (g)",
+      "Sodium (mg)",
+      "Cholesterol (mg)",
+      "Water_Intake (ml)"
+    ]
+  },
+  "framework": "tensorflow"
 }

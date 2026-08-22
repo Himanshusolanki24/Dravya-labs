@@ -91,19 +91,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                setUser({
-                    ...parsedUser,
-                    isProfileComplete: parsedUser.isProfileComplete ?? false,
-                });
-                hasCachedUser = true;
+                const isPlaceholder = parsedUser?.id === mockUser.id;
+                if (!isPlaceholder) {
+                    setUser({
+                        ...parsedUser,
+                        isProfileComplete: parsedUser.isProfileComplete ?? false,
+                    });
+                    hasCachedUser = true;
+                } else {
+                    localStorage.removeItem('user');
+                }
             } catch (error) {
                 console.error('Error parsing stored user:', error);
                 localStorage.removeItem('user');
             }
-        } else {
-            // Default to mock user for UI development
-            setUser(mockUser);
-            hasCachedUser = true;
         }
 
         // If we have cached user data, stop loading immediately
@@ -124,12 +125,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 if (session?.user) {
                     await syncUserFromDb(session.user.id, session.user.email || '', session.user.user_metadata);
                 } else {
-                    // Default to mock user if no session
-                    setUser(mockUser);
+                    setUser(null);
                 }
             } catch (error) {
                 console.error('Error checking session:', error);
-                setUser(mockUser);
+                setUser(null);
             } finally {
                 // Always set loading false when done (covers no-cache case)
                 setIsLoading(false);

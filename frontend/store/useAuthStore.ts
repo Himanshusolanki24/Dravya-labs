@@ -172,9 +172,8 @@ export const useAuthStore = create<IAuthState>()(
                 if (state) {
                     state.setHydrated(true);
                     state.setLoading(false);
-                    // If no persisted user, load the mock user for dev
-                    if (!state.user) {
-                        state.setUser(MOCK_USER);
+                    if (state.user?.id === MOCK_USER.id) {
+                        state.setUser(null);
                     }
                 }
             },

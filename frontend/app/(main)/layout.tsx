@@ -1,14 +1,37 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/navigation/app-sidebar";
 import Topbar from "@/components/navigation/topbar";
+import { useUser } from "@/context/UserContext";
+import { Loader2 } from "lucide-react";
 
 export default function MainLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const { isAuthenticated, isLoading } = useUser();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            const next = pathname ? `?next=${encodeURIComponent(pathname)}` : "";
+            router.replace(`/auth/login${next}`);
+        }
+    }, [isAuthenticated, isLoading, pathname, router]);
+
+    if (isLoading || !isAuthenticated) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-[#F8FAFC]">
+                <Loader2 className="size-8 text-emerald-600 animate-spin" />
+            </div>
+        );
+    }
+
     return (
         <SidebarProvider defaultOpen={true}>
             <div className="h-screen flex w-full bg-gray-50 overflow-hidden">

@@ -1,13 +1,34 @@
 "use client"
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { isSupabaseConfigured, missingSupabaseMessage, supabase } from '@/lib/supabase'
 import { useUser } from '@/context/UserContext'
 
-export default function Login() {
+function safeNextPath(raw: string | null): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/dashboard'
+  return raw
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <Login />
+    </Suspense>
+  )
+}
+
+function Login() {
   const router = useRouter()
-  const { login, signInWithGoogle } = useUser()
+  const searchParams = useSearchParams()
+  const { login, signInWithGoogle, isAuthenticated, isLoading: authLoading } = useUser()
+  const afterLogin = safeNextPath(searchParams.get('next'))
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace(afterLogin)
+    }
+  }, [isAuthenticated, authLoading, afterLogin, router])
 
   const [formData, setFormData] = useState({
     email: '',
@@ -52,7 +73,7 @@ export default function Login() {
           isProfileComplete: true,
         }
         login(userData)
-        router.push('/dashboard')
+        router.push(afterLogin)
         return;
       }
 
@@ -99,7 +120,7 @@ export default function Login() {
           router.push('/auth/profile')
         }, 2000)
       } else {
-        router.push('/dashboard')
+        router.push(afterLogin)
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -127,7 +148,7 @@ export default function Login() {
         isProfileComplete: true,
       }
       login(userData)
-      router.push('/dashboard')
+      router.push(afterLogin)
       return
     }
 

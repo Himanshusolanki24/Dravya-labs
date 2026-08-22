@@ -36,14 +36,26 @@ def main() -> None:
     x = np.column_stack(encoded).astype("float32")
     label_encoder = LabelEncoder()
     y = label_encoder.fit_transform(df[target])
+    order = np.random.RandomState(42).permutation(len(x))
+    x, y = x[order], y[order]
     model = build_brahma_model(x.shape[1], len(label_encoder.classes_))
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
     output_dir = ROOT / "model"
     output_dir.mkdir(exist_ok=True)
     checkpoint = output_dir / "brahma_model.keras"
-    model.fit(x, y, validation_split=0.2, epochs=200, batch_size=64, verbose=2,
+    history = model.fit(x, y, validation_split=0.2, epochs=200, batch_size=64, verbose=2,
               callbacks=[tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", mode="max", patience=25, restore_best_weights=True),
                          tf.keras.callbacks.ModelCheckpoint(checkpoint, monitor="val_accuracy", mode="max", save_best_only=True)])
+    print(json.dumps({
+        "model": "brahma",
+        "samples": int(len(x)),
+        "num_classes": int(len(label_encoder.classes_)),
+        "input_dim": int(x.shape[1]),
+        "epochs_ran": len(history.history["accuracy"]),
+        "best_train_accuracy": round(float(max(history.history["accuracy"])), 4),
+        "best_val_accuracy": round(float(max(history.history["val_accuracy"])), 4),
+        "final_val_loss": round(float(history.history["val_loss"][int(np.argmax(history.history["val_accuracy"]))]), 4),
+    }))
     metadata = {
         "num_classes": len(label_encoder.classes_), "input_dim": x.shape[1], "features": features,
         "feature_classes": feature_classes,

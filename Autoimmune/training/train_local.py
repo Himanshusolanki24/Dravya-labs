@@ -31,12 +31,24 @@ def main() -> None:
         df[continuous] = scaler.fit_transform(df[continuous])
     x = df[feature_columns].astype("float32").to_numpy()
     labels = LabelEncoder(); y = labels.fit_transform(df[TARGET].astype(str))
+    order = np.random.RandomState(42).permutation(len(x))
+    x, y = x[order], y[order]
     model = build_autoimmune_model(x.shape[1], len(labels.classes_))
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
     output_dir = ROOT / "model"; output_dir.mkdir(exist_ok=True)
-    model.fit(x, y, validation_split=0.2, epochs=200, batch_size=256, verbose=2,
+    history = model.fit(x, y, validation_split=0.2, epochs=200, batch_size=256, verbose=2,
               callbacks=[tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", mode="max", patience=25, restore_best_weights=True),
                          tf.keras.callbacks.ModelCheckpoint(output_dir / "autoimmune_model.keras", monitor="val_accuracy", mode="max", save_best_only=True)])
+    print(json.dumps({
+        "model": "autoimmune",
+        "samples": int(len(x)),
+        "num_classes": int(len(labels.classes_)),
+        "input_dim": int(x.shape[1]),
+        "epochs_ran": len(history.history["accuracy"]),
+        "best_train_accuracy": round(float(max(history.history["accuracy"])), 4),
+        "best_val_accuracy": round(float(max(history.history["val_accuracy"])), 4),
+        "final_val_loss": round(float(history.history["val_loss"][int(np.argmax(history.history["val_accuracy"]))]), 4),
+    }))
     metadata = {"num_classes": len(labels.classes_), "input_dim": x.shape[1], "feature_columns": feature_columns,
                 "continuous_columns": continuous, "binary_columns": binary, "categorical_columns": ["Gender"], "gender_map": {"Male": 0, "Female": 1},
                 "scaler_params": {"min": scaler.data_min_.tolist() if continuous else [], "max": scaler.data_max_.tolist() if continuous else [], "columns": continuous},

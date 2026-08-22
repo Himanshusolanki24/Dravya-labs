@@ -26,6 +26,12 @@ interface SavedItemsContextType {
 
 const SavedItemsContext = createContext<SavedItemsContextType | undefined>(undefined);
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string) {
+    return UUID_RE.test(value);
+}
+
 export function SavedItemsProvider({ children }: { children: React.ReactNode }) {
     const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +51,7 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
             }
         };
 
-        if (!isSupabaseConfigured) {
+        if (!isSupabaseConfigured || !isUuid(userId)) {
             loadFromLocalStorage();
             return;
         }
@@ -108,7 +114,7 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
             });
         }
 
-        if (!isSupabaseConfigured) return;
+        if (!isSupabaseConfigured || !isUuid(userId)) return;
 
         try {
             if (exists) {
