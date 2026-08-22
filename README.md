@@ -1,164 +1,222 @@
 <div align="center">
   <h1>🌿 Dravya Labs</h1>
-  <p><b>AI-Powered Ayurvedic Wellness, Rooted in Tradition, Powered by Intelligence</b></p>
+  <p><b>AI-powered Ayurvedic wellness — rooted in tradition, built for the screen you are on.</b></p>
 </div>
 
 ---
 
-Dravya Labs is a next-generation AI-powered Ayurvedic wellness platform. It merges ancient Indian health wisdom with state-of-the-art AI technology to provide safe, personalized, and deeply educational wellness guidance. 
+Dravya Labs is an Ayurvedic intelligence product: a public marketing site, authenticated app, FastAPI orchestrator, and a set of ML microservices. It estimates **Prakriti** (constitution) and **Vikriti** (current imbalance) from symptoms and habits, then recommends herbs, diet, and lifestyle using classical sources plus model checks.
 
-By evaluating your natural body constitution (**Prakriti**) and analyzing your current imbalances (**Vikriti**) based on your symptoms, Dravya Labs recommends tailored herbs, dietary habits, and lifestyle changes using strictly verified classical Ayurvedic knowledge.
-
-> ⚠️ **Medical Disclaimer:** This platform provides *educational wellness guidance only*. It is NOT designed to diagnose diseases, replace medical doctors, or prescribe medicines. We ALWAYS recommend professional consultation for serious symptoms.
+> **Medical disclaimer:** Educational wellness guidance only. It does not diagnose disease, replace a clinician, or prescribe medicine. Seek professional care for serious symptoms.
 
 ---
 
-## ✨ Key Features
+## What is in the product now
 
-- 🤖 **Agent-to-Agent (A2A) Architecture:** Powered by a swarm of specialized LangGraph agents (Prakriti, Vikriti, Herbs, Diet, and Safety) coordinated by the Master Orchestrator (Vaidya AI).
-- 🧠 **Multi-Model Intelligence:** Integrates over 10 specialized ML microservices (Autoimmune, Diabetes, PCOS, Skin, Dietplain, etc.) to validate dosha imbalances.
-- ⚡ **Real-Time Streaming:** Features a robust WebSockets implementation to stream live progress of the AI pipeline directly to the frontend.
-- 🔐 **Military-Grade Encryption:** Protects patient health data at rest using `XSalsa20-Poly1305` (libsodium/PyNaCl).
-- 📚 **Retrieval-Augmented Generation (RAG):** Grounds all LLM responses in classical Ayurvedic texts using **Helix DB** for vector similarity search.
-- 🚀 **High Performance:** Implements async Redis connection pooling to aggressively cache LLM and ML model predictions.
+### Public landing (`/`)
+
+Full-viewport sections, playful lime / mint / yellow UI, **Lenis** smooth scroll, **GSAP** enter/exit reveals on every section.
+
+| Section | What you see |
+| --- | --- |
+| **Hero** | Background video (`/homebg.mp4`), highlighter heading, Get Started, feature chips |
+| **About** | Copy + organic clip-path plant gallery |
+| **Encyclopedia** | Stacked herb carousel (autoplay, Lenis-friendly) |
+| **Features** | How it works steps (prakriti → library → AI → tracking) |
+| **Pricing** | Starter / Pro / Clinic, monthly vs annual (10% off), glass cards, no hidden-fee copy |
+| **Footer** | Reveal footer (fixed behind the page; shows only at the end of the scroll) |
+
+The old **Solution** block was removed. Nav is About · Features · Pricing.
+
+Horizontal swipe no longer peeks the footer: overflow is clipped, Lenis is vertical-only, and the footer stays hidden until the reveal spacer.
+
+### App (after login)
+
+- Email/password and **Google OAuth** via Supabase (`/auth/callback` → profile or dashboard)
+- Dashboard, encyclopedia, saved items, AI consult streaming
+- Profile row in `public.users` (created on first Auth user via trigger)
+
+### AI stack
+
+LangGraph agents (symptoms, vikriti, herbs, diet, safety) behind FastAPI + WebSockets. Optional Helix RAG and Redis cache. Health JSON encrypted at rest with PyNaCl.
 
 ---
 
-## 🏗️ How it Works: The Data Flow
-
-1. **Secure Ingestion:** The user submits symptoms via the Next.js frontend. The backend encrypts personal identifiers, sending only medical context into the AI Core.
-2. **Concurrent Inference:** The Orchestrator triggers specialist agents to query the ML models simultaneously to detect disease risk flags and dosha imbalances.
-3. **Database Grounding (RAG):** The system searches Helix DB for relevant classical text passages to strictly ground the advice.
-4. **Safety Validation:** ALL generated recommendations are passed through a strict Safety Agent. Dangerous herb combinations or critical risk profiles trigger an emergency medical warning and block herbal outputs.
-5. **Streaming Output:** The final personalized protocol (Herbs, Diet, Home Remedies) is streamed back to the user via WebSockets in real-time.
-
-## 🏗️ System Architecture
-
-Dravya Labs employs a modern, event-driven microservices architecture. 
+## Architecture
 
 ```mermaid
 graph TD
-    Client[Next.js Frontend] -->|WebSocket / HTTP| API[FastAPI Backend]
-    API -->|JWT Validation| Auth[Supabase Auth]
-    API -->|Encrypted Data| DB[(Supabase Postgres)]
-    
-    API --> Orchestrator[Vaidya AI Master Agent]
-    
-    subgraph Multi-Agent Swarm
-    Orchestrator --> Symptoms[Symptoms Agent]
-    Orchestrator --> Vikriti[Vikriti Agent]
-    Orchestrator --> Herb[Herb Agent]
-    Orchestrator --> Diet[Diet Agent]
-    end
-    
-    subgraph ML Microservices
-    Symptoms -.-> ML1[Autoimmune & Diabetes ML]
-    Vikriti -.-> ML2[Brahma Dosha ML]
-    Herb -.-> ML3[Herbs ML]
-    end
-    
-    Orchestrator --> RAG[RAG Engine]
-    RAG -->|Vector Search| Helix[(Helix DB)]
-    
-    Orchestrator --> Safety[Safety Agent]
-    Safety -->|Validate Protocol| Output[Final Streamed Response]
-    Output -->|WebSocket| Client
+    Browser[Next.js 16] -->|HTTP / WebSocket| API[FastAPI :8000]
+    Browser -->|Auth + profiles| SBAuth[Supabase Auth]
+    Browser -->|RLS tables| SBDB[(Supabase Postgres)]
+    API -->|JWT| SBAuth
+    API --> Orch[Vaidya orchestrator]
+    Orch --> Agents[LangGraph agents]
+    Agents --> ML[ML services :8002–8008]
+    Orch --> RAG[Helix RAG]
+    Orch --> Safety[Safety agent]
 ```
 
 ---
 
-## 📂 Folder Architecture
+## Repository layout
 
 ```text
 Dravya-labs/
-├── backend/                 # Python FastAPI Backend
-│   ├── agents/              # LangGraph Agents (Orchestrator, Prakriti, Safety, etc.)
-│   ├── app/
-│   │   ├── core/            # Config and Security (JWT, Encryption)
-│   │   ├── routes/          # REST API endpoints (FastAPI routers)
-│   │   ├── services/        # Third-party integrations (Redis Cache, Helix, Supabase)
-│   │   └── utils/           # Helpers (Event Bus for WebSockets, crypto tools)
-│   ├── memory/              # RAG implementations (Health Context retrieval)
-│   ├── model_clients/       # Asynchronous HTTP clients for ML microservices
-│   ├── main.py              # Application entry point & WebSocket handlers
-│   └── requirement.txt      # Python dependencies
-│
-├── frontend/                # Next.js 16 Frontend
-│   ├── src/
-│   │   ├── app/             # Next.js App Router (pages and layouts)
-│   │   ├── components/      # React components (Radix UI, Tailwind CSS)
-│   │   └── lib/             # API helpers and utilities
-│   └── package.json         # Node dependencies
-│
-└── README.md                # Project documentation
+├── frontend/                      # Next.js 16 (App Router) — bun
+│   ├── app/(public)/landing/      # Marketing page + landing.css
+│   ├── app/(auth)/                # login, signup, callback, profile
+│   ├── components/landing/        # hero bar, carousel, features, pricing, footer
+│   └── .env                       # NEXT_PUBLIC_SUPABASE_* , BACKEND_URL
+├── backend/                       # FastAPI orchestrator
+│   ├── migrations/
+│   │   ├── 000_complete_schema.sql    # run once in Supabase SQL editor
+│   │   └── 001_fix_auth_trigger.sql   # if Auth returns 500 unexpected_failure
+│   ├── requirement.txt
+│   └── .env.example
+├── herbs/  Autoimmune/  dietplain/  brahma/
+├── symptom_treatment/  skin/  diabetes/
+├── start-ml-services.bat          # Windows: launch all ML windows
+├── start-ml-services.command      # macOS helper
+└── README.md
 ```
 
----
-
-## 🛠️ Tech Stack
-
-### AI & Backend
-- **Framework:** Python 3.11+, FastAPI
-- **LLM Engine:** Mistral Large (with Multi-LLM routing/voting support)
-- **Agent Orchestration:** LangGraph
-- **Vector Database:** Helix DB + sentence-transformers (HF)
-- **Caching & Pub/Sub:** Redis (`redis.asyncio`)
-- **Encryption:** PyNaCl (libsodium)
-- **Authentication:** Strict Supabase Auth + JWT
-
-### Frontend
-- **Framework:** Next.js 16 (React 19)
-- **Styling:** Tailwind CSS 4, Radix UI
-- **Data Visualization:** Recharts
+Frontend lives at `frontend/app`, not `frontend/src`.
 
 ---
 
-## 🚀 Quick Start
+## Tech stack
 
-### 1. Prerequisites
+| Layer | Stack |
+| --- | --- |
+| Frontend | Next.js 16, React 19, Tailwind 4, GSAP, Lenis, Motion, Zustand, TanStack Query |
+| Auth / DB | Supabase Auth (email + Google), Postgres + RLS |
+| API | FastAPI, LangGraph, PyNaCl, Redis |
+| ML | Separate FastAPI apps (keep **TensorFlow 2.16.1** pins; do not bump casually) |
+
+---
+
+## Quick start
+
+### Prerequisites
+
 - Python 3.11+
-- Node.js 18+
-- Redis Server (e.g., `brew install redis && brew services start redis`)
-- Supabase Project & Helix DB Instance
+- [Bun](https://bun.sh) (or Node 18+)
+- Redis (optional locally: `redis-server`)
+- A [Supabase](https://supabase.com) project
 
-### 2. Backend Setup
+### 1. Database
+
+In **Supabase → SQL Editor**, run:
+
+1. `backend/migrations/000_complete_schema.sql`
+2. If Google / signup returns `{ "error_code": "unexpected_failure" }`, run `backend/migrations/001_fix_auth_trigger.sql`
+
+That creates `users`, health/chat/analysis, saved items, feedback, LLM usage, RLS, and `handle_new_user` on `auth.users`.
+
+### 2. Google OAuth
+
+1. Google Cloud → Credentials → OAuth client (Web)
+2. Authorized redirect URI: `https://<PROJECT_REF>.supabase.co/auth/v1/callback`
+3. Origins: `http://localhost:3000` (and production origin)
+4. Supabase → Authentication → Providers → Google: paste client ID + secret
+5. URL config:
+   - Site URL: `http://localhost:3000`
+   - Redirect URLs: `http://localhost:3000/auth/callback`
+
+### 3. Environment
+
+**`frontend/.env`**
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+BACKEND_URL=http://localhost:8000
+```
+
+**`backend/.env`** (from `.env.example`)
+
+```env
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_JWT_SECRET=your-jwt-secret
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ENCRYPTION_KEY=your-64-char-hex-key
+REDIS_URL=redis://localhost:6379/0
+MISTRAL_API_KEY=...
+```
+
+Never put the service role key in the frontend.
+
+### 4. ML services (Windows)
+
+```bat
+start-ml-services.bat
+```
+
+| Service | Port |
+| --- | --- |
+| herbs | 8002 |
+| Autoimmune | 8003 |
+| dietplain | 8004 |
+| brahma | 8005 |
+| symptom_treatment | 8006 |
+| skin | 8007 |
+| diabetes | 8008 |
+
+macOS: `./start-ml-services.command` or start each `python -m app.main` in its folder.
+
+### 5. Backend
+
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
 pip install -r requirement.txt
-
-# Set up your environment variables
-cp .env.example .env
-# Edit .env to add your Mistral, Supabase, Helix DB, and Redis credentials
-
-# Start the server
 uvicorn main:app --reload --port 8000
 ```
 
-### 3. Frontend Setup
+### 6. Frontend
+
 ```bash
 cd frontend
-npm install
-
-# Set up your environment variables
-cp .env.local.example .env.local
-
-# Start the dev server
-npm run dev
+bun install
+bun run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🔒 Security & Privacy
+## Landing motion
 
-Dravya Labs is built on the principle of privacy-by-design. 
-- API Endpoints strictly validate Supabase JWT tokens via HTTP Bearer headers.
-- Health profiles and chat session data are encrypted using `PyNaCl` before ever touching the Supabase PostgreSQL database. 
-- No plaintext medical data is stored at rest.
+Lenis owns page scroll (`orientation` / `gestureOrientation`: vertical). GSAP `ScrollTrigger` is updated from Lenis `raf` via `gsap.ticker`. Hero animates on load; About, Encyclopedia, Features, and Pricing play on enter and reverse on leave. Footer layers scrub in only when the reveal spacer hits the viewport.
+
+---
+
+## Pricing (marketing copy)
+
+Displayed on the landing page (not billed in-app yet):
+
+| Plan | Monthly | Annual (10% off) |
+| --- | --- | --- |
+| Starter | $0 | Free |
+| Pro | $15 | $13.50/mo, billed $162/year |
+| Clinic | $25 | $22.50/mo, billed $270/year |
+
+Copy states no setup fees, cancel anytime, same features on annual, USD with tax only at checkout if it applies.
+
+---
+
+## Security
+
+- Browser uses the **anon** key; RLS scopes rows to `auth.uid()`.
+- Backend uses JWT verification + **service role** for server jobs.
+- Encrypted health payloads use PyNaCl `SecretBox` before Postgres.
+- Auth trigger `handle_new_user` is written so a profile insert failure does not 500 Auth.
 
 ---
 
 <div align="center">
-  <i>Built with ❤️ for the future of holistic health.</i>
+  <i>Built for holistic health, with care for what we store and what we claim.</i>
 </div>
